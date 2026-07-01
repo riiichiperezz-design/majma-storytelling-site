@@ -1,14 +1,46 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion, useScroll, useTransform, useReducedMotion, useMotionValueEvent, useInView } from "motion/react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useReducedMotion,
+  useMotionValueEvent,
+  useInView,
+} from "motion/react";
 import { useRef, useState, useCallback, useEffect, type MouseEvent } from "react";
 import {
-  Wifi, Snowflake, Flame, Tv, Coffee, Baby, Ban, MapPin,
-  MessageCircle, ArrowRight, Check, Phone, Menu, X, Sun, Star, Quote,
-  Landmark, UtensilsCrossed, Compass, Sunset,
-  CloudSun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudFog,
+  Wifi,
+  Snowflake,
+  Flame,
+  Tv,
+  Coffee,
+  Baby,
+  Ban,
+  MapPin,
+  MessageCircle,
+  ArrowRight,
+  Check,
+  Phone,
+  Menu,
+  X,
+  Sun,
+  Star,
+  Landmark,
+  UtensilsCrossed,
+  Compass,
+  Sunset,
+  CloudSun,
+  Cloud,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  CloudFog,
 } from "lucide-react";
 import {
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
 import { trackEvent } from "@/lib/analytics";
 import { useT, useLang } from "@/lib/i18n";
@@ -23,12 +55,17 @@ import terrazaImg from "@/assets/terraza.webp";
 import fachadaImg from "@/assets/fachada.webp";
 
 /* ─────────── Datos reales ─────────── */
+// Dominio placeholder (igual que robots.txt/sitemap.xml): swap por el dominio
+// real antes de publicar para que las previews de redes sociales funcionen.
+const SITE_URL = "https://www.majma-caceres.com";
 const BOOKING_URL =
   "https://www.booking.com/hotel/es/apartamentos-turisticos-majma.es.html?aid=356980&label=gog235jc-10CAsoRkIdYXBhcnRhbWVudG9zLXR1cmlzdGljb3MtbWFqbWFIUlgDaEaIAQGYATO4ARfIAQzYAQPoAQH4AQGIAgGoAgG4AoD4ktIGwAIB0gIkZWYxYTJmNDEtZDRkNy00MGU0LWE4NmYtOTc4YWU4Zjc5MDUy2AIB4AIB&sid=faf8b176b4cd575f70169e3f6ca21d42&dist=0&keep_landing=1&sb_price_type=total&type=total&";
 const PHONE_HUMAN = "722 24 74 36";
 const PHONE_TEL = "+34722247436";
 const WA_URL =
   "https://wa.me/34722247436?text=Hola,%20me%20interesa%20reservar%20en%20MAJMA.%20%C2%BFTen%C3%A9is%20disponibilidad%3F";
+const GOOGLE_MAPS_URL =
+  "https://www.google.com/maps?q=Calle+Cornudilla+3,+10003+C%C3%A1ceres,+Spain";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -104,9 +141,10 @@ export const Route = createFileRoute("/")({
           "Tres apartamentos en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
-      { property: "og:image", content: heroImg },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: new URL(heroImg, SITE_URL).toString() },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: new URL(heroImg, SITE_URL).toString() },
       {
         "script:ld+json": {
           "@context": "https://schema.org",
@@ -114,9 +152,9 @@ export const Route = createFileRoute("/")({
           name: "Apartamentos turísticos MAJMA",
           description:
             "Tres apartamentos turísticos independientes en el casco histórico de Cáceres, a dos minutos de la Iglesia de San Juan, Ciudad Patrimonio de la Humanidad.",
-          image: heroImg,
+          image: new URL(heroImg, SITE_URL).toString(),
           telephone: PHONE_TEL,
-          url: "/",
+          url: SITE_URL,
           address: {
             "@type": "PostalAddress",
             streetAddress: "Calle Cornudilla, 3",
@@ -158,7 +196,7 @@ export const Route = createFileRoute("/")({
         },
       },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: SITE_URL }],
   }),
   component: MajmaLanding,
 });
@@ -270,7 +308,9 @@ function Wordmark({ dark = false, compact = false }: { dark?: boolean; compact?:
   const t = useT();
   return (
     <div className="flex items-center gap-3">
-      <BattlementMark className={`${compact ? "h-6" : "h-8"} w-auto ${dark ? "text-cream" : "text-ink"} transition-[height] duration-500`} />
+      <BattlementMark
+        className={`${compact ? "h-6" : "h-8"} w-auto ${dark ? "text-cream" : "text-ink"} transition-[height] duration-500`}
+      />
       <div className="flex flex-col leading-none">
         <span
           className={`font-serif ${compact ? "text-xl" : "text-2xl"} tracking-[0.35em] transition-all duration-500 ${dark ? "text-cream" : "text-ink"}`}
@@ -294,8 +334,16 @@ function Wordmark({ dark = false, compact = false }: { dark?: boolean; compact?:
 /* ─────────── Reveal ─────────── */
 
 function Reveal({
-  children, delay = 0, className = "", y = 24,
-}: { children: React.ReactNode; delay?: number; className?: string; y?: number }) {
+  children,
+  delay = 0,
+  className = "",
+  y = 24,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+  y?: number;
+}) {
   const reduce = useReducedMotionSafe();
   return (
     <motion.div
@@ -312,7 +360,15 @@ function Reveal({
 
 /* ─────────── CountUp ─────────── */
 
-function CountUp({ to, duration = 1.6, suffix = "" }: { to: number; duration?: number; suffix?: string }) {
+function CountUp({
+  to,
+  duration = 1.6,
+  suffix = "",
+}: {
+  to: number;
+  duration?: number;
+  suffix?: string;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.5 });
   const reduce = useReducedMotionSafe();
@@ -336,27 +392,43 @@ function CountUp({ to, duration = 1.6, suffix = "" }: { to: number; duration?: n
     return () => cancelAnimationFrame(raf);
   }, [inView, to, duration, reduce]);
 
-  return <span ref={ref}>{n}{suffix}</span>;
+  return (
+    <span ref={ref}>
+      {n}
+      {suffix}
+    </span>
+  );
 }
 
 /* ─────────── Tilt de galería ─────────── */
 
 function TiltImage({
-  src, alt, className = "", onClick,
-}: { src: string; alt: string; className?: string; onClick?: () => void }) {
+  src,
+  alt,
+  className = "",
+  onClick,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  onClick?: () => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const [t, setT] = useState({ rx: 0, ry: 0 });
 
-  const onMove = useCallback((e: MouseEvent<HTMLDivElement>) => {
-    if (reduce) return;
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setT({ rx: -y * 6, ry: x * 8 });
-  }, [reduce]);
+  const onMove = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      if (reduce) return;
+      const el = ref.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      setT({ rx: -y * 6, ry: x * 8 });
+    },
+    [reduce],
+  );
   const reset = () => setT({ rx: 0, ry: 0 });
 
   return (
@@ -409,12 +481,19 @@ function FlipCard({ room }: { room: Room }) {
         transition={{ duration: reduce ? 0 : 0.6, ease: EASE }}
       >
         <div className="backface-hidden absolute inset-0 overflow-hidden border border-border shadow-[0_10px_30px_-20px_rgba(0,0,0,0.4)]">
-          <img src={room.img} alt={room.title} loading="lazy" className="h-full w-full object-cover" />
+          <img
+            src={room.img}
+            alt={room.title}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-6">
             <h3 className="font-serif text-3xl text-cream">{room.title}</h3>
             <p className="mt-1 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-cream/70">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-gold/60 text-gold">+</span>
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-gold/60 text-gold">
+                +
+              </span>
               {verDetalles}
             </p>
           </div>
@@ -443,8 +522,16 @@ function FlipCard({ room }: { room: Room }) {
 /* ─────────── Lightbox ─────────── */
 
 function Lightbox({
-  images, index, onClose, onNav,
-}: { images: { src: string; alt: string }[]; index: number | null; onClose: () => void; onNav: (i: number) => void }) {
+  images,
+  index,
+  onClose,
+  onNav,
+}: {
+  images: { src: string; alt: string }[];
+  index: number | null;
+  onClose: () => void;
+  onNav: (i: number) => void;
+}) {
   const t = useT().lightbox;
   useEffect(() => {
     if (index === null) return;
@@ -461,32 +548,46 @@ function Lightbox({
   const img = images[index];
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/90 backdrop-blur-sm"
       onClick={onClose}
     >
-      <button aria-label={t.close} onClick={onClose} className="absolute right-6 top-6 text-cream/80 hover:text-gold">
+      <button
+        aria-label={t.close}
+        onClick={onClose}
+        className="absolute right-6 top-6 text-cream/80 hover:text-gold"
+      >
         <X className="h-8 w-8" />
       </button>
       <button
         aria-label={t.prev}
-        onClick={(e) => { e.stopPropagation(); onNav((index - 1 + images.length) % images.length); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onNav((index - 1 + images.length) % images.length);
+        }}
         className="absolute left-4 top-1/2 -translate-y-1/2 text-cream/70 hover:text-gold md:left-8"
       >
         <ArrowRight className="h-8 w-8 rotate-180" />
       </button>
       <motion.img
         key={img.src}
-        initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        initial={{ scale: 0.96, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: EASE }}
-        src={img.src} alt={img.alt}
+        src={img.src}
+        alt={img.alt}
         className="max-h-[85vh] max-w-[90vw] object-contain shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       />
       <button
         aria-label={t.next}
-        onClick={(e) => { e.stopPropagation(); onNav((index + 1) % images.length); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onNav((index + 1) % images.length);
+        }}
         className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/70 hover:text-gold md:right-8"
       >
         <ArrowRight className="h-8 w-8" />
@@ -547,7 +648,9 @@ function ReadingProgress() {
 function LangToggle({ className = "" }: { className?: string }) {
   const { lang, setLang } = useLang();
   return (
-    <div className={`flex items-center text-[10px] uppercase tracking-[0.2em] text-cream/70 ${className}`}>
+    <div
+      className={`flex items-center text-[10px] uppercase tracking-[0.2em] text-cream/70 ${className}`}
+    >
       <button
         type="button"
         onClick={() => setLang("es")}
@@ -577,16 +680,22 @@ function TopBar() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${
-        scrolled ? "bg-ink/85 backdrop-blur-md shadow-[0_2px_20px_-10px_rgba(0,0,0,0.5)]" : "bg-transparent"
+        scrolled
+          ? "bg-ink/85 backdrop-blur-md shadow-[0_2px_20px_-10px_rgba(0,0,0,0.5)]"
+          : "bg-transparent"
       }`}
     >
-      <div className={`mx-auto flex max-w-7xl items-center justify-between px-6 md:px-10 transition-all duration-500 ${scrolled ? "py-3" : "py-5"}`}>
+      <div
+        className={`mx-auto flex max-w-7xl items-center justify-between gap-x-6 px-6 md:px-10 transition-all duration-500 ${scrolled ? "py-3" : "py-5"}`}
+      >
         <a href="#top" className="text-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
           <Wordmark dark compact={scrolled} />
         </a>
-        <nav className="hidden items-center gap-8 text-xs uppercase tracking-[0.3em] text-cream/85 md:flex">
+        <nav className="hidden items-center gap-6 text-xs uppercase tracking-[0.25em] text-cream/85 md:flex lg:gap-7 lg:tracking-[0.3em]">
           {t.links.map((l) => (
-            <a key={l.href} href={l.href} className="hover:text-gold transition-colors">{l.label}</a>
+            <a key={l.href} href={l.href} className="hover:text-gold transition-colors">
+              {l.label}
+            </a>
           ))}
         </nav>
         <div className="hidden items-center gap-5 md:flex">
@@ -615,7 +724,12 @@ function TopBar() {
       >
         <nav className="flex flex-col gap-1 px-6 py-4 text-sm uppercase tracking-[0.3em] text-cream/90">
           {t.links.map((l) => (
-            <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="py-3 border-b border-cream/10 hover:text-gold">
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="py-3 border-b border-cream/10 hover:text-gold"
+            >
               {l.label}
             </a>
           ))}
@@ -623,7 +737,11 @@ function TopBar() {
             <span className="text-cream/60">{t.langLabel}</span>
             <LangToggle />
           </div>
-          <a href="#reserva" onClick={() => setOpen(false)} className="mt-3 inline-flex items-center justify-center gap-2 border border-gold px-5 py-3 text-xs text-cream hover:bg-gold hover:text-ink">
+          <a
+            href="#reserva"
+            onClick={() => setOpen(false)}
+            className="mt-3 inline-flex items-center justify-center gap-2 border border-gold px-5 py-3 text-xs text-cream hover:bg-gold hover:text-ink"
+          >
             {t.reservar}
           </a>
         </nav>
@@ -704,7 +822,8 @@ function Hero() {
         className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
       >
         <motion.div
-          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: EASE }}
           className="mb-8 flex items-center gap-4 text-[10px] uppercase tracking-[0.5em] text-cream/70"
         >
@@ -713,21 +832,24 @@ function Hero() {
         </motion.div>
         <h1 className="font-serif text-5xl leading-[0.95] tracking-tight text-cream md:text-8xl">
           <motion.span
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
             className="block"
           >
             {t.titleLine1}
           </motion.span>
           <motion.span
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.25, ease: EASE }}
             className="block"
           >
             <em className="relative text-gold-soft">
               {t.titleLine2}
               <motion.span
-                initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
                 transition={{ duration: 1, delay: 1, ease: EASE }}
                 className="absolute -bottom-2 left-0 right-0 h-[2px] origin-left bg-gold/70"
               />
@@ -735,19 +857,36 @@ function Hero() {
           </motion.span>
         </h1>
         <motion.p
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
           className="mt-8 max-w-xl text-base text-cream/85 md:text-lg"
         >
           {t.subtitle}
         </motion.p>
         <motion.div
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.6, ease: EASE }}
+          className="mt-6 flex items-center gap-2 text-xs text-cream/80"
+        >
+          <div className="flex gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} className="h-3.5 w-3.5 fill-gold text-gold" strokeWidth={1} />
+            ))}
+          </div>
+          <span className="tracking-[0.04em]">{t.ratingBadge}</span>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.7, ease: EASE }}
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
         >
           <a
-            href={BOOKING_URL} target="_blank" rel="noopener noreferrer"
+            href={BOOKING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={() => trackEvent("click_booking", { location: "hero" })}
             className="group relative inline-flex items-center gap-3 overflow-hidden bg-gold px-8 py-4 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:-translate-y-[1px] active:scale-[0.98]"
           >
@@ -762,9 +901,25 @@ function Hero() {
             {t.ctaDiscover}
           </a>
         </motion.div>
+        <motion.a
+          href={WA_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackEvent("click_whatsapp", { location: "hero" })}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.9, delay: 0.85, ease: EASE }}
+          className="mt-5 inline-flex items-center gap-2 text-xs text-cream/70 underline-offset-4 hover:text-gold hover:underline"
+        >
+          <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
+          {t.ctaWhatsappHint}
+        </motion.a>
       </motion.div>
 
-      <motion.div style={{ opacity: indicatorOpacity }} className="absolute inset-x-0 bottom-8 flex justify-center">
+      <motion.div
+        style={{ opacity: indicatorOpacity }}
+        className="absolute inset-x-0 bottom-8 flex justify-center"
+      >
         <motion.div
           animate={reduce ? undefined : { y: [0, 8, 0] }}
           transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
@@ -783,13 +938,18 @@ function Territorio() {
   const t = useT().territorio;
   const facts = t.facts;
   return (
-    <section id="territorio" className="stone-grain relative overflow-hidden bg-stone-soft py-32 md:py-48">
+    <section
+      id="territorio"
+      className="stone-grain relative overflow-hidden bg-stone-soft py-32 md:py-48"
+    >
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 md:grid-cols-12 md:px-10">
         <Reveal className="md:col-span-5">
           <div className="sticky top-32">
             <SectionNumber n="01" label={t.sectionLabel} />
             <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
-              {t.titlePre}<br />{t.titleMid} <em className="text-gold">{t.titleEm}</em>.
+              {t.titlePre}
+              <br />
+              {t.titleMid} <em className="text-gold">{t.titleEm}</em>.
             </h2>
             <p className="mt-8 text-lg leading-relaxed text-ink/80">{t.p1}</p>
             <p className="mt-6 text-lg leading-relaxed text-ink/80">{t.p2}</p>
@@ -826,7 +986,9 @@ function SectionNumber({ n, label, dark = false }: { n: string; label: string; d
       <span className={`font-serif text-lg leading-none ${dark ? "text-gold-soft" : "text-gold"}`}>
         {n}
       </span>
-      <span className={`text-[10px] uppercase tracking-[0.5em] ${dark ? "text-cream/60" : "text-stone-deep"}`}>
+      <span
+        className={`text-[10px] uppercase tracking-[0.5em] ${dark ? "text-cream/60" : "text-stone-deep"}`}
+      >
         {label}
       </span>
     </div>
@@ -844,15 +1006,20 @@ function Apartamento() {
           <div>
             <SectionNumber n="02" label={t.sectionLabel} />
             <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
-              {t.titlePre}<br />
+              {t.titlePre}
+              <br />
               <em className="text-gold">{t.titleEm}</em>
             </h2>
             <p className="mt-8 text-lg leading-relaxed text-ink/80">{t.p1}</p>
             <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-border pt-6">
               {t.stats.map(({ k, v }) => (
                 <div key={v}>
-                  <dt className="font-serif text-4xl text-ink"><CountUp to={k} /></dt>
-                  <dd className="mt-1 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{v}</dd>
+                  <dt className="font-serif text-4xl text-ink">
+                    <CountUp to={k} />
+                  </dt>
+                  <dd className="mt-1 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                    {v}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -886,7 +1053,9 @@ function Galeria() {
             <div>
               <SectionNumber n="03" label={t.sectionLabel} />
               <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
-                {t.titlePre}<br /><em className="text-gold">{t.titleEm}</em>.
+                {t.titlePre}
+                <br />
+                <em className="text-gold">{t.titleEm}</em>.
               </h2>
             </div>
             <p className="max-w-sm text-sm leading-relaxed text-ink/70">{t.p1}</p>
@@ -896,7 +1065,12 @@ function Galeria() {
         <div className="grid auto-rows-[220px] grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
           {gallery.map((g, i) => (
             <Reveal key={i} delay={i * 0.05} className={g.span}>
-              <TiltImage src={g.src} alt={g.alt} className="h-full w-full" onClick={() => setLb(i)} />
+              <TiltImage
+                src={g.src}
+                alt={g.alt}
+                className="h-full w-full"
+                onClick={() => setLb(i)}
+              />
             </Reveal>
           ))}
         </div>
@@ -911,7 +1085,11 @@ function Galeria() {
 function Distribucion() {
   const t = useT().distribucion;
   const roomImages = [salonImg, dormitorioImg, cocinaImg, banoImg, terrazaImg];
-  const rooms: Room[] = t.rooms.map((r, i) => ({ title: r.title, img: roomImages[i], details: r.details }));
+  const rooms: Room[] = t.rooms.map((r, i) => ({
+    title: r.title,
+    img: roomImages[i],
+    details: r.details,
+  }));
 
   return (
     <section id="distribucion" className="relative bg-cream py-32 md:py-48">
@@ -920,7 +1098,9 @@ function Distribucion() {
           <div className="mb-6 max-w-2xl">
             <SectionNumber n="04" label={t.sectionLabel} />
             <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
-              {t.titlePre}<br /><em className="text-gold">{t.titleEm}</em>
+              {t.titlePre}
+              <br />
+              <em className="text-gold">{t.titleEm}</em>
             </h2>
           </div>
         </Reveal>
@@ -933,6 +1113,7 @@ function Distribucion() {
             </Reveal>
           ))}
         </div>
+        <p className="mt-8 text-sm italic leading-relaxed text-muted-foreground">{t.disclaimer}</p>
       </div>
     </section>
   );
@@ -950,7 +1131,9 @@ function Equipamiento() {
         <Reveal>
           <div className="mb-14">
             <h3 className="font-serif text-3xl text-cream md:text-4xl">
-              {t.titlePre}<br /><span className="text-gold-soft">{t.titleEm}</span>
+              {t.titlePre}
+              <br />
+              <span className="text-gold-soft">{t.titleEm}</span>
             </h3>
           </div>
         </Reveal>
@@ -969,46 +1152,103 @@ function Equipamiento() {
   );
 }
 
+/* ─────────── Distancias a pie (barras) ─────────── */
+
+function DistanceBars({ spots }: { spots: { name: string; time: string }[] }) {
+  const reduce = useReducedMotionSafe();
+  const minutes = spots.map((s) => parseInt(s.time, 10) || 0);
+  const max = Math.max(...minutes);
+  const min = Math.min(...minutes);
+  return (
+    <div className="mt-10 space-y-6">
+      {spots.map((s, i) => {
+        const m = minutes[i];
+        // Cuanto más cerca, más llena la barra (rango 35%-100%).
+        const pct = max === min ? 100 : 100 - ((m - min) / (max - min)) * 65;
+        return (
+          <Reveal key={s.name} delay={i * 0.06}>
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <span className="flex items-center gap-3 text-base text-ink">
+                  <MapPin className="h-4 w-4 shrink-0 text-gold" strokeWidth={1.5} />
+                  {s.name}
+                </span>
+                <span className="shrink-0 font-serif text-xl text-ink">{s.time}</span>
+              </div>
+              <div className="h-[3px] w-full bg-ink/10">
+                <motion.div
+                  className="h-full bg-gold"
+                  initial={{ width: reduce ? `${pct}%` : 0 }}
+                  whileInView={{ width: `${pct}%` }}
+                  viewport={{ once: true, amount: 0.6 }}
+                  transition={{
+                    duration: reduce ? 0 : 1,
+                    delay: reduce ? 0 : 0.1 + i * 0.08,
+                    ease: EASE,
+                  }}
+                />
+              </div>
+            </div>
+          </Reveal>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ─────────── Ubicación ─────────── */
 
 function Ubicacion() {
   const t = useT().ubicacion;
+  const [mapFailed, setMapFailed] = useState(false);
   return (
-    <section id="ubicacion" className="stone-grain relative overflow-hidden bg-stone-soft py-32 md:py-48">
+    <section
+      id="ubicacion"
+      className="stone-grain relative overflow-hidden bg-stone-soft py-32 md:py-48"
+    >
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 md:grid-cols-2 md:px-10">
         <Reveal>
           <SectionNumber n="05" label={t.sectionLabel} />
           <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
-            {t.titlePre}<br />{t.titleMid} <em className="text-gold">{t.titleEm}</em>.
+            {t.titlePre}
+            <br />
+            {t.titleMid} <em className="text-gold">{t.titleEm}</em>.
           </h2>
           <p className="mt-8 text-lg leading-relaxed text-ink/80">{t.p1}</p>
-          <ul className="mt-10 divide-y divide-ink/15 border-y border-ink/15">
-            {t.spots.map((s) => (
-              <li key={s.name} className="flex items-center justify-between py-4 text-ink">
-                <span className="flex items-center gap-3 text-base">
-                  <MapPin className="h-4 w-4 text-gold" strokeWidth={1.5} />
-                  {s.name}
-                </span>
-                <span className="font-serif text-xl text-ink">{s.time}</span>
-              </li>
-            ))}
-          </ul>
+          <DistanceBars spots={t.spots} />
           <p className="mt-8 text-sm italic leading-relaxed text-ink/60">{t.footnote}</p>
         </Reveal>
 
         <Reveal delay={0.15}>
           <div className="relative aspect-square overflow-hidden border border-ink/15 bg-ink">
-            <iframe
-              title={t.mapTitle}
-              src="https://www.google.com/maps?q=Calle+Cornudilla+3,+10003+C%C3%A1ceres,+Spain&output=embed"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0 h-full w-full border-0"
-            />
+            {!mapFailed ? (
+              <iframe
+                title={t.mapTitle}
+                src="https://www.google.com/maps?q=Calle+Cornudilla+3,+10003+C%C3%A1ceres,+Spain&output=embed"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                onError={() => setMapFailed(true)}
+                className="absolute inset-0 h-full w-full border-0"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-stone-deep px-6 text-center text-cream">
+                <BattlementMark className="h-10 w-auto text-gold" />
+                <p className="text-sm text-cream/80">{t.mapErrorText}</p>
+              </div>
+            )}
             <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2 bg-ink/85 px-3 py-2 text-cream backdrop-blur">
               <BattlementMark className="h-4 w-auto text-gold" />
               <span className="text-[10px] uppercase tracking-[0.3em]">{t.mapBadge}</span>
             </div>
+            <a
+              href={GOOGLE_MAPS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute bottom-4 right-4 inline-flex items-center gap-2 bg-cream px-4 py-2.5 text-[10px] uppercase tracking-[0.3em] text-ink shadow-[0_6px_20px_-8px_rgba(0,0,0,0.6)] transition-colors hover:bg-gold"
+            >
+              <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
+              {t.mapOpenLink}
+            </a>
           </div>
         </Reveal>
       </div>
@@ -1382,8 +1622,15 @@ function Testimonios() {
           {reviews.map((r, i) => (
             <Reveal key={r.name} delay={i * 0.08}>
               <div className="flex h-full flex-col border border-border bg-background p-8">
-                <Quote className="h-6 w-6 text-gold" strokeWidth={1.25} />
-                <p className="mt-5 flex-1 text-sm leading-relaxed text-ink/80">“{r.text}”</p>
+                <span
+                  className="font-serif text-6xl italic leading-none text-gold/60"
+                  aria-hidden="true"
+                >
+                  &ldquo;
+                </span>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-ink/80">
+                  &ldquo;{r.text}&rdquo;
+                </p>
                 <div className="mt-6 border-t border-border pt-4">
                   <p className="font-serif text-lg text-ink">{r.name}</p>
                   <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
@@ -1467,7 +1714,9 @@ function Reserva() {
         <Reveal>
           <SectionNumber n="09" label={t.sectionLabel} dark />
           <h2 className="mt-6 font-serif text-5xl leading-[1] text-cream md:text-7xl">
-            {t.titlePre}<br /><em className="text-gold-soft">{t.titleEm}</em>
+            {t.titlePre}
+            <br />
+            <em className="text-gold-soft">{t.titleEm}</em>
           </h2>
           <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-cream/80">{t.p1}</p>
         </Reveal>
@@ -1475,7 +1724,9 @@ function Reserva() {
         <Reveal delay={0.15}>
           <div className="mt-12 flex flex-col items-stretch justify-center gap-4 sm:flex-row">
             <a
-              href={BOOKING_URL} target="_blank" rel="noopener noreferrer"
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => trackEvent("click_booking", { location: "reserva" })}
               className="group relative inline-flex items-center justify-center gap-3 overflow-hidden bg-gold px-8 py-4 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:-translate-y-[1px] active:scale-[0.98]"
             >
@@ -1484,7 +1735,9 @@ function Reserva() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
-              href={WA_URL} target="_blank" rel="noopener noreferrer"
+              href={WA_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => trackEvent("click_whatsapp", { location: "reserva" })}
               className="inline-flex items-center justify-center gap-3 border border-cream/40 px-8 py-4 text-xs uppercase tracking-[0.3em] text-cream transition-all hover:border-gold hover:text-gold active:scale-[0.98]"
             >
@@ -1518,13 +1771,22 @@ function Footer() {
           <p className="mt-6 max-w-xs text-sm text-muted-foreground">{t.tagline}</p>
         </div>
         <div>
-          <div className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">{t.contacto}</div>
+          <div className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+            {t.contacto}
+          </div>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
-              <a href={`tel:${PHONE_TEL}`} className="hover:text-gold">+34 {PHONE_HUMAN}</a>
+              <a href={`tel:${PHONE_TEL}`} className="hover:text-gold">
+                +34 {PHONE_HUMAN}
+              </a>
             </li>
             <li>
-              <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="hover:text-gold">
+              <a
+                href={WA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-gold"
+              >
                 {t.whatsapp}
               </a>
             </li>
@@ -1532,13 +1794,19 @@ function Footer() {
           </ul>
         </div>
         <div>
-          <div className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">{t.legal}</div>
+          <div className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+            {t.legal}
+          </div>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
-              <Link to="/aviso-legal" className="hover:text-gold">{t.avisoLegal}</Link>
+              <Link to="/aviso-legal" className="hover:text-gold">
+                {t.avisoLegal}
+              </Link>
             </li>
             <li>
-              <Link to="/privacidad" className="hover:text-gold">{t.privacidad}</Link>
+              <Link to="/privacidad" className="hover:text-gold">
+                {t.privacidad}
+              </Link>
             </li>
           </ul>
         </div>
@@ -1565,7 +1833,10 @@ function WhatsAppFab() {
     if (!show) return;
     const t = setTimeout(() => setTag(true), 1200);
     const t2 = setTimeout(() => setTag(false), 4500);
-    return () => { clearTimeout(t); clearTimeout(t2); };
+    return () => {
+      clearTimeout(t);
+      clearTimeout(t2);
+    };
   }, [show]);
 
   return (
@@ -1611,7 +1882,9 @@ function MobileStickyCTA() {
       className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-ink/10 bg-cream/95 p-3 shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.2)] backdrop-blur md:hidden"
     >
       <a
-        href={BOOKING_URL} target="_blank" rel="noopener noreferrer"
+        href={BOOKING_URL}
+        target="_blank"
+        rel="noopener noreferrer"
         onClick={() => trackEvent("click_booking", { location: "mobile_sticky" })}
         className="flex flex-1 items-center justify-center gap-2 bg-ink px-4 py-3 text-[11px] uppercase tracking-[0.25em] text-cream active:scale-[0.98]"
       >
