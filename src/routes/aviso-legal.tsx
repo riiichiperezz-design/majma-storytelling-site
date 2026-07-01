@@ -28,9 +28,9 @@ function AvisoLegal() {
         <ul className="list-disc pl-6 space-y-2">
           <li><strong>Titular:</strong> [RAZÓN SOCIAL]</li>
           <li><strong>NIF / CIF:</strong> [NIF]</li>
-          <li><strong>Domicilio:</strong> [DOMICILIO], Cáceres, España</li>
+          <li><strong>Domicilio:</strong> Calle Cornudilla, 3, 10003 Cáceres, España</li>
           <li><strong>Contacto:</strong> +34 722 24 74 36</li>
-          <li><strong>Actividad:</strong> Explotación de apartamento turístico</li>
+          <li><strong>Actividad:</strong> Explotación de apartamentos turísticos</li>
           <li><strong>Nº de registro turístico:</strong> [REGISTRO TURÍSTICO EXTREMADURA]</li>
         </ul>
         <h2 className="font-serif text-2xl">Condiciones de uso</h2>

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useReducedMotion, useMotionValueEvent, useInView } from "motion/react";
 import { useRef, useState, useCallback, useEffect, type MouseEvent } from "react";
 import {
-  Wifi, Snowflake, Flame, Tv, Coffee, Baby, Ban, ArrowUpDown, MapPin,
+  Wifi, Snowflake, Flame, Tv, Coffee, Baby, Ban, MapPin,
   MessageCircle, ArrowRight, Check, Phone, Menu, X, Sun, Star, Quote,
   Landmark, UtensilsCrossed, Compass, Sunset,
   CloudSun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudFog,
@@ -30,15 +30,16 @@ const WA_URL =
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/* Coordenadas aproximadas del casco histórico de Cáceres (Iglesia de San Juan) */
-const CACERES_LAT = 39.4759;
-const CACERES_LON = -6.3722;
+/* Coordenadas reales de MAJMA — Calle Cornudilla, 3, 10003 Cáceres (ficha de Booking.com) */
+const CACERES_LAT = 39.472231;
+const CACERES_LON = -6.372929;
+const MAJMA_ADDRESS = "Calle Cornudilla, 3, 10003 Cáceres, España";
 
 /* Preguntas frecuentes — compartidas entre la sección y el JSON-LD de SEO */
 const FAQS = [
   {
     q: "¿A qué hora son el check-in y el check-out?",
-    a: "El check-in es a partir de las 16:00h y el check-out hasta las 11:00h. Si necesitas flexibilidad, escríbenos por WhatsApp y lo miramos según disponibilidad.",
+    a: "El check-in es de 15:00h a 22:00h y el check-out de 11:00h a 12:00h. Si necesitas un horario distinto, avísanos con antelación por WhatsApp.",
   },
   {
     q: "¿Cómo funciona la llegada? ¿Hay alguien esperando?",
@@ -46,19 +47,23 @@ const FAQS = [
   },
   {
     q: "¿Dónde se puede aparcar?",
-    a: "El casco histórico es peatonal, pero hay parkings públicos a pocos minutos andando del apartamento. Te indicamos la opción más cómoda al confirmar tu reserva.",
+    a: "El casco histórico es peatonal, pero hay opciones de aparcamiento gratuito cerca según nos comentan otros huéspedes. Te indicamos la opción más cómoda al confirmar tu reserva.",
   },
   {
     q: "¿Se admiten niños?",
-    a: "Sí, MAJMA es apto para niños. Disponemos de cuna bajo petición sin coste adicional; solo tienes que avisarnos con antelación.",
+    a: "Sí, se admiten niños de cualquier edad. Ten en cuenta que no disponemos de cunas ni camas adicionales para bebés.",
   },
   {
     q: "¿Se admiten mascotas?",
-    a: "Actualmente el apartamento no admite mascotas.",
+    a: "No, actualmente los apartamentos no admiten mascotas.",
+  },
+  {
+    q: "¿Se permiten despedidas de soltero/a u otro tipo de fiestas?",
+    a: "No, los apartamentos no están pensados para despedidas de soltero/a ni eventos similares.",
   },
   {
     q: "¿Cuántos huéspedes caben como máximo?",
-    a: "El apartamento tiene capacidad para 4 personas: cama doble en el dormitorio y sofá cama en el salón.",
+    a: "MAJMA son 3 apartamentos independientes: dos de 40 m² para hasta 4 huéspedes y uno de 27 m² para hasta 3, todos con cama doble y sofá cama.",
   },
   {
     q: "¿Cuál es la política de cancelación?",
@@ -73,17 +78,17 @@ const FAQS = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MAJMA · Apartamento turístico en el casco histórico de Cáceres" },
+      { title: "MAJMA · Apartamentos turísticos en el casco histórico de Cáceres" },
       {
         name: "description",
         content:
-          "Apartamento turístico MAJMA: a 2 minutos de la Iglesia de San Juan, en pleno casco histórico de Cáceres, Ciudad Patrimonio de la Humanidad. Un dormitorio, salón, terraza y todo el equipamiento.",
+          "Apartamentos turísticos MAJMA: a 2 minutos de la Iglesia de San Juan, en pleno casco histórico de Cáceres, Ciudad Patrimonio de la Humanidad. Tres apartamentos independientes, totalmente equipados.",
       },
       { property: "og:title", content: "MAJMA · Dormir dentro de la Historia — Cáceres" },
       {
         property: "og:description",
         content:
-          "Un apartamento en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
+          "Tres apartamentos en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
@@ -93,14 +98,16 @@ export const Route = createFileRoute("/")({
         "script:ld+json": {
           "@context": "https://schema.org",
           "@type": "LodgingBusiness",
-          name: "MAJMA Apartamentos Turísticos",
+          name: "Apartamentos turísticos MAJMA",
           description:
-            "Apartamento turístico en el casco histórico de Cáceres, a dos minutos de la Iglesia de San Juan, Ciudad Patrimonio de la Humanidad.",
+            "Tres apartamentos turísticos independientes en el casco histórico de Cáceres, a dos minutos de la Iglesia de San Juan, Ciudad Patrimonio de la Humanidad.",
           image: heroImg,
           telephone: PHONE_TEL,
           url: "/",
           address: {
             "@type": "PostalAddress",
+            streetAddress: "Calle Cornudilla, 3",
+            postalCode: "10003",
             addressLocality: "Cáceres",
             addressRegion: "Extremadura",
             addressCountry: "ES",
@@ -110,14 +117,19 @@ export const Route = createFileRoute("/")({
             latitude: CACERES_LAT,
             longitude: CACERES_LON,
           },
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: 9.7,
+            bestRating: 10,
+            reviewCount: 826,
+          },
           amenityFeature: [
             "WiFi gratis",
             "Aire acondicionado",
             "Calefacción",
             "TV con streaming",
             "Cafetera",
-            "Terraza exterior",
-            "Ascensor",
+            "Terraza o balcón",
           ].map((name) => ({ "@type": "LocationFeatureSpecification", name })),
         },
       },
@@ -591,8 +603,8 @@ function Hero() {
           transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
           className="mt-8 max-w-xl text-base text-cream/85 md:text-lg"
         >
-          A dos minutos de la Iglesia de San Juan, en el corazón amurallado de Cáceres. Un
-          apartamento. Una ciudad Patrimonio de la Humanidad a tus pies.
+          A dos minutos de la Iglesia de San Juan, en el corazón amurallado de Cáceres. Tres
+          apartamentos. Una ciudad Patrimonio de la Humanidad a tus pies.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
@@ -611,7 +623,7 @@ function Hero() {
             href="#apartamento"
             className="inline-flex items-center gap-3 border border-cream/40 px-8 py-4 text-xs uppercase tracking-[0.3em] text-cream transition-all hover:border-gold hover:text-gold active:scale-[0.98]"
           >
-            Descubre el apartamento
+            Descubre los apartamentos
           </a>
         </motion.div>
       </motion.div>
@@ -713,15 +725,16 @@ function Apartamento() {
             </h2>
             <div className="mt-8 h-px w-16 bg-gold" />
             <p className="mt-8 text-lg leading-relaxed text-ink/80">
-              Un dormitorio independiente, un salón con carácter propio y una terraza donde
-              el atardecer cacereño se sirve solo. MAJMA es un apartamento pensado para dos —
-              perfecto también para una familia con un pequeño — con todo lo necesario para
-              sentirte en casa, aunque estés a un paso de un Patrimonio Mundial.
+              MAJMA son tres apartamentos independientes en el mismo edificio del casco
+              histórico, cada uno con su propio salón, cocina, baño y terraza o balcón donde
+              el atardecer cacereño se sirve solo. Perfectos para dos — y también para una
+              familia con un pequeño — con todo lo necesario para sentirte en casa, aunque
+              estés a un paso de un Patrimonio Mundial.
             </p>
             <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-border pt-6">
               {[
-                { k: 1, v: "Dormitorio" },
-                { k: 2, v: "Camas" },
+                { k: 3, v: "Apartamentos" },
+                { k: 2, v: "Camas por apto." },
                 { k: 4, v: "Huéspedes máx." },
               ].map(({ k, v }) => (
                 <div key={v}>
@@ -803,7 +816,7 @@ function Distribucion() {
         "Cama doble con ropa de cama de calidad",
         "Habitación independiente y silenciosa",
         "Aire acondicionado y calefacción",
-        "Cuna disponible bajo petición",
+        "Armario para el equipaje",
       ],
     },
     {
@@ -874,9 +887,9 @@ function Equipamiento() {
     { icon: Flame, label: "Calefacción" },
     { icon: Tv, label: "TV con streaming" },
     { icon: Coffee, label: "Cafetera" },
-    { icon: Sun, label: "Terraza exterior" },
-    { icon: ArrowUpDown, label: "Ascensor" },
-    { icon: Baby, label: "Cuna · apto niños" },
+    { icon: Sun, label: "Terraza o balcón" },
+    { icon: UtensilsCrossed, label: "Ruta de bares en la puerta" },
+    { icon: Baby, label: "Apto para niños" },
     { icon: Ban, label: "No fumadores" },
   ];
   return (
@@ -910,10 +923,10 @@ function Equipamiento() {
 function Ubicacion() {
   const spots = [
     { name: "Iglesia de San Juan", time: "2 min" },
-    { name: "Plaza Mayor", time: "5 min" },
-    { name: "Arco de la Estrella", time: "6 min" },
-    { name: "Concatedral de Santa María", time: "7 min" },
-    { name: "Torre de Bujaco", time: "6 min" },
+    { name: "Museo de Cáceres", time: "5 min" },
+    { name: "Plaza de San Jorge", time: "6 min" },
+    { name: "Plaza Mayor", time: "6 min" },
+    { name: "Arco de la Estrella", time: "7 min" },
   ];
   return (
     <section id="ubicacion" className="stone-grain relative overflow-hidden bg-stone-soft py-32 md:py-48">
@@ -948,7 +961,7 @@ function Ubicacion() {
           <div className="relative aspect-square overflow-hidden border border-ink/15 bg-ink">
             <iframe
               title="Ubicación de MAJMA en Cáceres"
-              src="https://www.google.com/maps?q=Iglesia+de+San+Juan,+C%C3%A1ceres,+Spain&output=embed"
+              src="https://www.google.com/maps?q=Calle+Cornudilla+3,+10003+C%C3%A1ceres,+Spain&output=embed"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               className="absolute inset-0 h-full w-full border-0"
@@ -1052,12 +1065,12 @@ type ProximityPoint = { name: string; time: number; angle: number };
 function ProximityMap() {
   const points: ProximityPoint[] = [
     { name: "Iglesia de San Juan", time: 2, angle: -90 },
-    { name: "Plaza Mayor", time: 5, angle: -45 },
-    { name: "Torre de Bujaco", time: 6, angle: 0 },
-    { name: "Concatedral", time: 7, angle: 40 },
-    { name: "Museo de Cáceres", time: 8, angle: 90 },
+    { name: "Plaza Mayor", time: 6, angle: -45 },
+    { name: "Plaza de San Jorge", time: 6, angle: 0 },
+    { name: "Museo de Cáceres", time: 5, angle: 40 },
+    { name: "Torre de Bujaco", time: 6, angle: 90 },
     { name: "Foro de los Balbos", time: 8, angle: 140 },
-    { name: "Arco de la Estrella", time: 6, angle: 180 },
+    { name: "Arco de la Estrella", time: 7, angle: 180 },
     { name: "Barrio judío", time: 4, angle: -135 },
   ];
   const cx = 200;
@@ -1207,7 +1220,7 @@ function GuiaCaceres() {
       items: [
         {
           name: "Plaza Mayor",
-          time: "5 min a pie",
+          time: "6 min a pie",
           text: "El salón de la ciudad, con la Torre de Bujaco vigilando desde lo alto. Punto de partida perfecto para perderse por el casco.",
         },
         {
@@ -1217,7 +1230,7 @@ function GuiaCaceres() {
         },
         {
           name: "Museo de Cáceres · Casa de las Veletas",
-          time: "8 min a pie",
+          time: "5 min a pie",
           text: "Un palacio del siglo XVI construido sobre un aljibe árabe casi intacto. Entrada gratuita para ciudadanos de la Unión Europea.",
         },
         {
@@ -1233,7 +1246,7 @@ function GuiaCaceres() {
       items: [
         {
           name: "Terrazas de la Plaza Mayor",
-          time: "5 min a pie",
+          time: "6 min a pie",
           text: "Tapa y caña con la muralla de testigo, a cualquier hora del día.",
         },
         {
@@ -1341,40 +1354,31 @@ function GuiaCaceres() {
 type Review = {
   name: string;
   origin: string;
-  date: string;
-  rating: number;
   text: string;
 };
 
+/* Reseñas reales de huéspedes, tal cual aparecen en Booking.com (recortadas por Booking con "...") */
 function Testimonios() {
   const reviews: Review[] = [
     {
-      name: "Laura M.",
-      origin: "Madrid, España",
-      date: "Mayo 2026",
-      rating: 5,
-      text: "Despertarse con la muralla al otro lado de la ventana no tiene precio. El apartamento estaba impecable y Iñigo nos respondió al minuto cuando tuvimos una duda con el check-in. Volveremos seguro.",
+      name: "Maria",
+      origin: "Chile",
+      text: "Su anfitrión súper atento! Pedí una plancha que no tenía el dpto y me la consiguió sin problema! Además siempre recomendaba lugares y estaba...",
     },
     {
-      name: "Thomas & Julie",
-      origin: "Lyon, Francia",
-      date: "Abril 2026",
-      rating: 5,
-      text: "Un emplazamiento perfecto para descubrir Cáceres a pie: en dos minutos ya estábamos en la Plaza Mayor. La terraza al atardecer fue el mejor momento del viaje. Muy recomendable.",
+      name: "Elizabeth",
+      origin: "España",
+      text: "La ubicación es ideal para visitar Cáceres. El anfitrión muy atento. Tener en cuenta que para el apartamento 2 y 3 hay que subir escaleras y que...",
     },
     {
-      name: "Marco Rossi",
-      origin: "Milán, Italia",
-      date: "Marzo 2026",
-      rating: 5,
-      text: "Camas muy cómodas, cocina bien equipada y una decoración con mucho carácter que respeta el edificio original. Se nota que han cuidado cada detalle. La comunicación con el anfitrión, excelente.",
+      name: "Maite",
+      origin: "España",
+      text: "La paz que se respira en el apartamento, la cercanía a la zona monumental, el diseñó interior y la cama nos resultó comodísima. Descansamos muy...",
     },
     {
-      name: "Elena Fernández",
-      origin: "Sevilla, España",
-      date: "Febrero 2026",
-      rating: 4,
-      text: "Muy buena ubicación y apartamento muy acogedor, silencioso a pesar de estar en pleno casco histórico. Solo echamos en falta un poco más de información sobre el parking al llegar, pero nada que empañe una gran estancia.",
+      name: "Laura",
+      origin: "España",
+      text: "El apartamento con mayor encanto en el que hemos estado. Está cuidado al detalle, la terraza con vistas a la muralla no puede ser más agradable...",
     },
   ];
 
@@ -1397,7 +1401,7 @@ function Testimonios() {
                   <Star key={i} className="h-4 w-4 fill-gold text-gold" strokeWidth={1} />
                 ))}
               </div>
-              <span className="text-sm text-ink/70">4.8 / 5 en Booking.com</span>
+              <span className="text-sm text-ink/70">9.7 / 10 · 826 opiniones en Booking.com</span>
             </div>
           </div>
         </Reveal>
@@ -1407,20 +1411,11 @@ function Testimonios() {
             <Reveal key={r.name} delay={i * 0.08}>
               <div className="flex h-full flex-col border border-border bg-background p-8">
                 <Quote className="h-6 w-6 text-gold" strokeWidth={1.25} />
-                <div className="mt-5 flex gap-1">
-                  {Array.from({ length: 5 }).map((_, s) => (
-                    <Star
-                      key={s}
-                      className={`h-3.5 w-3.5 ${s < r.rating ? "fill-gold text-gold" : "text-ink/20"}`}
-                      strokeWidth={1}
-                    />
-                  ))}
-                </div>
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-ink/80">“{r.text}”</p>
+                <p className="mt-5 flex-1 text-sm leading-relaxed text-ink/80">“{r.text}”</p>
                 <div className="mt-6 border-t border-border pt-4">
                   <p className="font-serif text-lg text-ink">{r.name}</p>
                   <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                    {r.origin} · {r.date}
+                    {r.origin} · Reseña verificada en Booking.com
                   </p>
                 </div>
               </div>
@@ -1547,7 +1542,7 @@ function Footer() {
         <div>
           <Wordmark />
           <p className="mt-6 max-w-xs text-sm text-muted-foreground">
-            Apartamento turístico en el casco histórico de Cáceres. Piedra centenaria, confort
+            Apartamentos turísticos en el casco histórico de Cáceres. Piedra centenaria, confort
             contemporáneo.
           </p>
         </div>
