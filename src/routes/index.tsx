@@ -4,7 +4,8 @@ import { useRef, useState, useCallback, useEffect, type MouseEvent } from "react
 import {
   Wifi, Snowflake, Flame, Tv, Coffee, Baby, Ban, ArrowUpDown, MapPin,
   MessageCircle, ArrowRight, Check, Phone, Menu, X, Sun, Star, Quote,
-  Landmark, UtensilsCrossed, Compass,
+  Landmark, UtensilsCrossed, Compass, Sunset,
+  CloudSun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudFog,
 } from "lucide-react";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -29,6 +30,46 @@ const WA_URL =
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+/* Coordenadas aproximadas del casco histórico de Cáceres (Iglesia de San Juan) */
+const CACERES_LAT = 39.4759;
+const CACERES_LON = -6.3722;
+
+/* Preguntas frecuentes — compartidas entre la sección y el JSON-LD de SEO */
+const FAQS = [
+  {
+    q: "¿A qué hora son el check-in y el check-out?",
+    a: "El check-in es a partir de las 16:00h y el check-out hasta las 11:00h. Si necesitas flexibilidad, escríbenos por WhatsApp y lo miramos según disponibilidad.",
+  },
+  {
+    q: "¿Cómo funciona la llegada? ¿Hay alguien esperando?",
+    a: "El check-in es autónomo mediante caja de llaves segura. Antes de tu llegada te enviamos instrucciones detalladas y un contacto directo por si necesitas ayuda en cualquier momento.",
+  },
+  {
+    q: "¿Dónde se puede aparcar?",
+    a: "El casco histórico es peatonal, pero hay parkings públicos a pocos minutos andando del apartamento. Te indicamos la opción más cómoda al confirmar tu reserva.",
+  },
+  {
+    q: "¿Se admiten niños?",
+    a: "Sí, MAJMA es apto para niños. Disponemos de cuna bajo petición sin coste adicional; solo tienes que avisarnos con antelación.",
+  },
+  {
+    q: "¿Se admiten mascotas?",
+    a: "Actualmente el apartamento no admite mascotas.",
+  },
+  {
+    q: "¿Cuántos huéspedes caben como máximo?",
+    a: "El apartamento tiene capacidad para 4 personas: cama doble en el dormitorio y sofá cama en el salón.",
+  },
+  {
+    q: "¿Cuál es la política de cancelación?",
+    a: "Depende de la tarifa elegida en el momento de la reserva. Puedes consultar las condiciones exactas antes de confirmar en la propia página de Booking.",
+  },
+  {
+    q: "¿Hay wifi y climatización?",
+    a: "Sí, wifi de alta velocidad gratuito y aire acondicionado/calefacción en todas las estancias del apartamento.",
+  },
+];
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -48,6 +89,49 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: "/" },
       { property: "og:image", content: heroImg },
       { name: "twitter:card", content: "summary_large_image" },
+      {
+        "script:ld+json": {
+          "@context": "https://schema.org",
+          "@type": "LodgingBusiness",
+          name: "MAJMA Apartamentos Turísticos",
+          description:
+            "Apartamento turístico en el casco histórico de Cáceres, a dos minutos de la Iglesia de San Juan, Ciudad Patrimonio de la Humanidad.",
+          image: heroImg,
+          telephone: PHONE_TEL,
+          url: "/",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Cáceres",
+            addressRegion: "Extremadura",
+            addressCountry: "ES",
+          },
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: CACERES_LAT,
+            longitude: CACERES_LON,
+          },
+          amenityFeature: [
+            "WiFi gratis",
+            "Aire acondicionado",
+            "Calefacción",
+            "TV con streaming",
+            "Cafetera",
+            "Terraza exterior",
+            "Ascensor",
+          ].map((name) => ({ "@type": "LocationFeatureSpecification", name })),
+        },
+      },
+      {
+        "script:ld+json": {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FAQS.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        },
+      },
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
@@ -404,6 +488,7 @@ function TopBar() {
 
 function Hero() {
   const ref = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const reduce = useReducedMotion();
   const [videoFailed, setVideoFailed] = useState(false);
   const { scrollYProgress } = useScroll({
@@ -416,6 +501,15 @@ function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const indicatorOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
 
+  // El vídeo se renderiza igual en servidor y cliente (evita mismatches de hidratación);
+  // el arranque/pausa según "reducir movimiento" se controla aquí, tras montar.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (reduce) v.pause();
+    else v.play().catch(() => {});
+  }, [reduce]);
+
   return (
     <section
       ref={ref}
@@ -423,10 +517,9 @@ function Hero() {
       className="relative h-screen w-full overflow-hidden bg-ink text-cream"
     >
       <motion.div style={{ y: yImg }} className="absolute inset-0 -top-10 -bottom-10">
-        {!reduce && !videoFailed ? (
+        {!videoFailed ? (
           <video
-            key={heroVideo}
-            autoPlay
+            ref={videoRef}
             muted
             loop
             playsInline
@@ -871,6 +964,236 @@ function Ubicacion() {
   );
 }
 
+/* ─────────── Clima en directo de Cáceres ─────────── */
+
+type WeatherData = { temp: number; code: number; sunset: string };
+
+function useCaceresWeather() {
+  const [data, setData] = useState<WeatherData | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const url =
+      `https://api.open-meteo.com/v1/forecast?latitude=${CACERES_LAT}&longitude=${CACERES_LON}` +
+      `&current=temperature_2m,weather_code&daily=sunset&timezone=Europe%2FMadrid&forecast_days=1`;
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error("weather request failed");
+        return res.json();
+      })
+      .then((json) => {
+        if (cancelled) return;
+        setData({
+          temp: Math.round(json.current.temperature_2m),
+          code: json.current.weather_code,
+          sunset: json.daily.sunset[0],
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { data, error };
+}
+
+function weatherIcon(code: number) {
+  if (code === 0) return Sun;
+  if (code === 1 || code === 2 || code === 3) return CloudSun;
+  if (code === 45 || code === 48) return CloudFog;
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return CloudRain;
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return CloudSnow;
+  if (code === 95 || code === 96 || code === 99) return CloudLightning;
+  return Cloud;
+}
+
+function formatMadridTime(iso: string) {
+  // La API ya devuelve la hora local de Madrid (timezone=Europe/Madrid) sin
+  // offset; se extrae el HH:MM tal cual para no reconvertir con la zona
+  // horaria del visitante (que duplicaría el desfase horario).
+  const match = iso.match(/T(\d{2}):(\d{2})/);
+  return match ? `${match[1]}:${match[2]}` : iso;
+}
+
+function LiveWeather() {
+  const { data, error } = useCaceresWeather();
+  if (error || !data) return null;
+  const Icon = weatherIcon(data.code);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: EASE }}
+      className="inline-flex flex-wrap items-center gap-x-4 gap-y-2 border border-cream/15 bg-cream/[0.04] px-5 py-3 text-xs text-cream/80"
+    >
+      <span className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-gold" strokeWidth={1.5} />
+        Ahora mismo en Cáceres: <strong className="font-medium text-cream">{data.temp}°C</strong>
+      </span>
+      <span className="hidden h-3 w-px bg-cream/20 sm:block" />
+      <span className="flex items-center gap-2">
+        <Sunset className="h-4 w-4 text-gold" strokeWidth={1.5} />
+        Hoy el sol se pone a las {formatMadridTime(data.sunset)} — hora perfecta para la terraza
+      </span>
+    </motion.div>
+  );
+}
+
+/* ─────────── Mapa de cercanía ─────────── */
+
+type ProximityPoint = { name: string; time: number; angle: number };
+
+function ProximityMap() {
+  const points: ProximityPoint[] = [
+    { name: "Iglesia de San Juan", time: 2, angle: -90 },
+    { name: "Plaza Mayor", time: 5, angle: -45 },
+    { name: "Torre de Bujaco", time: 6, angle: 0 },
+    { name: "Concatedral", time: 7, angle: 40 },
+    { name: "Museo de Cáceres", time: 8, angle: 90 },
+    { name: "Foro de los Balbos", time: 8, angle: 140 },
+    { name: "Arco de la Estrella", time: 6, angle: 180 },
+    { name: "Barrio judío", time: 4, angle: -135 },
+  ];
+  const cx = 200;
+  const cy = 200;
+  const toRadius = (t: number) => 30 + t * 14;
+
+  return (
+    <div className="relative mx-auto aspect-square w-full max-w-md">
+      <svg
+        viewBox="0 0 400 400"
+        className="h-full w-full overflow-visible"
+        role="img"
+        aria-label="Mapa de cercanía: distancias a pie desde MAJMA a los puntos de interés de Cáceres"
+      >
+        <circle
+          cx={cx}
+          cy={cy}
+          r={toRadius(5)}
+          fill="none"
+          stroke="var(--color-gold)"
+          strokeOpacity="0.3"
+          strokeDasharray="2 6"
+          strokeLinecap="round"
+        />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={toRadius(10)}
+          fill="none"
+          stroke="var(--color-gold)"
+          strokeOpacity="0.16"
+          strokeDasharray="2 6"
+          strokeLinecap="round"
+        />
+        <text
+          x={cx}
+          y={cy - toRadius(5) - 8}
+          textAnchor="middle"
+          fill="var(--color-cream)"
+          fillOpacity="0.45"
+          fontSize="9"
+          letterSpacing="2"
+        >
+          5 MIN
+        </text>
+        <text
+          x={cx}
+          y={cy - toRadius(10) - 8}
+          textAnchor="middle"
+          fill="var(--color-cream)"
+          fillOpacity="0.3"
+          fontSize="9"
+          letterSpacing="2"
+        >
+          10 MIN
+        </text>
+
+        {points.map((p, i) => {
+          const rad = (p.angle * Math.PI) / 180;
+          const r = toRadius(p.time);
+          const x = cx + r * Math.cos(rad);
+          const y = cy + r * Math.sin(rad);
+          const labelR = r + 34;
+          const lx = cx + labelR * Math.cos(rad);
+          const ly = cy + labelR * Math.sin(rad);
+          const cos = Math.cos(rad);
+          const anchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
+          return (
+            <g key={p.name}>
+              <line
+                x1={cx}
+                y1={cy}
+                x2={x}
+                y2={y}
+                stroke="var(--color-gold)"
+                strokeOpacity="0.3"
+                strokeWidth="1"
+              />
+              <motion.circle
+                cx={x}
+                cy={y}
+                r="4.5"
+                fill="var(--color-gold)"
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.5 + i * 0.06, ease: EASE }}
+              />
+              <text
+                x={lx}
+                y={ly - 3}
+                textAnchor={anchor}
+                fill="var(--color-cream)"
+                fontSize="11"
+                fontFamily="var(--font-serif)"
+              >
+                {p.name}
+              </text>
+              <text
+                x={lx}
+                y={ly + 11}
+                textAnchor={anchor}
+                fill="var(--color-gold)"
+                fontSize="9"
+                letterSpacing="1"
+              >
+                {p.time} MIN A PIE
+              </text>
+            </g>
+          );
+        })}
+
+        <circle
+          cx={cx}
+          cy={cy}
+          r="24"
+          fill="var(--color-ink)"
+          stroke="var(--color-gold)"
+          strokeWidth="1.5"
+        />
+        <text
+          x={cx}
+          y={cy + 4}
+          textAnchor="middle"
+          fill="var(--color-gold)"
+          fontSize="10"
+          letterSpacing="1"
+          fontFamily="var(--font-serif)"
+        >
+          MAJMA
+        </text>
+      </svg>
+    </div>
+  );
+}
+
 /* ─────────── Guía de Cáceres ─────────── */
 
 type GuideItem = { name: string; time: string; text: string };
@@ -949,41 +1272,60 @@ function GuiaCaceres() {
   ];
 
   return (
-    <section id="guia" className="relative bg-ink py-32 text-cream md:py-48">
+    <section id="guia" className="relative overflow-hidden bg-ink py-32 text-cream md:py-48">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <Reveal>
-          <div className="mb-16 max-w-2xl">
-            <SectionNumber n="06" label="Guía" dark />
-            <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-cream md:text-6xl">
-              Cáceres,
-              <br />
-              <em className="text-gold-soft">a un paseo de casa</em>.
-            </h2>
-            <p className="mt-8 text-lg leading-relaxed text-cream/80">
-              No hace falta agenda ni coche: todo lo esencial de la ciudad está a menos de diez
-              minutos andando desde MAJMA. Una pequeña guía para aprovechar cada hora.
-            </p>
-          </div>
-        </Reveal>
+        <div className="grid grid-cols-1 items-center gap-16 md:grid-cols-2">
+          <Reveal>
+            <div className="max-w-xl">
+              <SectionNumber n="06" label="Guía" dark />
+              <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-cream md:text-6xl">
+                Cáceres,
+                <br />
+                <em className="text-gold-soft">a un paseo de casa</em>.
+              </h2>
+              <p className="mt-8 text-lg leading-relaxed text-cream/80">
+                No hace falta agenda ni coche: todo lo esencial de la ciudad está a menos de diez
+                minutos andando desde MAJMA. Una pequeña guía para aprovechar cada hora.
+              </p>
+              <div className="mt-8">
+                <LiveWeather />
+              </div>
+            </div>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <ProximityMap />
+          </Reveal>
+        </div>
 
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+        <div className="mt-24 grid grid-cols-1 gap-x-10 gap-y-14 md:grid-cols-3">
           {groups.map((g, gi) => (
             <Reveal key={g.label} delay={gi * 0.1}>
               <div className="flex items-center gap-3 border-b border-cream/15 pb-4">
                 <g.icon className="h-5 w-5 text-gold" strokeWidth={1.25} />
                 <h3 className="text-xs uppercase tracking-[0.4em] text-cream/70">{g.label}</h3>
               </div>
-              <ul className="mt-6 space-y-6">
+              <ul className="mt-6 space-y-4">
                 {g.items.map((it) => (
-                  <li key={it.name}>
-                    <div className="flex items-baseline justify-between gap-4">
-                      <span className="font-serif text-lg text-cream">{it.name}</span>
-                      <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.25em] text-gold">
-                        {it.time}
-                      </span>
+                  <motion.li
+                    key={it.name}
+                    whileHover={{ x: 4 }}
+                    transition={{ duration: 0.3, ease: EASE }}
+                    className="group flex gap-4 border border-cream/10 bg-cream/[0.03] p-5 transition-colors hover:border-gold/40 hover:bg-cream/[0.06]"
+                  >
+                    <g.icon
+                      className="mt-1 h-4 w-4 shrink-0 text-gold/70 transition-colors group-hover:text-gold"
+                      strokeWidth={1.25}
+                    />
+                    <div>
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                        <span className="font-serif text-lg text-cream">{it.name}</span>
+                        <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.25em] text-gold">
+                          {it.time}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm leading-relaxed text-cream/70">{it.text}</p>
                     </div>
-                    <p className="mt-2 text-sm leading-relaxed text-cream/70">{it.text}</p>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             </Reveal>
@@ -1093,40 +1435,7 @@ function Testimonios() {
 /* ─────────── Preguntas frecuentes ─────────── */
 
 function FAQ() {
-  const faqs = [
-    {
-      q: "¿A qué hora son el check-in y el check-out?",
-      a: "El check-in es a partir de las 16:00h y el check-out hasta las 11:00h. Si necesitas flexibilidad, escríbenos por WhatsApp y lo miramos según disponibilidad.",
-    },
-    {
-      q: "¿Cómo funciona la llegada? ¿Hay alguien esperando?",
-      a: "El check-in es autónomo mediante caja de llaves segura. Antes de tu llegada te enviamos instrucciones detalladas y un contacto directo por si necesitas ayuda en cualquier momento.",
-    },
-    {
-      q: "¿Dónde se puede aparcar?",
-      a: "El casco histórico es peatonal, pero hay parkings públicos a pocos minutos andando del apartamento. Te indicamos la opción más cómoda al confirmar tu reserva.",
-    },
-    {
-      q: "¿Se admiten niños?",
-      a: "Sí, MAJMA es apto para niños. Disponemos de cuna bajo petición sin coste adicional; solo tienes que avisarnos con antelación.",
-    },
-    {
-      q: "¿Se admiten mascotas?",
-      a: "Actualmente el apartamento no admite mascotas.",
-    },
-    {
-      q: "¿Cuántos huéspedes caben como máximo?",
-      a: "El apartamento tiene capacidad para 4 personas: cama doble en el dormitorio y sofá cama en el salón.",
-    },
-    {
-      q: "¿Cuál es la política de cancelación?",
-      a: "Depende de la tarifa elegida en el momento de la reserva. Puedes consultar las condiciones exactas antes de confirmar en la propia página de Booking.",
-    },
-    {
-      q: "¿Hay wifi y climatización?",
-      a: "Sí, wifi de alta velocidad gratuito y aire acondicionado/calefacción en todas las estancias del apartamento.",
-    },
-  ];
+  const faqs = FAQS;
 
   return (
     <section id="faq" className="relative bg-cream py-32 md:py-48">

@@ -77,25 +77,43 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "MAJMA offers a unique historical apartment stay in Cáceres, Spain, blending ancient charm with modern comfort." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "MAJMA offers a unique historical apartment stay in Cáceres, Spain, blending ancient charm with modern comfort." },
+      { title: "MAJMA · Apartamento turístico en el casco histórico de Cáceres" },
+      {
+        name: "description",
+        content:
+          "Apartamento turístico MAJMA, a dos minutos de la Iglesia de San Juan, en pleno casco histórico de Cáceres, Ciudad Patrimonio de la Humanidad.",
+      },
+      { name: "author", content: "MAJMA Apartamentos Turísticos" },
+      { property: "og:site_name", content: "MAJMA · Cáceres" },
+      {
+        property: "og:title",
+        content: "MAJMA · Apartamento turístico en el casco histórico de Cáceres",
+      },
+      {
+        property: "og:description",
+        content:
+          "Un apartamento en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "MAJMA offers a unique historical apartment stay in Cáceres, Spain, blending ancient charm with modern comfort." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2c92792e-0ede-4dd6-a706-c9f00c009287/id-preview-d9475724--3d77069f-a6f8-4d94-9fca-449713a37bc4.lovable.app-1782889117788.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2c92792e-0ede-4dd6-a706-c9f00c009287/id-preview-d9475724--3d77069f-a6f8-4d94-9fca-449713a37bc4.lovable.app-1782889117788.png" },
+      { property: "og:locale", content: "es_ES" },
+      { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "twitter:title",
+        content: "MAJMA · Apartamento turístico en el casco histórico de Cáceres",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Un apartamento en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
+      },
+      { name: "robots", content: "index, follow" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@300;400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Public+Sans:wght@300;400;500;600;700&display=swap",
       },
       { rel: "stylesheet", href: appCss },
     ],
@@ -108,7 +126,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
