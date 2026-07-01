@@ -184,6 +184,7 @@ export const content = {
         "Mapa de cercanía: distancias a pie desde MAJMA a los puntos de interés de Cáceres",
       minWalk: "MIN A PIE",
       mapHint: "Toca o pasa el cursor sobre un punto del mapa",
+      howToGetThere: "Cómo llegar a pie",
       radarPoints: [
         {
           name: "Iglesia de San Juan",
@@ -264,19 +265,19 @@ export const content = {
           label: "Sabores",
           items: [
             {
-              name: "Santisteban",
-              time: "Muy cerca",
-              text: "Uno de los restaurantes más próximos a MAJMA, a un paseo corto.",
+              name: "Terrazas de la Plaza Mayor",
+              time: "6 min a pie",
+              text: "Tapa y caña con la muralla de testigo, a cualquier hora del día.",
             },
             {
-              name: "Trinidad Tapería Café Bar",
-              time: "Muy cerca",
-              text: "Tapería y café bar a poca distancia del alojamiento.",
+              name: "Tabernas del casco histórico",
+              time: "5-8 min a pie",
+              text: "Cocina extremeña tradicional en locales con siglos de historia entre sus paredes.",
             },
             {
-              name: "Restaurante Nolasco",
-              time: "Pocos minutos",
-              text: "Un paseo corto en pleno casco histórico.",
+              name: "Mercado y tiendas gourmet",
+              time: "5 min a pie",
+              text: "Ideal para llevarte un trozo de Extremadura en la maleta: quesos, embutidos y aceite de la tierra.",
             },
           ],
         },
@@ -372,6 +373,11 @@ export const content = {
         reset: "Reiniciar",
         cta: "Ver disponibilidad en Booking",
         hint: "Elige tus fechas: te llevamos directo a la disponibilidad real en Booking, sin compromiso.",
+        directTitle: "¿Prefieres reservar directo con nosotros?",
+        directHint: "Sin intermediarios. Te confirmamos la disponibilidad real por WhatsApp.",
+        namePlaceholder: "Tu nombre",
+        guestsLabel: "Huéspedes",
+        directCta: "Solicitar por WhatsApp",
       },
     },
     footer: {
@@ -402,6 +408,18 @@ export const content = {
       link: "política de privacidad",
       accept: "Aceptar",
       reject: "Rechazar",
+    },
+    chatbot: {
+      label: "Asistente MAJMA",
+      title: "Asistente MAJMA",
+      subtitle: "Busca en las preguntas frecuentes",
+      greeting: "Hola, soy el asistente de MAJMA. Elige una pregunta o escribe la tuya.",
+      placeholder: "Escribe tu pregunta...",
+      send: "Enviar",
+      noMatch:
+        "No he encontrado una respuesta exacta a eso. Escríbenos por WhatsApp y te ayudamos enseguida.",
+      whatsappCta: "Escribir por WhatsApp",
+      close: "Cerrar",
     },
     notFound: {
       title: "Página no encontrada",
@@ -590,6 +608,7 @@ export const content = {
         "Proximity map: walking distances from MAJMA to Cáceres' points of interest",
       minWalk: "MIN WALK",
       mapHint: "Tap or hover a point on the map",
+      howToGetThere: "Walking directions",
       radarPoints: [
         {
           name: "Iglesia de San Juan",
@@ -670,19 +689,19 @@ export const content = {
           label: "Flavors",
           items: [
             {
-              name: "Santisteban",
-              time: "Very close",
-              text: "One of the closest restaurants to MAJMA, a short walk away.",
+              name: "Terrazas de la Plaza Mayor",
+              time: "6 min walk",
+              text: "Tapas and a cold beer with the city wall as your backdrop, any time of day.",
             },
             {
-              name: "Trinidad Tapería Café Bar",
-              time: "Very close",
-              text: "A tapas bar and café just a short distance from the door.",
+              name: "Old-town taverns",
+              time: "5-8 min walk",
+              text: "Traditional Extremaduran cooking in rooms with centuries of history in their walls.",
             },
             {
-              name: "Restaurante Nolasco",
-              time: "A few minutes",
-              text: "A short stroll into the heart of the old town.",
+              name: "Mercado y tiendas gourmet",
+              time: "5 min walk",
+              text: "Ideal for taking a piece of Extremadura home: cheeses, cured meats and local olive oil.",
             },
           ],
         },
@@ -778,6 +797,11 @@ export const content = {
         reset: "Reset",
         cta: "Check availability on Booking.com",
         hint: "Pick your dates: we'll take you straight to real availability on Booking.com, no commitment.",
+        directTitle: "Prefer to book directly with us?",
+        directHint: "No middleman. We'll confirm real availability over WhatsApp.",
+        namePlaceholder: "Your name",
+        guestsLabel: "Guests",
+        directCta: "Request via WhatsApp",
       },
     },
     footer: {
@@ -808,6 +832,18 @@ export const content = {
       link: "privacy policy",
       accept: "Accept",
       reject: "Decline",
+    },
+    chatbot: {
+      label: "MAJMA Assistant",
+      title: "MAJMA Assistant",
+      subtitle: "Search our frequently asked questions",
+      greeting: "Hi, I'm the MAJMA assistant. Pick a question or type your own.",
+      placeholder: "Type your question...",
+      send: "Send",
+      noMatch:
+        "I couldn't find an exact answer to that. Message us on WhatsApp and we'll help right away.",
+      whatsappCta: "Message on WhatsApp",
+      close: "Close",
     },
     notFound: {
       title: "Page not found",
