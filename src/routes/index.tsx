@@ -179,6 +179,30 @@ function BattlementMark({ className = "" }: { className?: string }) {
   );
 }
 
+/* ─────────── Remate almenado entre secciones ───────────
+   En vez de una línea genérica, el borde inferior de cada tramo se recorta
+   como una muralla: los merlones anticipan, en el color de la sección
+   siguiente, el cambio de fondo que viene justo después. */
+
+function BattlementSeam({ from, to }: { from: string; to: string }) {
+  const teeth = 32;
+  return (
+    <div
+      aria-hidden="true"
+      className="relative flex h-5 w-full items-end overflow-hidden md:h-7"
+      style={{ backgroundColor: from }}
+    >
+      {Array.from({ length: teeth }).map((_, i) => (
+        <div
+          key={i}
+          className="flex-1"
+          style={{ backgroundColor: to, height: i % 2 === 0 ? "45%" : "100%" }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function Wordmark({ dark = false, compact = false }: { dark?: boolean; compact?: boolean }) {
   const t = useT();
   return (
@@ -325,7 +349,6 @@ function FlipCard({ room }: { room: Room }) {
           <img src={room.img} alt={room.title} loading="lazy" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-6">
-            <div className="mb-2 h-px w-8 bg-gold" />
             <h3 className="font-serif text-3xl text-cream">{room.title}</h3>
             <p className="mt-1 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-cream/70">
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-gold/60 text-gold">+</span>
@@ -338,7 +361,6 @@ function FlipCard({ room }: { room: Room }) {
           style={{ transform: "rotateY(180deg)" }}
         >
           <div>
-            <div className="mb-3 h-px w-8 bg-gold" />
             <h3 className="font-serif text-3xl">{room.title}</h3>
           </div>
           <ul className="space-y-3">
@@ -422,12 +444,18 @@ function MajmaLanding() {
       <Apartamento />
       <Galeria />
       <Distribucion />
+      <BattlementSeam from="var(--color-cream)" to="var(--color-ink)" />
       <Equipamiento />
+      <BattlementSeam from="var(--color-ink)" to="var(--color-stone-soft)" />
       <Ubicacion />
+      <BattlementSeam from="var(--color-stone-soft)" to="var(--color-ink)" />
       <GuiaCaceres />
+      <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" />
       <Testimonios />
       <FAQ />
+      <BattlementSeam from="var(--color-cream)" to="var(--color-ink)" />
       <Reserva />
+      <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" />
       <Footer />
       <WhatsAppFab />
       <MobileStickyCTA />
@@ -613,9 +641,8 @@ function Hero() {
           transition={{ duration: 0.9, ease: EASE }}
           className="mb-8 flex items-center gap-4 text-[10px] uppercase tracking-[0.5em] text-cream/70"
         >
-          <span className="h-px w-10 bg-gold" />
+          <BattlementMark className="h-3 w-auto text-gold" />
           {t.eyebrow}
-          <span className="h-px w-10 bg-gold" />
         </motion.div>
         <h1 className="font-serif text-5xl leading-[0.95] tracking-tight text-cream md:text-8xl">
           <motion.span
@@ -697,7 +724,6 @@ function Territorio() {
             <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
               {t.titlePre}<br />{t.titleMid} <em className="text-gold">{t.titleEm}</em>.
             </h2>
-            <div className="mt-8 h-px w-16 bg-gold" />
             <p className="mt-8 text-lg leading-relaxed text-ink/80">{t.p1}</p>
             <p className="mt-6 text-lg leading-relaxed text-ink/80">{t.p2}</p>
           </div>
@@ -729,14 +755,12 @@ function Territorio() {
 
 function SectionNumber({ n, label, dark = false }: { n: string; label: string; dark?: boolean }) {
   return (
-    <div className="flex items-center gap-4">
-      <motion.span
-        initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }}
-        transition={{ duration: 0.9, ease: EASE }}
-        className={`inline-block h-px w-8 origin-left ${dark ? "bg-cream/50" : "bg-ink/40"}`}
-      />
+    <div className="flex items-baseline gap-3">
+      <span className={`font-serif text-lg leading-none ${dark ? "text-gold-soft" : "text-gold"}`}>
+        {n}
+      </span>
       <span className={`text-[10px] uppercase tracking-[0.5em] ${dark ? "text-cream/60" : "text-stone-deep"}`}>
-        {n} · {label}
+        {label}
       </span>
     </div>
   );
@@ -756,7 +780,6 @@ function Apartamento() {
               {t.titlePre}<br />
               <em className="text-gold">{t.titleEm}</em>
             </h2>
-            <div className="mt-8 h-px w-16 bg-gold" />
             <p className="mt-8 text-lg leading-relaxed text-ink/80">{t.p1}</p>
             <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-border pt-6">
               {t.stats.map(({ k, v }) => (
@@ -858,11 +881,10 @@ function Equipamiento() {
     <section className="relative bg-ink py-24 text-cream md:py-32">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         <Reveal>
-          <div className="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div className="mb-14">
             <h3 className="font-serif text-3xl text-cream md:text-4xl">
               {t.titlePre}<br /><span className="text-gold-soft">{t.titleEm}</span>
             </h3>
-            <div className="h-px w-16 bg-gold md:mb-4" />
           </div>
         </Reveal>
         <div className="grid grid-cols-2 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -892,7 +914,6 @@ function Ubicacion() {
           <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
             {t.titlePre}<br />{t.titleMid} <em className="text-gold">{t.titleEm}</em>.
           </h2>
-          <div className="mt-8 h-px w-16 bg-gold" />
           <p className="mt-8 text-lg leading-relaxed text-ink/80">{t.p1}</p>
           <ul className="mt-10 divide-y divide-ink/15 border-y border-ink/15">
             {t.spots.map((s) => (
