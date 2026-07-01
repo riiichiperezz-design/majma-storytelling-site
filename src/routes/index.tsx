@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   motion,
+  AnimatePresence,
   useScroll,
   useTransform,
   useReducedMotion,
@@ -37,6 +38,7 @@ import {
   CloudFog,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import {
   Accordion,
@@ -627,6 +629,7 @@ function MajmaLanding() {
       <Reserva />
       <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" rider />
       <Footer />
+      <ChatbotWidget />
       <WhatsAppFab />
       <MobileStickyCTA />
     </div>
@@ -1611,6 +1614,9 @@ function GuiaCaceres() {
   const t = useT().guia;
   const groupIcons = [Landmark, UtensilsCrossed, Compass];
   const groups: GuideGroup[] = t.groups.map((g, i) => ({ ...g, icon: groupIcons[i] }));
+  const [activeTab, setActiveTab] = useState(0);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const active = groups[activeTab];
 
   return (
     <section id="guia" className="relative overflow-hidden bg-ink py-32 text-cream md:py-48">
@@ -1635,39 +1641,104 @@ function GuiaCaceres() {
           </Reveal>
         </div>
 
-        <div className="mt-24 grid grid-cols-1 gap-x-10 gap-y-14 md:grid-cols-3">
-          {groups.map((g, gi) => (
-            <Reveal key={gi} delay={gi * 0.1}>
-              <div className="flex items-center gap-3 border-b border-cream/15 pb-4">
-                <g.icon className="h-5 w-5 text-gold" strokeWidth={1.25} />
-                <h3 className="text-xs uppercase tracking-[0.4em] text-cream/70">{g.label}</h3>
-              </div>
-              <ul className="mt-6 space-y-4">
-                {g.items.map((it) => (
-                  <motion.li
+        <div className="mt-24">
+          <div className="flex flex-wrap gap-x-8 gap-y-2 border-b border-cream/15">
+            {groups.map((g, gi) => (
+              <button
+                key={gi}
+                type="button"
+                onClick={() => {
+                  setActiveTab(gi);
+                  setExpanded(null);
+                }}
+                className={`flex items-center gap-2 border-b-2 py-4 text-xs uppercase tracking-[0.3em] transition-colors ${
+                  activeTab === gi
+                    ? "border-gold text-gold"
+                    : "border-transparent text-cream/50 hover:text-cream/80"
+                }`}
+              >
+                <g.icon className="h-4 w-4" strokeWidth={1.25} />
+                {g.label}
+              </button>
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35, ease: EASE }}
+              className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2"
+            >
+              {active.items.map((it, i) => {
+                const isOpen = expanded === it.name;
+                const mapsHref = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+                  "Calle Cornudilla 3, Cáceres",
+                )}&destination=${encodeURIComponent(`${it.name}, Cáceres`)}&travelmode=walking`;
+                return (
+                  <motion.div
                     key={it.name}
-                    whileHover={{ x: 4 }}
-                    transition={{ duration: 0.3, ease: EASE }}
-                    className="group flex gap-4 border border-cream/10 bg-cream/[0.03] p-5 transition-colors hover:border-gold/40 hover:bg-cream/[0.06]"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: i * 0.06, ease: EASE }}
+                    className={`border p-6 transition-colors ${
+                      isOpen
+                        ? "border-gold/50 bg-cream/[0.06]"
+                        : "border-cream/10 bg-cream/[0.03] hover:border-gold/30"
+                    }`}
                   >
-                    <g.icon
-                      className="mt-1 h-4 w-4 shrink-0 text-gold/70 transition-colors group-hover:text-gold"
-                      strokeWidth={1.25}
-                    />
-                    <div>
-                      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                        <span className="font-serif text-lg text-cream">{it.name}</span>
-                        <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.25em] text-gold">
-                          {it.time}
-                        </span>
+                    <button
+                      type="button"
+                      onClick={() => setExpanded(isOpen ? null : it.name)}
+                      className="flex w-full items-start justify-between gap-4 text-left"
+                    >
+                      <div className="flex gap-4">
+                        <active.icon
+                          className="mt-1 h-4 w-4 shrink-0 text-gold"
+                          strokeWidth={1.25}
+                        />
+                        <div>
+                          <span className="font-serif text-lg text-cream">{it.name}</span>
+                          <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-gold">
+                            {it.time}
+                          </div>
+                        </div>
                       </div>
-                      <p className="mt-2 text-sm leading-relaxed text-cream/70">{it.text}</p>
-                    </div>
-                  </motion.li>
-                ))}
-              </ul>
-            </Reveal>
-          ))}
+                      <ChevronDown
+                        className={`mt-1 h-4 w-4 shrink-0 text-cream/40 transition-transform ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: EASE }}
+                          className="overflow-hidden"
+                        >
+                          <p className="mt-4 text-sm leading-relaxed text-cream/70">{it.text}</p>
+                          <a
+                            href={mapsHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-gold hover:text-gold-soft"
+                          >
+                            <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
+                            {t.howToGetThere}
+                          </a>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>
@@ -1838,6 +1909,8 @@ function BookingCalendar() {
   );
   const [checkIn, setCheckIn] = useState<Date | null>(null);
   const [checkOut, setCheckOut] = useState<Date | null>(null);
+  const [guestName, setGuestName] = useState("");
+  const [guestCount, setGuestCount] = useState(2);
 
   const locale = lang === "es" ? "es-ES" : "en-GB";
   const rawMonthLabel = viewMonth.toLocaleDateString(locale, { month: "long", year: "numeric" });
@@ -2003,6 +2076,61 @@ function BookingCalendar() {
             {t.reset}
           </button>
         )}
+
+        {checkIn && checkOut && (
+          <div className="mt-6 border-t border-dashed border-ink/15 pt-6">
+            <p className="font-serif text-base text-ink">{t.directTitle}</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink/60">{t.directHint}</p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder={t.namePlaceholder}
+                className="flex-1 border border-ink/15 bg-background px-3 py-2.5 text-sm text-ink placeholder:text-ink/40 focus:border-gold focus:outline-none"
+              />
+              <label className="flex shrink-0 items-center gap-2 border border-ink/15 bg-background px-3 py-2.5 text-sm text-ink">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-ink/50">
+                  {t.guestsLabel}
+                </span>
+                <select
+                  value={guestCount}
+                  onChange={(e) => setGuestCount(Number(e.target.value))}
+                  className="bg-background text-sm text-ink focus:outline-none"
+                >
+                  {[1, 2, 3, 4].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <a
+              href={`https://wa.me/${PHONE_TEL.replace("+", "")}?text=${encodeURIComponent(
+                `Hola, soy ${guestName || "un huésped"}. Quiero reservar en MAJMA del ${toISODate(
+                  checkIn,
+                )} al ${toISODate(checkOut)} (${nights} ${nights === 1 ? t.night : t.nights}) para ${guestCount} ${
+                  t.guestsLabel
+                }. ¿Hay disponibilidad?`,
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() =>
+                trackEvent("click_whatsapp", {
+                  location: "calendar_direct_request",
+                  checkin: toISODate(checkIn),
+                  checkout: toISODate(checkOut),
+                  guests: guestCount,
+                })
+              }
+              className="mt-4 flex items-center justify-center gap-3 border border-ink/20 px-6 py-3.5 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:border-gold hover:text-gold active:scale-[0.98]"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {t.directCta}
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -2129,6 +2257,217 @@ function Footer() {
         © {new Date().getFullYear()} MAJMA · Cáceres
       </div>
     </footer>
+  );
+}
+
+/* ─────────── Asistente MAJMA (busca en las FAQ) ───────────
+   No hay backend de IA conectado: busca por coincidencia de palabras
+   clave contra las preguntas frecuentes reales de la web. Si no
+   encuentra una respuesta razonable, ofrece WhatsApp en vez de
+   inventar una respuesta. */
+
+function normalizeForMatch(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s]/g, " ");
+}
+
+const CHAT_STOPWORDS = new Set([
+  "el",
+  "la",
+  "los",
+  "las",
+  "de",
+  "del",
+  "y",
+  "a",
+  "en",
+  "que",
+  "con",
+  "por",
+  "para",
+  "es",
+  "un",
+  "una",
+  "al",
+  "se",
+  "hay",
+  "como",
+  "cual",
+  "cuales",
+  "son",
+  "o",
+  "the",
+  "is",
+  "are",
+  "and",
+  "of",
+  "to",
+  "in",
+  "for",
+  "on",
+  "with",
+  "do",
+  "does",
+  "i",
+  "we",
+]);
+
+function scoreFaqMatch(query: string, target: string) {
+  const qWords = normalizeForMatch(query)
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !CHAT_STOPWORDS.has(w));
+  if (qWords.length === 0) return 0;
+  const tWords = new Set(
+    normalizeForMatch(target)
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !CHAT_STOPWORDS.has(w)),
+  );
+  let hits = 0;
+  for (const w of qWords) if (tWords.has(w)) hits++;
+  return hits / qWords.length;
+}
+
+type ChatMessage = { role: "user" | "bot"; text: string; waFallback?: boolean };
+
+function ChatbotWidget() {
+  const t = useT().chatbot;
+  const faqItems = useT().faq.items;
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [thread, setThread] = useState<ChatMessage[]>([]);
+
+  const ask = (question: string) => {
+    if (!question.trim()) return;
+    let bestScore = 0;
+    let bestAnswer: string | null = null;
+    for (const item of faqItems) {
+      const score = Math.max(
+        scoreFaqMatch(question, item.q),
+        scoreFaqMatch(question, item.a) * 0.6,
+      );
+      if (score > bestScore) {
+        bestScore = score;
+        bestAnswer = item.a;
+      }
+    }
+    const matched = bestScore >= 0.4 ? bestAnswer : null;
+    setThread((th) => [
+      ...th,
+      { role: "user", text: question },
+      matched ? { role: "bot", text: matched } : { role: "bot", text: t.noMatch, waFallback: true },
+    ]);
+    setQuery("");
+    trackEvent("chatbot_ask", { matched: !!matched });
+  };
+
+  return (
+    <>
+      <motion.button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label={t.label}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, delay: 1, ease: EASE }}
+        className="fixed bottom-24 left-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-ink shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-transform hover:scale-105 md:bottom-6"
+      >
+        {open ? <X className="h-5 w-5" /> : <BattlementMark className="h-5 w-5" />}
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: EASE }}
+            className="fixed bottom-40 left-5 right-5 z-50 flex max-h-[70vh] flex-col overflow-hidden border border-gold/30 bg-cream shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] sm:right-auto sm:w-[380px] md:bottom-24"
+          >
+            <div className="flex items-center gap-3 bg-ink px-5 py-4 text-cream">
+              <BattlementMark className="h-5 w-auto text-gold" />
+              <div>
+                <div className="font-serif text-base">{t.title}</div>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-cream/60">
+                  {t.subtitle}
+                </div>
+              </div>
+            </div>
+
+            <div className="stone-grain flex-1 space-y-3 overflow-y-auto p-4 text-ink">
+              <p className="text-sm text-ink/70">{t.greeting}</p>
+              {thread.length === 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {faqItems.slice(0, 5).map((it) => (
+                    <button
+                      key={it.q}
+                      type="button"
+                      onClick={() => ask(it.q)}
+                      className="border border-ink/15 bg-cream px-3 py-1.5 text-left text-xs text-ink/80 hover:border-gold hover:text-gold"
+                    >
+                      {it.q}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {thread.map((m, i) => (
+                <div
+                  key={i}
+                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[85%] px-4 py-2.5 text-sm leading-relaxed ${
+                      m.role === "user"
+                        ? "bg-gold text-ink"
+                        : "border border-ink/10 bg-cream text-ink/85"
+                    }`}
+                  >
+                    {m.text}
+                    {m.waFallback && (
+                      <a
+                        href={WA_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackEvent("click_whatsapp", { location: "chatbot" })}
+                        className="mt-2 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-gold hover:text-gold-soft"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        {t.whatsappCta}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                ask(query);
+              }}
+              className="flex items-center gap-2 border-t border-ink/10 bg-cream p-3"
+            >
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t.placeholder}
+                className="flex-1 border border-ink/15 bg-background px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:border-gold focus:outline-none"
+              />
+              <button
+                type="submit"
+                aria-label={t.send}
+                className="flex h-9 w-9 shrink-0 items-center justify-center bg-gold text-ink transition-colors hover:bg-gold-soft"
+              >
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
