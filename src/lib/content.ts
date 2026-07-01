@@ -183,6 +183,57 @@ export const content = {
       proximityMapLabel:
         "Mapa de cercanía: distancias a pie desde MAJMA a los puntos de interés de Cáceres",
       minWalk: "MIN A PIE",
+      mapHint: "Toca o pasa el cursor sobre un punto del mapa",
+      radarPoints: [
+        {
+          name: "Iglesia de San Juan",
+          time: 2,
+          angle: -90,
+          desc: "A la vuelta de la esquina de MAJMA.",
+        },
+        {
+          name: "Plaza Mayor",
+          time: 6,
+          angle: -45,
+          desc: "El salón de la ciudad, animado a cualquier hora del día.",
+        },
+        {
+          name: "Plaza de San Jorge",
+          time: 6,
+          angle: 0,
+          desc: "Escalinata escondida a los pies de la muralla.",
+        },
+        {
+          name: "Museo de Cáceres",
+          time: 5,
+          angle: 40,
+          desc: "Palacio del siglo XVI construido sobre un aljibe árabe.",
+        },
+        {
+          name: "Torre de Bujaco",
+          time: 6,
+          angle: 90,
+          desc: "La atalaya que vigila la Plaza Mayor desde lo alto.",
+        },
+        {
+          name: "Foro de los Balbos",
+          time: 8,
+          angle: 140,
+          desc: "Uno de los mejores miradores sobre la muralla.",
+        },
+        {
+          name: "Arco de la Estrella",
+          time: 7,
+          angle: 180,
+          desc: "La puerta monumental de entrada al casco antiguo.",
+        },
+        {
+          name: "Barrio judío",
+          time: 4,
+          angle: -135,
+          desc: "Calles estrechas del trazado medieval cacereño.",
+        },
+      ],
       groups: [
         {
           label: "Patrimonio",
@@ -213,19 +264,19 @@ export const content = {
           label: "Sabores",
           items: [
             {
-              name: "Terrazas de la Plaza Mayor",
-              time: "6 min a pie",
-              text: "Tapa y caña con la muralla de testigo, a cualquier hora del día.",
+              name: "Santisteban",
+              time: "Muy cerca",
+              text: "Uno de los restaurantes más próximos a MAJMA, a un paseo corto.",
             },
             {
-              name: "Tabernas de la judería",
-              time: "6 min a pie",
-              text: "Cocina extremeña tradicional: jamón ibérico, torta del Casar y buen vino de pitarra en bodegas centenarias.",
+              name: "Trinidad Tapería Café Bar",
+              time: "Muy cerca",
+              text: "Tapería y café bar a poca distancia del alojamiento.",
             },
             {
-              name: "Mercado y tiendas gourmet",
-              time: "5 min a pie",
-              text: "Ideal para llevarte un trozo de Extremadura en la maleta: quesos, embutidos y aceite de la tierra.",
+              name: "Restaurante Nolasco",
+              time: "Pocos minutos",
+              text: "Un paseo corto en pleno casco histórico.",
             },
           ],
         },
@@ -311,6 +362,17 @@ export const content = {
       p1: "Reserva directa en Booking o escríbenos por WhatsApp y resolvemos cualquier duda al momento.",
       ctaBooking: "Reservar en Booking",
       ctaWhatsapp: "WhatsApp directo",
+      calendar: {
+        checkin: "Entrada",
+        checkout: "Salida",
+        night: "noche",
+        nights: "noches",
+        selectPrompt: "Elige tu entrada y tu salida",
+        selectCheckout: "Ahora elige la salida",
+        reset: "Reiniciar",
+        cta: "Ver disponibilidad en Booking",
+        hint: "Elige tus fechas: te llevamos directo a la disponibilidad real en Booking, sin compromiso.",
+      },
     },
     footer: {
       tagline:
@@ -527,6 +589,57 @@ export const content = {
       proximityMapLabel:
         "Proximity map: walking distances from MAJMA to Cáceres' points of interest",
       minWalk: "MIN WALK",
+      mapHint: "Tap or hover a point on the map",
+      radarPoints: [
+        {
+          name: "Iglesia de San Juan",
+          time: 2,
+          angle: -90,
+          desc: "Right around the corner from MAJMA.",
+        },
+        {
+          name: "Plaza Mayor",
+          time: 6,
+          angle: -45,
+          desc: "The city's living room, lively any time of day.",
+        },
+        {
+          name: "Plaza de San Jorge",
+          time: 6,
+          angle: 0,
+          desc: "A hidden staircase at the foot of the wall.",
+        },
+        {
+          name: "Museo de Cáceres",
+          time: 5,
+          angle: 40,
+          desc: "A 16th-century palace built over an Arab cistern.",
+        },
+        {
+          name: "Torre de Bujaco",
+          time: 6,
+          angle: 90,
+          desc: "The watchtower keeping guard over Plaza Mayor.",
+        },
+        {
+          name: "Foro de los Balbos",
+          time: 8,
+          angle: 140,
+          desc: "One of the best viewpoints over the city wall.",
+        },
+        {
+          name: "Arco de la Estrella",
+          time: 7,
+          angle: 180,
+          desc: "The monumental gate into the old town.",
+        },
+        {
+          name: "Barrio judío",
+          time: 4,
+          angle: -135,
+          desc: "Narrow streets tracing the medieval quarter.",
+        },
+      ],
       groups: [
         {
           label: "Heritage",
@@ -557,19 +670,19 @@ export const content = {
           label: "Flavors",
           items: [
             {
-              name: "Terrazas de la Plaza Mayor",
-              time: "6 min walk",
-              text: "Tapas and a cold beer with the city wall as your backdrop, any time of day.",
+              name: "Santisteban",
+              time: "Very close",
+              text: "One of the closest restaurants to MAJMA, a short walk away.",
             },
             {
-              name: "Tabernas de la judería",
-              time: "6 min walk",
-              text: "Traditional Extremaduran cooking: Iberian ham, torta del Casar cheese and good local wine in century-old cellars.",
+              name: "Trinidad Tapería Café Bar",
+              time: "Very close",
+              text: "A tapas bar and café just a short distance from the door.",
             },
             {
-              name: "Mercado y tiendas gourmet",
-              time: "5 min walk",
-              text: "Ideal for taking a piece of Extremadura home: cheeses, cured meats and local olive oil.",
+              name: "Restaurante Nolasco",
+              time: "A few minutes",
+              text: "A short stroll into the heart of the old town.",
             },
           ],
         },
@@ -655,6 +768,17 @@ export const content = {
       p1: "Book directly on Booking.com or message us on WhatsApp and we'll answer any question right away.",
       ctaBooking: "Book on Booking.com",
       ctaWhatsapp: "WhatsApp us directly",
+      calendar: {
+        checkin: "Check-in",
+        checkout: "Check-out",
+        night: "night",
+        nights: "nights",
+        selectPrompt: "Choose your check-in and check-out",
+        selectCheckout: "Now choose check-out",
+        reset: "Reset",
+        cta: "Check availability on Booking.com",
+        hint: "Pick your dates: we'll take you straight to real availability on Booking.com, no commitment.",
+      },
     },
     footer: {
       tagline:

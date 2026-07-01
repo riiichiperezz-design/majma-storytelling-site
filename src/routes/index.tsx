@@ -35,6 +35,8 @@ import {
   CloudSnow,
   CloudLightning,
   CloudFog,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Accordion,
@@ -1338,152 +1340,264 @@ function LiveWeather() {
   );
 }
 
-/* ─────────── Mapa de cercanía ─────────── */
-
-type ProximityPoint = { name: string; time: number; angle: number };
+/* ─────────── Mapa de cercanía (radar) ─────────── */
 
 function ProximityMap() {
   const t = useT().guia;
-  const points: ProximityPoint[] = [
-    { name: "Iglesia de San Juan", time: 2, angle: -90 },
-    { name: "Plaza Mayor", time: 6, angle: -45 },
-    { name: "Plaza de San Jorge", time: 6, angle: 0 },
-    { name: "Museo de Cáceres", time: 5, angle: 40 },
-    { name: "Torre de Bujaco", time: 6, angle: 90 },
-    { name: "Foro de los Balbos", time: 8, angle: 140 },
-    { name: "Arco de la Estrella", time: 7, angle: 180 },
-    { name: "Barrio judío", time: 4, angle: -135 },
-  ];
+  const points = t.radarPoints;
+  const reduce = useReducedMotionSafe();
+  const [active, setActive] = useState<string | null>(null);
   const cx = 200;
   const cy = 200;
   const toRadius = (min: number) => 30 + min * 14;
+  const maxR = toRadius(10);
+  const activePoint = points.find((p) => p.name === active) ?? null;
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-md">
-      <svg
-        viewBox="0 0 400 400"
-        className="h-full w-full overflow-visible"
-        role="img"
-        aria-label={t.proximityMapLabel}
-      >
-        <circle
-          cx={cx}
-          cy={cy}
-          r={toRadius(5)}
-          fill="none"
-          stroke="var(--color-gold)"
-          strokeOpacity="0.3"
-          strokeDasharray="2 6"
-          strokeLinecap="round"
-        />
-        <circle
-          cx={cx}
-          cy={cy}
-          r={toRadius(10)}
-          fill="none"
-          stroke="var(--color-gold)"
-          strokeOpacity="0.16"
-          strokeDasharray="2 6"
-          strokeLinecap="round"
-        />
-        <text
-          x={cx}
-          y={cy - toRadius(5) - 8}
-          textAnchor="middle"
-          fill="var(--color-cream)"
-          fillOpacity="0.45"
-          fontSize="9"
-          letterSpacing="2"
+    <div>
+      <div className="relative mx-auto aspect-square w-full max-w-md">
+        <svg
+          viewBox="0 0 400 400"
+          className="h-full w-full overflow-visible"
+          role="img"
+          aria-label={t.proximityMapLabel}
         >
-          5 MIN
-        </text>
-        <text
-          x={cx}
-          y={cy - toRadius(10) - 8}
-          textAnchor="middle"
-          fill="var(--color-cream)"
-          fillOpacity="0.3"
-          fontSize="9"
-          letterSpacing="2"
-        >
-          10 MIN
-        </text>
+          {/* Anillo de referencia lento, atmósfera de "mapa vivo" */}
+          {!reduce && (
+            <motion.circle
+              cx={cx}
+              cy={cy}
+              r={maxR + 34}
+              fill="none"
+              stroke="var(--color-gold)"
+              strokeOpacity="0.12"
+              strokeDasharray="1 10"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 140, repeat: Infinity, ease: "linear" }}
+              style={{ transformOrigin: `${cx}px ${cy}px` }}
+            />
+          )}
 
-        {points.map((p, i) => {
-          const rad = (p.angle * Math.PI) / 180;
-          const r = toRadius(p.time);
-          const x = cx + r * Math.cos(rad);
-          const y = cy + r * Math.sin(rad);
-          const labelR = r + 34;
-          const lx = cx + labelR * Math.cos(rad);
-          const ly = cy + labelR * Math.sin(rad);
-          const cos = Math.cos(rad);
-          const anchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
-          return (
-            <g key={p.name}>
-              <line
-                x1={cx}
-                y1={cy}
-                x2={x}
-                y2={y}
-                stroke="var(--color-gold)"
-                strokeOpacity="0.3"
-                strokeWidth="1"
-              />
+          {/* Pulsos de sonar desde MAJMA */}
+          {!reduce &&
+            [0, 1, 2].map((i) => (
               <motion.circle
-                cx={x}
-                cy={y}
-                r="4.5"
-                fill="var(--color-gold)"
-                initial={{ scale: 0 }}
-                whileInView={{ scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.5 + i * 0.06, ease: EASE }}
+                key={`pulse-${i}`}
+                cx={cx}
+                cy={cy}
+                r={maxR}
+                fill="none"
+                stroke="var(--color-gold)"
+                strokeWidth="1.5"
+                initial={{ opacity: 0.45, scale: 0.3 }}
+                animate={{ opacity: 0, scale: 1.12 }}
+                transition={{ duration: 3.6, repeat: Infinity, delay: i * 1.2, ease: "easeOut" }}
+                style={{ transformOrigin: `${cx}px ${cy}px` }}
               />
-              <text
-                x={lx}
-                y={ly - 3}
-                textAnchor={anchor}
-                fill="var(--color-cream)"
-                fontSize="11"
-                fontFamily="var(--font-serif)"
-              >
-                {p.name}
-              </text>
-              <text
-                x={lx}
-                y={ly + 11}
-                textAnchor={anchor}
-                fill="var(--color-gold)"
-                fontSize="9"
-                letterSpacing="1"
-              >
-                {p.time} {t.minWalk}
-              </text>
-            </g>
-          );
-        })}
+            ))}
 
-        <circle
-          cx={cx}
-          cy={cy}
-          r="24"
-          fill="var(--color-ink)"
-          stroke="var(--color-gold)"
-          strokeWidth="1.5"
-        />
-        <text
-          x={cx}
-          y={cy + 4}
-          textAnchor="middle"
-          fill="var(--color-gold)"
-          fontSize="10"
-          letterSpacing="1"
-          fontFamily="var(--font-serif)"
-        >
-          MAJMA
-        </text>
-      </svg>
+          <circle
+            cx={cx}
+            cy={cy}
+            r={toRadius(5)}
+            fill="none"
+            stroke="var(--color-gold)"
+            strokeOpacity="0.3"
+            strokeDasharray="2 6"
+            strokeLinecap="round"
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r={toRadius(10)}
+            fill="none"
+            stroke="var(--color-gold)"
+            strokeOpacity="0.16"
+            strokeDasharray="2 6"
+            strokeLinecap="round"
+          />
+          <text
+            x={cx}
+            y={cy - toRadius(5) - 8}
+            textAnchor="middle"
+            fill="var(--color-cream)"
+            fillOpacity="0.45"
+            fontSize="9"
+            letterSpacing="2"
+          >
+            5 MIN
+          </text>
+          <text
+            x={cx}
+            y={cy - toRadius(10) - 8}
+            textAnchor="middle"
+            fill="var(--color-cream)"
+            fillOpacity="0.3"
+            fontSize="9"
+            letterSpacing="2"
+          >
+            10 MIN
+          </text>
+
+          {points.map((p, i) => {
+            const rad = (p.angle * Math.PI) / 180;
+            const r = toRadius(p.time);
+            const x = cx + r * Math.cos(rad);
+            const y = cy + r * Math.sin(rad);
+            const labelR = r + 34;
+            const lx = cx + labelR * Math.cos(rad);
+            const ly = cy + labelR * Math.sin(rad);
+            const cos = Math.cos(rad);
+            const anchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
+            const isActive = active === p.name;
+            return (
+              <g key={p.name}>
+                <motion.line
+                  x1={cx}
+                  y1={cy}
+                  x2={x}
+                  y2={y}
+                  stroke="var(--color-gold)"
+                  strokeWidth={isActive ? 1.5 : 1}
+                  strokeOpacity={isActive ? 0.9 : 0.3}
+                  initial={{ pathLength: reduce ? 1 : 0 }}
+                  whileInView={{ pathLength: 1 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    duration: reduce ? 0 : 0.8,
+                    delay: reduce ? 0 : 0.15 + i * 0.08,
+                    ease: EASE,
+                  }}
+                />
+
+                {/* Caminante que va y vuelve, refuerza "todo a pie" */}
+                {!reduce && (
+                  <motion.circle
+                    r="2.2"
+                    fill="var(--color-cream)"
+                    initial={{ cx, cy, opacity: 0 }}
+                    animate={{ cx: [cx, x, cx], cy: [cy, y, cy], opacity: [0, 0.85, 0] }}
+                    transition={{
+                      duration: 3.5 + (i % 3),
+                      repeat: Infinity,
+                      delay: 2 + i * 0.4,
+                      ease: "easeInOut",
+                    }}
+                  />
+                )}
+
+                <g
+                  onMouseEnter={() => setActive(p.name)}
+                  onMouseLeave={() => setActive((a) => (a === p.name ? null : a))}
+                  onClick={() => setActive(p.name)}
+                  className="cursor-pointer"
+                >
+                  <circle cx={x} cy={y} r="16" fill="transparent" />
+                  {isActive && !reduce && (
+                    <motion.circle
+                      cx={x}
+                      cy={y}
+                      r="5"
+                      fill="none"
+                      stroke="var(--color-gold)"
+                      strokeWidth="1.5"
+                      initial={{ opacity: 0.7, scale: 0.8 }}
+                      animate={{ opacity: 0, scale: 2.4 }}
+                      transition={{ duration: 1.1, repeat: Infinity, ease: "easeOut" }}
+                      style={{ transformOrigin: `${x}px ${y}px` }}
+                    />
+                  )}
+                  <motion.circle
+                    cx={x}
+                    cy={y}
+                    r={isActive ? 6.5 : 4.5}
+                    fill="var(--color-gold)"
+                    stroke={isActive ? "var(--color-cream)" : "none"}
+                    strokeWidth="1.5"
+                    initial={{ scale: reduce ? 1 : 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 16,
+                      delay: reduce ? 0 : 0.35 + i * 0.08,
+                    }}
+                  />
+                  <text
+                    x={lx}
+                    y={ly - 3}
+                    textAnchor={anchor}
+                    fill={isActive ? "var(--color-gold)" : "var(--color-cream)"}
+                    fontSize={isActive ? "12" : "11"}
+                    fontFamily="var(--font-serif)"
+                  >
+                    {p.name}
+                  </text>
+                  <text
+                    x={lx}
+                    y={ly + 11}
+                    textAnchor={anchor}
+                    fill="var(--color-gold)"
+                    fontSize="9"
+                    letterSpacing="1"
+                  >
+                    {p.time} {t.minWalk}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+
+          <motion.circle
+            cx={cx}
+            cy={cy}
+            r="34"
+            fill="var(--color-gold)"
+            initial={{ opacity: 0.15 }}
+            animate={reduce ? { opacity: 0.15 } : { opacity: [0.12, 0.32, 0.12] }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+            style={{ filter: "blur(10px)" }}
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r="24"
+            fill="var(--color-ink)"
+            stroke="var(--color-gold)"
+            strokeWidth="1.5"
+          />
+          <text
+            x={cx}
+            y={cy + 4}
+            textAnchor="middle"
+            fill="var(--color-gold)"
+            fontSize="10"
+            letterSpacing="1"
+            fontFamily="var(--font-serif)"
+          >
+            MAJMA
+          </text>
+        </svg>
+      </div>
+
+      <div className="mt-8 min-h-[68px] border-t border-cream/15 pt-5">
+        {activePoint ? (
+          <div>
+            <div className="flex items-baseline justify-between gap-4">
+              <span className="font-serif text-lg text-cream">{activePoint.name}</span>
+              <span className="whitespace-nowrap text-xs uppercase tracking-[0.25em] text-gold">
+                {activePoint.time} {t.minWalk}
+              </span>
+            </div>
+            <p className="mt-2 text-sm leading-relaxed text-cream/70">{activePoint.desc}</p>
+          </div>
+        ) : (
+          <p className="text-center text-xs uppercase tracking-[0.3em] text-cream/40">
+            {t.mapHint}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -1701,6 +1815,199 @@ function FAQ() {
   );
 }
 
+/* ─────────── Calendario de reserva ───────────
+   No hay motor de reservas propio: el calendario nunca inventa disponibilidad.
+   Solo captura las fechas deseadas y las entrega a la reserva real en Booking. */
+
+function toISODate(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function startOfDay(d: Date) {
+  const c = new Date(d);
+  c.setHours(0, 0, 0, 0);
+  return c;
+}
+
+function BookingCalendar() {
+  const t = useT().reserva.calendar;
+  const { lang } = useLang();
+  const today = startOfDay(new Date());
+  const [viewMonth, setViewMonth] = useState(
+    () => new Date(today.getFullYear(), today.getMonth(), 1),
+  );
+  const [checkIn, setCheckIn] = useState<Date | null>(null);
+  const [checkOut, setCheckOut] = useState<Date | null>(null);
+
+  const locale = lang === "es" ? "es-ES" : "en-GB";
+  const rawMonthLabel = viewMonth.toLocaleDateString(locale, { month: "long", year: "numeric" });
+  const monthLabel = rawMonthLabel.charAt(0).toUpperCase() + rawMonthLabel.slice(1);
+  const weekdayLabels = Array.from({ length: 7 }).map((_, i) => {
+    // 2024-01-01 es lunes: usamos esa semana solo para sacar las iniciales, en el orden correcto.
+    const d = new Date(2024, 0, 1 + i);
+    return d.toLocaleDateString(locale, { weekday: "narrow" });
+  });
+
+  const firstOfMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
+  const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
+  const leadingBlanks = (firstOfMonth.getDay() + 6) % 7;
+  const cells: (Date | null)[] = [
+    ...Array(leadingBlanks).fill(null),
+    ...Array.from(
+      { length: daysInMonth },
+      (_, i) => new Date(viewMonth.getFullYear(), viewMonth.getMonth(), i + 1),
+    ),
+  ];
+
+  const isPast = (d: Date) => d < today;
+  const isSameDay = (a: Date | null, b: Date | null) => !!a && !!b && a.getTime() === b.getTime();
+  const inRange = (d: Date) => !!checkIn && !!checkOut && d > checkIn && d < checkOut;
+
+  const handlePick = (d: Date) => {
+    if (isPast(d)) return;
+    if (!checkIn || checkOut || d <= checkIn) {
+      setCheckIn(d);
+      setCheckOut(null);
+      return;
+    }
+    setCheckOut(d);
+  };
+
+  const nights =
+    checkIn && checkOut ? Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000) : 0;
+
+  const bookingHref =
+    checkIn && checkOut
+      ? `${BOOKING_URL}checkin=${toISODate(checkIn)}&checkout=${toISODate(checkOut)}`
+      : BOOKING_URL;
+
+  const canGoPrevMonth =
+    new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1) >
+    new Date(today.getFullYear(), today.getMonth(), 1);
+
+  return (
+    <div className="mx-auto mt-14 max-w-md overflow-hidden border border-gold/30 bg-cream text-left text-ink shadow-[0_30px_60px_-30px_rgba(0,0,0,0.6)]">
+      <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" />
+
+      <div className="stone-grain p-6 md:p-8">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            aria-label="Mes anterior"
+            disabled={!canGoPrevMonth}
+            onClick={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+            className="text-ink/50 transition-colors hover:text-gold disabled:opacity-20 disabled:hover:text-ink/50"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <span className="font-serif text-lg text-ink">{monthLabel}</span>
+          <button
+            type="button"
+            aria-label="Mes siguiente"
+            onClick={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+            className="text-ink/50 transition-colors hover:text-gold"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="mt-6 grid grid-cols-7 gap-y-2 text-center">
+          {weekdayLabels.map((w, i) => (
+            <span key={i} className="text-[10px] uppercase tracking-[0.2em] text-ink/40">
+              {w}
+            </span>
+          ))}
+          {cells.map((d, i) => {
+            if (!d) return <span key={i} />;
+            const past = isPast(d);
+            const selected = isSameDay(d, checkIn) || isSameDay(d, checkOut);
+            const within = inRange(d);
+            return (
+              <button
+                key={i}
+                type="button"
+                disabled={past}
+                onClick={() => handlePick(d)}
+                className={`relative py-2 text-sm transition-colors ${
+                  past
+                    ? "cursor-not-allowed text-ink/20"
+                    : selected
+                      ? "bg-gold font-semibold text-ink"
+                      : within
+                        ? "bg-gold/15 text-ink"
+                        : "text-ink/80 hover:bg-gold/15"
+                }`}
+              >
+                {d.getDate()}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="border-t border-ink/10 bg-ink/[0.03] px-6 py-5 md:px-8">
+        <div className="flex items-center justify-between gap-4 text-sm">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-ink/50">{t.checkin}</div>
+            <div className="font-serif text-base text-ink">
+              {checkIn
+                ? checkIn.toLocaleDateString(locale, { day: "numeric", month: "short" })
+                : "—"}
+            </div>
+          </div>
+          <BattlementMark className="h-4 w-auto shrink-0 text-gold" />
+          <div className="text-right">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-ink/50">{t.checkout}</div>
+            <div className="font-serif text-base text-ink">
+              {checkOut
+                ? checkOut.toLocaleDateString(locale, { day: "numeric", month: "short" })
+                : "—"}
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-3 text-center text-xs text-ink/50">
+          {!checkIn
+            ? t.selectPrompt
+            : !checkOut
+              ? t.selectCheckout
+              : `${nights} ${nights === 1 ? t.night : t.nights}`}
+        </p>
+
+        <a
+          href={bookingHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() =>
+            trackEvent("click_booking", {
+              location: "calendar",
+              checkin: checkIn ? toISODate(checkIn) : "",
+              checkout: checkOut ? toISODate(checkOut) : "",
+            })
+          }
+          className="mt-5 flex items-center justify-center gap-3 bg-gold px-6 py-3.5 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+        >
+          {t.cta}
+          <ArrowRight className="h-4 w-4" />
+        </a>
+
+        {(checkIn || checkOut) && (
+          <button
+            type="button"
+            onClick={() => {
+              setCheckIn(null);
+              setCheckOut(null);
+            }}
+            className="mt-3 w-full text-center text-[10px] uppercase tracking-[0.2em] text-ink/40 hover:text-gold"
+          >
+            {t.reset}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─────────── Reserva ─────────── */
 
 function Reserva() {
@@ -1753,6 +2060,13 @@ function Reserva() {
               {PHONE_HUMAN}
             </a>
           </div>
+        </Reveal>
+
+        <Reveal delay={0.25}>
+          <p className="mx-auto mt-16 max-w-sm text-sm leading-relaxed text-cream/60">
+            {t.calendar.hint}
+          </p>
+          <BookingCalendar />
         </Reveal>
       </div>
     </section>
