@@ -31,6 +31,8 @@ export const content = {
       ctaDiscover: "Descubre los apartamentos",
       scrollHint: "Baja para entrar",
       heroAlt: "Casco histórico amurallado de Cáceres al atardecer",
+      ratingBadge: "9.7/10 en Booking.com · 826 opiniones",
+      ctaWhatsappHint: "¿Prefieres WhatsApp? Escríbenos directamente",
     },
     territorio: {
       sectionLabel: "El territorio",
@@ -84,6 +86,8 @@ export const content = {
       titlePre: "Cinco estancias.",
       titleEm: "Un mismo silencio.",
       hint: "Descubre cada estancia — toca para ver más",
+      disclaimer:
+        "Estancias de uno de nuestros tres apartamentos, a modo de ejemplo: cada uno tiene su propia distribución y personalidad.",
       verDetalles: "Ver detalles",
       rooms: [
         {
@@ -164,6 +168,8 @@ export const content = {
       footnote: "Estacionamiento y traslado al aeropuerto disponibles bajo consulta.",
       mapTitle: "Ubicación de MAJMA en Cáceres",
       mapBadge: "MAJMA · Cáceres",
+      mapErrorText: "No hemos podido cargar el mapa. Ábrelo directamente en Google Maps.",
+      mapOpenLink: "Abrir en Google Maps",
     },
     weather: {
       now: "Ahora mismo en Cáceres:",
@@ -373,6 +379,8 @@ export const content = {
       ctaDiscover: "Discover the apartments",
       scrollHint: "Scroll to enter",
       heroAlt: "Walled old town of Cáceres at sunset",
+      ratingBadge: "9.7/10 on Booking.com · 826 reviews",
+      ctaWhatsappHint: "Prefer WhatsApp? Message us directly",
     },
     territorio: {
       sectionLabel: "The setting",
@@ -422,6 +430,8 @@ export const content = {
       titlePre: "Five rooms.",
       titleEm: "One quiet.",
       hint: "Explore each room — tap to see more",
+      disclaimer:
+        "Rooms shown from one of our three apartments, as an example: each one has its own layout and personality.",
       verDetalles: "See details",
       rooms: [
         {
@@ -502,6 +512,8 @@ export const content = {
       footnote: "Parking and airport transfers available on request.",
       mapTitle: "MAJMA location in Cáceres",
       mapBadge: "MAJMA · Cáceres",
+      mapErrorText: "We couldn't load the map. Open it directly in Google Maps.",
+      mapOpenLink: "Open in Google Maps",
     },
     weather: {
       now: "Right now in Cáceres:",
