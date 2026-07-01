@@ -265,17 +265,17 @@ export const content = {
           items: [
             {
               name: "Santisteban",
-              time: "1 min a pie",
-              text: "El restaurante más cercano a MAJMA, a apenas 75 metros de la puerta.",
+              time: "Muy cerca",
+              text: "Uno de los restaurantes más próximos a MAJMA, a un paseo corto.",
             },
             {
               name: "Trinidad Tapería Café Bar",
-              time: "1 min a pie",
-              text: "Tapería y café bar a un paso del alojamiento.",
+              time: "Muy cerca",
+              text: "Tapería y café bar a poca distancia del alojamiento.",
             },
             {
               name: "Restaurante Nolasco",
-              time: "3 min a pie",
+              time: "Pocos minutos",
               text: "Un paseo corto en pleno casco histórico.",
             },
           ],
@@ -362,6 +362,17 @@ export const content = {
       p1: "Reserva directa en Booking o escríbenos por WhatsApp y resolvemos cualquier duda al momento.",
       ctaBooking: "Reservar en Booking",
       ctaWhatsapp: "WhatsApp directo",
+      calendar: {
+        checkin: "Entrada",
+        checkout: "Salida",
+        night: "noche",
+        nights: "noches",
+        selectPrompt: "Elige tu entrada y tu salida",
+        selectCheckout: "Ahora elige la salida",
+        reset: "Reiniciar",
+        cta: "Ver disponibilidad en Booking",
+        hint: "Elige tus fechas: te llevamos directo a la disponibilidad real en Booking, sin compromiso.",
+      },
     },
     footer: {
       tagline:
@@ -660,17 +671,17 @@ export const content = {
           items: [
             {
               name: "Santisteban",
-              time: "1 min walk",
-              text: "The closest restaurant to MAJMA, just 75 metres from the door.",
+              time: "Very close",
+              text: "One of the closest restaurants to MAJMA, a short walk away.",
             },
             {
               name: "Trinidad Tapería Café Bar",
-              time: "1 min walk",
-              text: "A tapas bar and café right around the corner.",
+              time: "Very close",
+              text: "A tapas bar and café just a short distance from the door.",
             },
             {
               name: "Restaurante Nolasco",
-              time: "3 min walk",
+              time: "A few minutes",
               text: "A short stroll into the heart of the old town.",
             },
           ],
@@ -757,6 +768,17 @@ export const content = {
       p1: "Book directly on Booking.com or message us on WhatsApp and we'll answer any question right away.",
       ctaBooking: "Book on Booking.com",
       ctaWhatsapp: "WhatsApp us directly",
+      calendar: {
+        checkin: "Check-in",
+        checkout: "Check-out",
+        night: "night",
+        nights: "nights",
+        selectPrompt: "Choose your check-in and check-out",
+        selectCheckout: "Now choose check-out",
+        reset: "Reset",
+        cta: "Check availability on Booking.com",
+        hint: "Pick your dates: we'll take you straight to real availability on Booking.com, no commitment.",
+      },
     },
     footer: {
       tagline:

@@ -35,6 +35,8 @@ import {
   CloudSnow,
   CloudLightning,
   CloudFog,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Accordion,
@@ -1813,6 +1815,199 @@ function FAQ() {
   );
 }
 
+/* ─────────── Calendario de reserva ───────────
+   No hay motor de reservas propio: el calendario nunca inventa disponibilidad.
+   Solo captura las fechas deseadas y las entrega a la reserva real en Booking. */
+
+function toISODate(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function startOfDay(d: Date) {
+  const c = new Date(d);
+  c.setHours(0, 0, 0, 0);
+  return c;
+}
+
+function BookingCalendar() {
+  const t = useT().reserva.calendar;
+  const { lang } = useLang();
+  const today = startOfDay(new Date());
+  const [viewMonth, setViewMonth] = useState(
+    () => new Date(today.getFullYear(), today.getMonth(), 1),
+  );
+  const [checkIn, setCheckIn] = useState<Date | null>(null);
+  const [checkOut, setCheckOut] = useState<Date | null>(null);
+
+  const locale = lang === "es" ? "es-ES" : "en-GB";
+  const rawMonthLabel = viewMonth.toLocaleDateString(locale, { month: "long", year: "numeric" });
+  const monthLabel = rawMonthLabel.charAt(0).toUpperCase() + rawMonthLabel.slice(1);
+  const weekdayLabels = Array.from({ length: 7 }).map((_, i) => {
+    // 2024-01-01 es lunes: usamos esa semana solo para sacar las iniciales, en el orden correcto.
+    const d = new Date(2024, 0, 1 + i);
+    return d.toLocaleDateString(locale, { weekday: "narrow" });
+  });
+
+  const firstOfMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
+  const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
+  const leadingBlanks = (firstOfMonth.getDay() + 6) % 7;
+  const cells: (Date | null)[] = [
+    ...Array(leadingBlanks).fill(null),
+    ...Array.from(
+      { length: daysInMonth },
+      (_, i) => new Date(viewMonth.getFullYear(), viewMonth.getMonth(), i + 1),
+    ),
+  ];
+
+  const isPast = (d: Date) => d < today;
+  const isSameDay = (a: Date | null, b: Date | null) => !!a && !!b && a.getTime() === b.getTime();
+  const inRange = (d: Date) => !!checkIn && !!checkOut && d > checkIn && d < checkOut;
+
+  const handlePick = (d: Date) => {
+    if (isPast(d)) return;
+    if (!checkIn || checkOut || d <= checkIn) {
+      setCheckIn(d);
+      setCheckOut(null);
+      return;
+    }
+    setCheckOut(d);
+  };
+
+  const nights =
+    checkIn && checkOut ? Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000) : 0;
+
+  const bookingHref =
+    checkIn && checkOut
+      ? `${BOOKING_URL}checkin=${toISODate(checkIn)}&checkout=${toISODate(checkOut)}`
+      : BOOKING_URL;
+
+  const canGoPrevMonth =
+    new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1) >
+    new Date(today.getFullYear(), today.getMonth(), 1);
+
+  return (
+    <div className="mx-auto mt-14 max-w-md overflow-hidden border border-gold/30 bg-cream text-left text-ink shadow-[0_30px_60px_-30px_rgba(0,0,0,0.6)]">
+      <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" />
+
+      <div className="stone-grain p-6 md:p-8">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            aria-label="Mes anterior"
+            disabled={!canGoPrevMonth}
+            onClick={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+            className="text-ink/50 transition-colors hover:text-gold disabled:opacity-20 disabled:hover:text-ink/50"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <span className="font-serif text-lg text-ink">{monthLabel}</span>
+          <button
+            type="button"
+            aria-label="Mes siguiente"
+            onClick={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+            className="text-ink/50 transition-colors hover:text-gold"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="mt-6 grid grid-cols-7 gap-y-2 text-center">
+          {weekdayLabels.map((w, i) => (
+            <span key={i} className="text-[10px] uppercase tracking-[0.2em] text-ink/40">
+              {w}
+            </span>
+          ))}
+          {cells.map((d, i) => {
+            if (!d) return <span key={i} />;
+            const past = isPast(d);
+            const selected = isSameDay(d, checkIn) || isSameDay(d, checkOut);
+            const within = inRange(d);
+            return (
+              <button
+                key={i}
+                type="button"
+                disabled={past}
+                onClick={() => handlePick(d)}
+                className={`relative py-2 text-sm transition-colors ${
+                  past
+                    ? "cursor-not-allowed text-ink/20"
+                    : selected
+                      ? "bg-gold font-semibold text-ink"
+                      : within
+                        ? "bg-gold/15 text-ink"
+                        : "text-ink/80 hover:bg-gold/15"
+                }`}
+              >
+                {d.getDate()}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="border-t border-ink/10 bg-ink/[0.03] px-6 py-5 md:px-8">
+        <div className="flex items-center justify-between gap-4 text-sm">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-ink/50">{t.checkin}</div>
+            <div className="font-serif text-base text-ink">
+              {checkIn
+                ? checkIn.toLocaleDateString(locale, { day: "numeric", month: "short" })
+                : "—"}
+            </div>
+          </div>
+          <BattlementMark className="h-4 w-auto shrink-0 text-gold" />
+          <div className="text-right">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-ink/50">{t.checkout}</div>
+            <div className="font-serif text-base text-ink">
+              {checkOut
+                ? checkOut.toLocaleDateString(locale, { day: "numeric", month: "short" })
+                : "—"}
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-3 text-center text-xs text-ink/50">
+          {!checkIn
+            ? t.selectPrompt
+            : !checkOut
+              ? t.selectCheckout
+              : `${nights} ${nights === 1 ? t.night : t.nights}`}
+        </p>
+
+        <a
+          href={bookingHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() =>
+            trackEvent("click_booking", {
+              location: "calendar",
+              checkin: checkIn ? toISODate(checkIn) : "",
+              checkout: checkOut ? toISODate(checkOut) : "",
+            })
+          }
+          className="mt-5 flex items-center justify-center gap-3 bg-gold px-6 py-3.5 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+        >
+          {t.cta}
+          <ArrowRight className="h-4 w-4" />
+        </a>
+
+        {(checkIn || checkOut) && (
+          <button
+            type="button"
+            onClick={() => {
+              setCheckIn(null);
+              setCheckOut(null);
+            }}
+            className="mt-3 w-full text-center text-[10px] uppercase tracking-[0.2em] text-ink/40 hover:text-gold"
+          >
+            {t.reset}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─────────── Reserva ─────────── */
 
 function Reserva() {
@@ -1865,6 +2060,13 @@ function Reserva() {
               {PHONE_HUMAN}
             </a>
           </div>
+        </Reveal>
+
+        <Reveal delay={0.25}>
+          <p className="mx-auto mt-16 max-w-sm text-sm leading-relaxed text-cream/60">
+            {t.calendar.hint}
+          </p>
+          <BookingCalendar />
         </Reveal>
       </div>
     </section>
