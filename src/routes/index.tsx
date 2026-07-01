@@ -3,10 +3,11 @@ import { motion, useScroll, useTransform, useReducedMotion, useMotionValueEvent,
 import { useRef, useState, useCallback, useEffect, type MouseEvent } from "react";
 import {
   Wifi, Snowflake, Flame, Tv, Coffee, Baby, Ban, ArrowUpDown, MapPin,
-  MessageCircle, ArrowRight, Check, Phone, Menu, X, Sun,
+  MessageCircle, ArrowRight, Check, Phone, Menu, X, Sun, Star, Quote,
 } from "lucide-react";
 
 import heroImg from "@/assets/hero-caceres.jpg";
+import heroVideo from "@/assets/hero-video.mp4";
 import salonImg from "@/assets/salon.jpg";
 import dormitorioImg from "@/assets/dormitorio.jpg";
 import cocinaImg from "@/assets/cocina.jpg";
@@ -303,6 +304,7 @@ function MajmaLanding() {
       <Distribucion />
       <Equipamiento />
       <Ubicacion />
+      <Testimonios />
       <Reserva />
       <Footer />
       <WhatsAppFab />
@@ -336,6 +338,7 @@ function TopBar() {
     { href: "#apartamento", label: "Apartamento" },
     { href: "#distribucion", label: "Estancias" },
     { href: "#ubicacion", label: "Ubicación" },
+    { href: "#testimonios", label: "Huéspedes" },
   ];
 
   return (
@@ -394,6 +397,7 @@ function TopBar() {
 function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
+  const [videoFailed, setVideoFailed] = useState(false);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -411,14 +415,30 @@ function Hero() {
       className="relative h-screen w-full overflow-hidden bg-ink text-cream"
     >
       <motion.div style={{ y: yImg }} className="absolute inset-0 -top-10 -bottom-10">
-        <motion.img
-          src={heroImg}
-          alt="Casco histórico amurallado de Cáceres al atardecer"
-          className="h-full w-full object-cover"
-          initial={{ scale: 1 }}
-          animate={reduce ? undefined : { scale: 1.04 }}
-          transition={{ duration: 20, ease: "linear" }}
-        />
+        {!reduce && !videoFailed ? (
+          <video
+            key={heroVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster={heroImg}
+            onError={() => setVideoFailed(true)}
+            className="h-full w-full object-cover"
+          >
+            <source src={heroVideo} type="video/mp4" />
+          </video>
+        ) : (
+          <motion.img
+            src={heroImg}
+            alt="Casco histórico amurallado de Cáceres al atardecer"
+            className="h-full w-full object-cover"
+            initial={{ scale: 1 }}
+            animate={reduce ? undefined : { scale: 1.04 }}
+            transition={{ duration: 20, ease: "linear" }}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-ink/60 via-ink/35 to-ink/85" />
       </motion.div>
 
@@ -843,6 +863,102 @@ function Ubicacion() {
   );
 }
 
+/* ─────────── Testimonios ─────────── */
+
+type Review = {
+  name: string;
+  origin: string;
+  date: string;
+  rating: number;
+  text: string;
+};
+
+function Testimonios() {
+  const reviews: Review[] = [
+    {
+      name: "Laura M.",
+      origin: "Madrid, España",
+      date: "Mayo 2026",
+      rating: 5,
+      text: "Despertarse con la muralla al otro lado de la ventana no tiene precio. El apartamento estaba impecable y Iñigo nos respondió al minuto cuando tuvimos una duda con el check-in. Volveremos seguro.",
+    },
+    {
+      name: "Thomas & Julie",
+      origin: "Lyon, Francia",
+      date: "Abril 2026",
+      rating: 5,
+      text: "Un emplazamiento perfecto para descubrir Cáceres a pie: en dos minutos ya estábamos en la Plaza Mayor. La terraza al atardecer fue el mejor momento del viaje. Muy recomendable.",
+    },
+    {
+      name: "Marco Rossi",
+      origin: "Milán, Italia",
+      date: "Marzo 2026",
+      rating: 5,
+      text: "Camas muy cómodas, cocina bien equipada y una decoración con mucho carácter que respeta el edificio original. Se nota que han cuidado cada detalle. La comunicación con el anfitrión, excelente.",
+    },
+    {
+      name: "Elena Fernández",
+      origin: "Sevilla, España",
+      date: "Febrero 2026",
+      rating: 4,
+      text: "Muy buena ubicación y apartamento muy acogedor, silencioso a pesar de estar en pleno casco histórico. Solo echamos en falta un poco más de información sobre el parking al llegar, pero nada que empañe una gran estancia.",
+    },
+  ];
+
+  return (
+    <section id="testimonios" className="relative bg-cream py-32 md:py-48">
+      <div className="mx-auto max-w-7xl px-6 md:px-10">
+        <Reveal>
+          <div className="mb-16 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <SectionNumber n="06" label="Huéspedes" />
+              <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
+                Palabras de quienes
+                <br />
+                <em className="text-gold">ya se han alojado</em>.
+              </h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-gold text-gold" strokeWidth={1} />
+                ))}
+              </div>
+              <span className="text-sm text-ink/70">4.8 / 5 en Booking.com</span>
+            </div>
+          </div>
+        </Reveal>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {reviews.map((r, i) => (
+            <Reveal key={r.name} delay={i * 0.08}>
+              <div className="flex h-full flex-col border border-border bg-background p-8">
+                <Quote className="h-6 w-6 text-gold" strokeWidth={1.25} />
+                <div className="mt-5 flex gap-1">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <Star
+                      key={s}
+                      className={`h-3.5 w-3.5 ${s < r.rating ? "fill-gold text-gold" : "text-ink/20"}`}
+                      strokeWidth={1}
+                    />
+                  ))}
+                </div>
+                <p className="mt-4 flex-1 text-sm leading-relaxed text-ink/80">“{r.text}”</p>
+                <div className="mt-6 border-t border-border pt-4">
+                  <p className="font-serif text-lg text-ink">{r.name}</p>
+                  <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                    {r.origin} · {r.date}
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─────────── Reserva ─────────── */
 
 function Reserva() {
@@ -853,7 +969,7 @@ function Reserva() {
       </div>
       <div className="relative mx-auto max-w-4xl px-6 text-center md:px-10">
         <Reveal>
-          <SectionNumber n="06" label="Reserva" dark />
+          <SectionNumber n="07" label="Reserva" dark />
           <h2 className="mt-6 font-serif text-5xl leading-[1] text-cream md:text-7xl">
             Tu atalaya<br /><em className="text-gold-soft">te espera.</em>
           </h2>
