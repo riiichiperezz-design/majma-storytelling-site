@@ -184,21 +184,84 @@ function BattlementMark({ className = "" }: { className?: string }) {
    como una muralla: los merlones anticipan, en el color de la sección
    siguiente, el cambio de fondo que viene justo después. */
 
-function BattlementSeam({ from, to }: { from: string; to: string }) {
+function BattlementSeam({
+  from,
+  to,
+  rider = false,
+}: {
+  from: string;
+  to: string;
+  rider?: boolean;
+}) {
   const teeth = 32;
   return (
+    <div className="relative">
+      <div
+        aria-hidden="true"
+        className="relative flex h-5 w-full items-end overflow-hidden md:h-7"
+        style={{ backgroundColor: from }}
+      >
+        {Array.from({ length: teeth }).map((_, i) => (
+          <div
+            key={i}
+            className="flex-1"
+            style={{ backgroundColor: to, height: i % 2 === 0 ? "45%" : "100%" }}
+          />
+        ))}
+      </div>
+      {rider && <GallopingRider />}
+    </div>
+  );
+}
+
+/* ─────────── Guerrero a caballo ───────────
+   Un jinete que galopa una sola vez sobre la muralla, en el color dorado
+   de la marca, la primera vez que el remate entra en pantalla. */
+
+function HorseRiderMark({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="-4 -46 155 134" className={className} aria-hidden="true">
+      <g fill="currentColor">
+        <path d="M35 45 L18 62 L13 66 L8 84 L2 84 L9 62 L28 42 Z" />
+        <path d="M43 46 L50 62 L53 84 L47 84 L44 64 L36 47 Z" />
+        <path d="M108 41 L124 58 L133 82 L127 84 L119 62 L100 44 Z" />
+        <path d="M99 43 L93 58 L84 68 L88 71 L98 61 L104 45 Z" />
+        <path d="M28 38 C16 40 6 48 0 62 C8 58 14 54 19 50 C13 58 8 68 6 76 C14 68 22 58 27 48 C30 44 30 40 28 38 Z" />
+        <path d="M27 47 C22 40 24 30 32 25 C40 22 55 21 66 21 C78 21 88 24 95 29 C99 32 100 37 98 41 L108 41 L100 44 L92 43 C78 46 60 47 45 47 Z" />
+        <path d="M95 29 C98 23 103 14 110 7 L116 11 C110 17 104 24 99 34 L98 41 C99 34 98 31 95 29 Z" />
+        <path d="M110 7 L119 -4 C124 -7 131 -6 136 -2 L145 8 L138 18 L127 19 L117 16 Z" />
+        <path d="M120 -3 L122 -12 L127 -3 Z" />
+      </g>
+      <g fill="currentColor">
+        <path d="M58 26 C55 18 58 9 66 4 C73 0 82 2 85 9 C87 13 85 18 80 21 L79 27 C75 31 63 31 58 26 Z" />
+        <circle cx="72" cy="-4" r="5.5" />
+        <path d="M69 -10 L72 -16 L75 -10 Z" />
+        <path d="M82 5 L100 -14 L103 -12 L86 8 Z" />
+        <path d="M98 -11 L105 -15 L129 -40 L124 -42 Z" />
+        <path d="M64 23 L59 34 L53 41 L57 43 L64 35 L69 25 Z" />
+      </g>
+    </svg>
+  );
+}
+
+function GallopingRider() {
+  const reduce = useReducedMotionSafe();
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+  return (
     <div
+      ref={ref}
       aria-hidden="true"
-      className="relative flex h-5 w-full items-end overflow-hidden md:h-7"
-      style={{ backgroundColor: from }}
+      className="pointer-events-none absolute inset-x-0 -top-4 h-10 overflow-visible md:-top-6 md:h-16"
     >
-      {Array.from({ length: teeth }).map((_, i) => (
-        <div
-          key={i}
-          className="flex-1"
-          style={{ backgroundColor: to, height: i % 2 === 0 ? "45%" : "100%" }}
-        />
-      ))}
+      <motion.div
+        className="absolute h-full w-14 text-gold md:w-20"
+        initial={{ left: "-12%" }}
+        animate={{ left: reduce ? "40%" : inView ? "104%" : "-12%" }}
+        transition={{ duration: reduce ? 0 : 2.8, ease: "linear" }}
+      >
+        <HorseRiderMark className="h-full w-auto" />
+      </motion.div>
     </div>
   );
 }
@@ -440,22 +503,26 @@ function MajmaLanding() {
       <ReadingProgress />
       <TopBar />
       <Hero />
+      <BattlementSeam from="var(--color-ink)" to="var(--color-stone-soft)" rider />
       <Territorio />
+      <BattlementSeam from="var(--color-stone-soft)" to="var(--color-cream)" rider />
       <Apartamento />
+      <BattlementSeam from="var(--color-cream)" to="var(--color-stone-soft)" rider />
       <Galeria />
+      <BattlementSeam from="var(--color-stone-soft)" to="var(--color-cream)" rider />
       <Distribucion />
-      <BattlementSeam from="var(--color-cream)" to="var(--color-ink)" />
+      <BattlementSeam from="var(--color-cream)" to="var(--color-ink)" rider />
       <Equipamiento />
-      <BattlementSeam from="var(--color-ink)" to="var(--color-stone-soft)" />
+      <BattlementSeam from="var(--color-ink)" to="var(--color-stone-soft)" rider />
       <Ubicacion />
-      <BattlementSeam from="var(--color-stone-soft)" to="var(--color-ink)" />
+      <BattlementSeam from="var(--color-stone-soft)" to="var(--color-ink)" rider />
       <GuiaCaceres />
-      <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" />
+      <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" rider />
       <Testimonios />
       <FAQ />
-      <BattlementSeam from="var(--color-cream)" to="var(--color-ink)" />
+      <BattlementSeam from="var(--color-cream)" to="var(--color-ink)" rider />
       <Reserva />
-      <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" />
+      <BattlementSeam from="var(--color-ink)" to="var(--color-cream)" rider />
       <Footer />
       <WhatsAppFab />
       <MobileStickyCTA />
