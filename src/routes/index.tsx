@@ -1338,152 +1338,264 @@ function LiveWeather() {
   );
 }
 
-/* ─────────── Mapa de cercanía ─────────── */
-
-type ProximityPoint = { name: string; time: number; angle: number };
+/* ─────────── Mapa de cercanía (radar) ─────────── */
 
 function ProximityMap() {
   const t = useT().guia;
-  const points: ProximityPoint[] = [
-    { name: "Iglesia de San Juan", time: 2, angle: -90 },
-    { name: "Plaza Mayor", time: 6, angle: -45 },
-    { name: "Plaza de San Jorge", time: 6, angle: 0 },
-    { name: "Museo de Cáceres", time: 5, angle: 40 },
-    { name: "Torre de Bujaco", time: 6, angle: 90 },
-    { name: "Foro de los Balbos", time: 8, angle: 140 },
-    { name: "Arco de la Estrella", time: 7, angle: 180 },
-    { name: "Barrio judío", time: 4, angle: -135 },
-  ];
+  const points = t.radarPoints;
+  const reduce = useReducedMotionSafe();
+  const [active, setActive] = useState<string | null>(null);
   const cx = 200;
   const cy = 200;
   const toRadius = (min: number) => 30 + min * 14;
+  const maxR = toRadius(10);
+  const activePoint = points.find((p) => p.name === active) ?? null;
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-md">
-      <svg
-        viewBox="0 0 400 400"
-        className="h-full w-full overflow-visible"
-        role="img"
-        aria-label={t.proximityMapLabel}
-      >
-        <circle
-          cx={cx}
-          cy={cy}
-          r={toRadius(5)}
-          fill="none"
-          stroke="var(--color-gold)"
-          strokeOpacity="0.3"
-          strokeDasharray="2 6"
-          strokeLinecap="round"
-        />
-        <circle
-          cx={cx}
-          cy={cy}
-          r={toRadius(10)}
-          fill="none"
-          stroke="var(--color-gold)"
-          strokeOpacity="0.16"
-          strokeDasharray="2 6"
-          strokeLinecap="round"
-        />
-        <text
-          x={cx}
-          y={cy - toRadius(5) - 8}
-          textAnchor="middle"
-          fill="var(--color-cream)"
-          fillOpacity="0.45"
-          fontSize="9"
-          letterSpacing="2"
+    <div>
+      <div className="relative mx-auto aspect-square w-full max-w-md">
+        <svg
+          viewBox="0 0 400 400"
+          className="h-full w-full overflow-visible"
+          role="img"
+          aria-label={t.proximityMapLabel}
         >
-          5 MIN
-        </text>
-        <text
-          x={cx}
-          y={cy - toRadius(10) - 8}
-          textAnchor="middle"
-          fill="var(--color-cream)"
-          fillOpacity="0.3"
-          fontSize="9"
-          letterSpacing="2"
-        >
-          10 MIN
-        </text>
+          {/* Anillo de referencia lento, atmósfera de "mapa vivo" */}
+          {!reduce && (
+            <motion.circle
+              cx={cx}
+              cy={cy}
+              r={maxR + 34}
+              fill="none"
+              stroke="var(--color-gold)"
+              strokeOpacity="0.12"
+              strokeDasharray="1 10"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 140, repeat: Infinity, ease: "linear" }}
+              style={{ transformOrigin: `${cx}px ${cy}px` }}
+            />
+          )}
 
-        {points.map((p, i) => {
-          const rad = (p.angle * Math.PI) / 180;
-          const r = toRadius(p.time);
-          const x = cx + r * Math.cos(rad);
-          const y = cy + r * Math.sin(rad);
-          const labelR = r + 34;
-          const lx = cx + labelR * Math.cos(rad);
-          const ly = cy + labelR * Math.sin(rad);
-          const cos = Math.cos(rad);
-          const anchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
-          return (
-            <g key={p.name}>
-              <line
-                x1={cx}
-                y1={cy}
-                x2={x}
-                y2={y}
-                stroke="var(--color-gold)"
-                strokeOpacity="0.3"
-                strokeWidth="1"
-              />
+          {/* Pulsos de sonar desde MAJMA */}
+          {!reduce &&
+            [0, 1, 2].map((i) => (
               <motion.circle
-                cx={x}
-                cy={y}
-                r="4.5"
-                fill="var(--color-gold)"
-                initial={{ scale: 0 }}
-                whileInView={{ scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.5 + i * 0.06, ease: EASE }}
+                key={`pulse-${i}`}
+                cx={cx}
+                cy={cy}
+                r={maxR}
+                fill="none"
+                stroke="var(--color-gold)"
+                strokeWidth="1.5"
+                initial={{ opacity: 0.45, scale: 0.3 }}
+                animate={{ opacity: 0, scale: 1.12 }}
+                transition={{ duration: 3.6, repeat: Infinity, delay: i * 1.2, ease: "easeOut" }}
+                style={{ transformOrigin: `${cx}px ${cy}px` }}
               />
-              <text
-                x={lx}
-                y={ly - 3}
-                textAnchor={anchor}
-                fill="var(--color-cream)"
-                fontSize="11"
-                fontFamily="var(--font-serif)"
-              >
-                {p.name}
-              </text>
-              <text
-                x={lx}
-                y={ly + 11}
-                textAnchor={anchor}
-                fill="var(--color-gold)"
-                fontSize="9"
-                letterSpacing="1"
-              >
-                {p.time} {t.minWalk}
-              </text>
-            </g>
-          );
-        })}
+            ))}
 
-        <circle
-          cx={cx}
-          cy={cy}
-          r="24"
-          fill="var(--color-ink)"
-          stroke="var(--color-gold)"
-          strokeWidth="1.5"
-        />
-        <text
-          x={cx}
-          y={cy + 4}
-          textAnchor="middle"
-          fill="var(--color-gold)"
-          fontSize="10"
-          letterSpacing="1"
-          fontFamily="var(--font-serif)"
-        >
-          MAJMA
-        </text>
-      </svg>
+          <circle
+            cx={cx}
+            cy={cy}
+            r={toRadius(5)}
+            fill="none"
+            stroke="var(--color-gold)"
+            strokeOpacity="0.3"
+            strokeDasharray="2 6"
+            strokeLinecap="round"
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r={toRadius(10)}
+            fill="none"
+            stroke="var(--color-gold)"
+            strokeOpacity="0.16"
+            strokeDasharray="2 6"
+            strokeLinecap="round"
+          />
+          <text
+            x={cx}
+            y={cy - toRadius(5) - 8}
+            textAnchor="middle"
+            fill="var(--color-cream)"
+            fillOpacity="0.45"
+            fontSize="9"
+            letterSpacing="2"
+          >
+            5 MIN
+          </text>
+          <text
+            x={cx}
+            y={cy - toRadius(10) - 8}
+            textAnchor="middle"
+            fill="var(--color-cream)"
+            fillOpacity="0.3"
+            fontSize="9"
+            letterSpacing="2"
+          >
+            10 MIN
+          </text>
+
+          {points.map((p, i) => {
+            const rad = (p.angle * Math.PI) / 180;
+            const r = toRadius(p.time);
+            const x = cx + r * Math.cos(rad);
+            const y = cy + r * Math.sin(rad);
+            const labelR = r + 34;
+            const lx = cx + labelR * Math.cos(rad);
+            const ly = cy + labelR * Math.sin(rad);
+            const cos = Math.cos(rad);
+            const anchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
+            const isActive = active === p.name;
+            return (
+              <g key={p.name}>
+                <motion.line
+                  x1={cx}
+                  y1={cy}
+                  x2={x}
+                  y2={y}
+                  stroke="var(--color-gold)"
+                  strokeWidth={isActive ? 1.5 : 1}
+                  strokeOpacity={isActive ? 0.9 : 0.3}
+                  initial={{ pathLength: reduce ? 1 : 0 }}
+                  whileInView={{ pathLength: 1 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    duration: reduce ? 0 : 0.8,
+                    delay: reduce ? 0 : 0.15 + i * 0.08,
+                    ease: EASE,
+                  }}
+                />
+
+                {/* Caminante que va y vuelve, refuerza "todo a pie" */}
+                {!reduce && (
+                  <motion.circle
+                    r="2.2"
+                    fill="var(--color-cream)"
+                    initial={{ cx, cy, opacity: 0 }}
+                    animate={{ cx: [cx, x, cx], cy: [cy, y, cy], opacity: [0, 0.85, 0] }}
+                    transition={{
+                      duration: 3.5 + (i % 3),
+                      repeat: Infinity,
+                      delay: 2 + i * 0.4,
+                      ease: "easeInOut",
+                    }}
+                  />
+                )}
+
+                <g
+                  onMouseEnter={() => setActive(p.name)}
+                  onMouseLeave={() => setActive((a) => (a === p.name ? null : a))}
+                  onClick={() => setActive(p.name)}
+                  className="cursor-pointer"
+                >
+                  <circle cx={x} cy={y} r="16" fill="transparent" />
+                  {isActive && !reduce && (
+                    <motion.circle
+                      cx={x}
+                      cy={y}
+                      r="5"
+                      fill="none"
+                      stroke="var(--color-gold)"
+                      strokeWidth="1.5"
+                      initial={{ opacity: 0.7, scale: 0.8 }}
+                      animate={{ opacity: 0, scale: 2.4 }}
+                      transition={{ duration: 1.1, repeat: Infinity, ease: "easeOut" }}
+                      style={{ transformOrigin: `${x}px ${y}px` }}
+                    />
+                  )}
+                  <motion.circle
+                    cx={x}
+                    cy={y}
+                    r={isActive ? 6.5 : 4.5}
+                    fill="var(--color-gold)"
+                    stroke={isActive ? "var(--color-cream)" : "none"}
+                    strokeWidth="1.5"
+                    initial={{ scale: reduce ? 1 : 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 16,
+                      delay: reduce ? 0 : 0.35 + i * 0.08,
+                    }}
+                  />
+                  <text
+                    x={lx}
+                    y={ly - 3}
+                    textAnchor={anchor}
+                    fill={isActive ? "var(--color-gold)" : "var(--color-cream)"}
+                    fontSize={isActive ? "12" : "11"}
+                    fontFamily="var(--font-serif)"
+                  >
+                    {p.name}
+                  </text>
+                  <text
+                    x={lx}
+                    y={ly + 11}
+                    textAnchor={anchor}
+                    fill="var(--color-gold)"
+                    fontSize="9"
+                    letterSpacing="1"
+                  >
+                    {p.time} {t.minWalk}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+
+          <motion.circle
+            cx={cx}
+            cy={cy}
+            r="34"
+            fill="var(--color-gold)"
+            initial={{ opacity: 0.15 }}
+            animate={reduce ? { opacity: 0.15 } : { opacity: [0.12, 0.32, 0.12] }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+            style={{ filter: "blur(10px)" }}
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r="24"
+            fill="var(--color-ink)"
+            stroke="var(--color-gold)"
+            strokeWidth="1.5"
+          />
+          <text
+            x={cx}
+            y={cy + 4}
+            textAnchor="middle"
+            fill="var(--color-gold)"
+            fontSize="10"
+            letterSpacing="1"
+            fontFamily="var(--font-serif)"
+          >
+            MAJMA
+          </text>
+        </svg>
+      </div>
+
+      <div className="mt-8 min-h-[68px] border-t border-cream/15 pt-5">
+        {activePoint ? (
+          <div>
+            <div className="flex items-baseline justify-between gap-4">
+              <span className="font-serif text-lg text-cream">{activePoint.name}</span>
+              <span className="whitespace-nowrap text-xs uppercase tracking-[0.25em] text-gold">
+                {activePoint.time} {t.minWalk}
+              </span>
+            </div>
+            <p className="mt-2 text-sm leading-relaxed text-cream/70">{activePoint.desc}</p>
+          </div>
+        ) : (
+          <p className="text-center text-xs uppercase tracking-[0.3em] text-cream/40">
+            {t.mapHint}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

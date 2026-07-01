@@ -183,6 +183,57 @@ export const content = {
       proximityMapLabel:
         "Mapa de cercanía: distancias a pie desde MAJMA a los puntos de interés de Cáceres",
       minWalk: "MIN A PIE",
+      mapHint: "Toca o pasa el cursor sobre un punto del mapa",
+      radarPoints: [
+        {
+          name: "Iglesia de San Juan",
+          time: 2,
+          angle: -90,
+          desc: "A la vuelta de la esquina de MAJMA.",
+        },
+        {
+          name: "Plaza Mayor",
+          time: 6,
+          angle: -45,
+          desc: "El salón de la ciudad, animado a cualquier hora del día.",
+        },
+        {
+          name: "Plaza de San Jorge",
+          time: 6,
+          angle: 0,
+          desc: "Escalinata escondida a los pies de la muralla.",
+        },
+        {
+          name: "Museo de Cáceres",
+          time: 5,
+          angle: 40,
+          desc: "Palacio del siglo XVI construido sobre un aljibe árabe.",
+        },
+        {
+          name: "Torre de Bujaco",
+          time: 6,
+          angle: 90,
+          desc: "La atalaya que vigila la Plaza Mayor desde lo alto.",
+        },
+        {
+          name: "Foro de los Balbos",
+          time: 8,
+          angle: 140,
+          desc: "Uno de los mejores miradores sobre la muralla.",
+        },
+        {
+          name: "Arco de la Estrella",
+          time: 7,
+          angle: 180,
+          desc: "La puerta monumental de entrada al casco antiguo.",
+        },
+        {
+          name: "Barrio judío",
+          time: 4,
+          angle: -135,
+          desc: "Calles estrechas del trazado medieval cacereño.",
+        },
+      ],
       groups: [
         {
           label: "Patrimonio",
@@ -527,6 +578,57 @@ export const content = {
       proximityMapLabel:
         "Proximity map: walking distances from MAJMA to Cáceres' points of interest",
       minWalk: "MIN WALK",
+      mapHint: "Tap or hover a point on the map",
+      radarPoints: [
+        {
+          name: "Iglesia de San Juan",
+          time: 2,
+          angle: -90,
+          desc: "Right around the corner from MAJMA.",
+        },
+        {
+          name: "Plaza Mayor",
+          time: 6,
+          angle: -45,
+          desc: "The city's living room, lively any time of day.",
+        },
+        {
+          name: "Plaza de San Jorge",
+          time: 6,
+          angle: 0,
+          desc: "A hidden staircase at the foot of the wall.",
+        },
+        {
+          name: "Museo de Cáceres",
+          time: 5,
+          angle: 40,
+          desc: "A 16th-century palace built over an Arab cistern.",
+        },
+        {
+          name: "Torre de Bujaco",
+          time: 6,
+          angle: 90,
+          desc: "The watchtower keeping guard over Plaza Mayor.",
+        },
+        {
+          name: "Foro de los Balbos",
+          time: 8,
+          angle: 140,
+          desc: "One of the best viewpoints over the city wall.",
+        },
+        {
+          name: "Arco de la Estrella",
+          time: 7,
+          angle: 180,
+          desc: "The monumental gate into the old town.",
+        },
+        {
+          name: "Barrio judío",
+          time: 4,
+          angle: -135,
+          desc: "Narrow streets tracing the medieval quarter.",
+        },
+      ],
       groups: [
         {
           label: "Heritage",
