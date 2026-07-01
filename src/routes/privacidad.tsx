@@ -28,7 +28,7 @@ function Privacidad() {
         <ul className="list-disc pl-6 space-y-2">
           <li><strong>Titular:</strong> [RAZÓN SOCIAL]</li>
           <li><strong>NIF:</strong> [NIF]</li>
-          <li><strong>Domicilio:</strong> [DOMICILIO], Cáceres, España</li>
+          <li><strong>Domicilio:</strong> Calle Cornudilla, 3, 10003 Cáceres, España</li>
           <li><strong>Contacto:</strong> +34 722 24 74 36</li>
         </ul>
         <h2 className="font-serif text-2xl">Finalidad</h2>
