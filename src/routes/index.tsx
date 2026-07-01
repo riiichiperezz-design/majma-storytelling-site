@@ -4,7 +4,11 @@ import { useRef, useState, useCallback, useEffect, type MouseEvent } from "react
 import {
   Wifi, Snowflake, Flame, Tv, Coffee, Baby, Ban, ArrowUpDown, MapPin,
   MessageCircle, ArrowRight, Check, Phone, Menu, X, Sun, Star, Quote,
+  Landmark, UtensilsCrossed, Compass,
 } from "lucide-react";
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
 
 import heroImg from "@/assets/hero-caceres.jpg";
 import heroVideo from "@/assets/hero-video.mp4";
@@ -304,7 +308,9 @@ function MajmaLanding() {
       <Distribucion />
       <Equipamiento />
       <Ubicacion />
+      <GuiaCaceres />
       <Testimonios />
+      <FAQ />
       <Reserva />
       <Footer />
       <WhatsAppFab />
@@ -338,7 +344,9 @@ function TopBar() {
     { href: "#apartamento", label: "Apartamento" },
     { href: "#distribucion", label: "Estancias" },
     { href: "#ubicacion", label: "Ubicación" },
+    { href: "#guia", label: "Guía" },
     { href: "#testimonios", label: "Huéspedes" },
+    { href: "#faq", label: "FAQ" },
   ];
 
   return (
@@ -863,6 +871,129 @@ function Ubicacion() {
   );
 }
 
+/* ─────────── Guía de Cáceres ─────────── */
+
+type GuideItem = { name: string; time: string; text: string };
+type GuideGroup = { label: string; icon: typeof Landmark; items: GuideItem[] };
+
+function GuiaCaceres() {
+  const groups: GuideGroup[] = [
+    {
+      label: "Patrimonio",
+      icon: Landmark,
+      items: [
+        {
+          name: "Plaza Mayor",
+          time: "5 min a pie",
+          text: "El salón de la ciudad, con la Torre de Bujaco vigilando desde lo alto. Punto de partida perfecto para perderse por el casco.",
+        },
+        {
+          name: "Concatedral de Santa María",
+          time: "7 min a pie",
+          text: "El templo gótico-renacentista donde antaño se juraba fidelidad a los Reyes Católicos. Sube al campanario para las mejores vistas de la ciudad.",
+        },
+        {
+          name: "Museo de Cáceres · Casa de las Veletas",
+          time: "8 min a pie",
+          text: "Un palacio del siglo XVI construido sobre un aljibe árabe casi intacto. Entrada gratuita para ciudadanos de la Unión Europea.",
+        },
+        {
+          name: "Barrio judío · Adarve del Padre Rocha",
+          time: "4 min a pie",
+          text: "Calles estrechas y silenciosas que conservan el trazado medieval de la antigua judería cacereña.",
+        },
+      ],
+    },
+    {
+      label: "Sabores",
+      icon: UtensilsCrossed,
+      items: [
+        {
+          name: "Terrazas de la Plaza Mayor",
+          time: "5 min a pie",
+          text: "Tapa y caña con la muralla de testigo, a cualquier hora del día.",
+        },
+        {
+          name: "Tabernas de la judería",
+          time: "6 min a pie",
+          text: "Cocina extremeña tradicional: jamón ibérico, torta del Casar y buen vino de pitarra en bodegas centenarias.",
+        },
+        {
+          name: "Mercado y tiendas gourmet",
+          time: "5 min a pie",
+          text: "Ideal para llevarte un trozo de Extremadura en la maleta: quesos, embutidos y aceite de la tierra.",
+        },
+      ],
+    },
+    {
+      label: "Planes",
+      icon: Compass,
+      items: [
+        {
+          name: "Atardecer en el Foro de los Balbos",
+          time: "8 min a pie",
+          text: "Uno de los mejores miradores sobre la muralla y la ciudad vieja. Imprescindible al caer el sol.",
+        },
+        {
+          name: "Ruta de las torres medievales",
+          time: "A tu ritmo",
+          text: "Cáceres conserva buena parte de sus treinta torres originales. Recorrerlas es una forma distinta de ver la ciudad, mirando siempre hacia arriba.",
+        },
+        {
+          name: "Semana Santa y WOMAD",
+          time: "Marzo/abril · mayo",
+          text: "Dos citas imprescindibles del calendario cacereño, si tu estancia coincide con ellas.",
+        },
+      ],
+    },
+  ];
+
+  return (
+    <section id="guia" className="relative bg-ink py-32 text-cream md:py-48">
+      <div className="mx-auto max-w-7xl px-6 md:px-10">
+        <Reveal>
+          <div className="mb-16 max-w-2xl">
+            <SectionNumber n="06" label="Guía" dark />
+            <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-cream md:text-6xl">
+              Cáceres,
+              <br />
+              <em className="text-gold-soft">a un paseo de casa</em>.
+            </h2>
+            <p className="mt-8 text-lg leading-relaxed text-cream/80">
+              No hace falta agenda ni coche: todo lo esencial de la ciudad está a menos de diez
+              minutos andando desde MAJMA. Una pequeña guía para aprovechar cada hora.
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+          {groups.map((g, gi) => (
+            <Reveal key={g.label} delay={gi * 0.1}>
+              <div className="flex items-center gap-3 border-b border-cream/15 pb-4">
+                <g.icon className="h-5 w-5 text-gold" strokeWidth={1.25} />
+                <h3 className="text-xs uppercase tracking-[0.4em] text-cream/70">{g.label}</h3>
+              </div>
+              <ul className="mt-6 space-y-6">
+                {g.items.map((it) => (
+                  <li key={it.name}>
+                    <div className="flex items-baseline justify-between gap-4">
+                      <span className="font-serif text-lg text-cream">{it.name}</span>
+                      <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.25em] text-gold">
+                        {it.time}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-cream/70">{it.text}</p>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─────────── Testimonios ─────────── */
 
 type Review = {
@@ -911,7 +1042,7 @@ function Testimonios() {
         <Reveal>
           <div className="mb-16 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <SectionNumber n="06" label="Huéspedes" />
+              <SectionNumber n="07" label="Huéspedes" />
               <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
                 Palabras de quienes
                 <br />
@@ -959,6 +1090,94 @@ function Testimonios() {
   );
 }
 
+/* ─────────── Preguntas frecuentes ─────────── */
+
+function FAQ() {
+  const faqs = [
+    {
+      q: "¿A qué hora son el check-in y el check-out?",
+      a: "El check-in es a partir de las 16:00h y el check-out hasta las 11:00h. Si necesitas flexibilidad, escríbenos por WhatsApp y lo miramos según disponibilidad.",
+    },
+    {
+      q: "¿Cómo funciona la llegada? ¿Hay alguien esperando?",
+      a: "El check-in es autónomo mediante caja de llaves segura. Antes de tu llegada te enviamos instrucciones detalladas y un contacto directo por si necesitas ayuda en cualquier momento.",
+    },
+    {
+      q: "¿Dónde se puede aparcar?",
+      a: "El casco histórico es peatonal, pero hay parkings públicos a pocos minutos andando del apartamento. Te indicamos la opción más cómoda al confirmar tu reserva.",
+    },
+    {
+      q: "¿Se admiten niños?",
+      a: "Sí, MAJMA es apto para niños. Disponemos de cuna bajo petición sin coste adicional; solo tienes que avisarnos con antelación.",
+    },
+    {
+      q: "¿Se admiten mascotas?",
+      a: "Actualmente el apartamento no admite mascotas.",
+    },
+    {
+      q: "¿Cuántos huéspedes caben como máximo?",
+      a: "El apartamento tiene capacidad para 4 personas: cama doble en el dormitorio y sofá cama en el salón.",
+    },
+    {
+      q: "¿Cuál es la política de cancelación?",
+      a: "Depende de la tarifa elegida en el momento de la reserva. Puedes consultar las condiciones exactas antes de confirmar en la propia página de Booking.",
+    },
+    {
+      q: "¿Hay wifi y climatización?",
+      a: "Sí, wifi de alta velocidad gratuito y aire acondicionado/calefacción en todas las estancias del apartamento.",
+    },
+  ];
+
+  return (
+    <section id="faq" className="relative bg-cream py-32 md:py-48">
+      <div className="mx-auto max-w-4xl px-6 md:px-10">
+        <Reveal>
+          <div className="mb-16 text-center">
+            <div className="flex justify-center">
+              <SectionNumber n="08" label="Preguntas frecuentes" />
+            </div>
+            <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-ink md:text-6xl">
+              Todo lo que
+              <br />
+              <em className="text-gold">quieras saber</em>.
+            </h2>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.1}>
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((f, i) => (
+              <AccordionItem key={f.q} value={`item-${i}`} className="border-ink/15">
+                <AccordionTrigger className="py-6 text-left font-serif text-lg text-ink hover:no-underline">
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-base leading-relaxed text-ink/75">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </Reveal>
+
+        <Reveal delay={0.15}>
+          <p className="mt-12 text-center text-sm leading-relaxed text-ink/60">
+            ¿No encuentras respuesta a tu pregunta?{" "}
+            <a
+              href={WA_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gold underline underline-offset-4 hover:text-ink"
+            >
+              Escríbenos por WhatsApp
+            </a>{" "}
+            y te respondemos enseguida.
+          </p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 /* ─────────── Reserva ─────────── */
 
 function Reserva() {
@@ -969,7 +1188,7 @@ function Reserva() {
       </div>
       <div className="relative mx-auto max-w-4xl px-6 text-center md:px-10">
         <Reveal>
-          <SectionNumber n="07" label="Reserva" dark />
+          <SectionNumber n="09" label="Reserva" dark />
           <h2 className="mt-6 font-serif text-5xl leading-[1] text-cream md:text-7xl">
             Tu atalaya<br /><em className="text-gold-soft">te espera.</em>
           </h2>
