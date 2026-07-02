@@ -59,6 +59,7 @@ import banoImg from "@/assets/bano.webp";
 import terrazaImg from "@/assets/terraza.webp";
 import fachadaImg from "@/assets/fachada.webp";
 import logoFull from "@/assets/logo-full.webp";
+import logoIconWhite from "@/assets/logo-icon-white.webp";
 
 /* ─────────── Datos reales ─────────── */
 // Dominio placeholder (igual que robots.txt/sitemap.xml): swap por el dominio
@@ -307,33 +308,6 @@ function GallopingRider() {
       >
         <HorseRiderMark className="h-full w-auto" />
       </motion.div>
-    </div>
-  );
-}
-
-function Wordmark({ dark = false, compact = false }: { dark?: boolean; compact?: boolean }) {
-  const t = useT();
-  return (
-    <div className="flex items-center gap-3">
-      <BattlementMark
-        className={`${compact ? "h-6" : "h-8"} w-auto ${dark ? "text-cream" : "text-ink"} transition-[height] duration-500`}
-      />
-      <div className="flex flex-col leading-none">
-        <span
-          className={`font-serif ${compact ? "text-xl" : "text-2xl"} tracking-[0.35em] transition-all duration-500 ${dark ? "text-cream" : "text-ink"}`}
-        >
-          MAJMA
-        </span>
-        {!compact && (
-          <span
-            className={`mt-1 text-[10px] uppercase tracking-[0.4em] ${
-              dark ? "text-cream/60" : "text-muted-foreground"
-            }`}
-          >
-            {t.wordmarkSubtitle}
-          </span>
-        )}
-      </div>
     </div>
   );
 }
@@ -683,7 +657,8 @@ function TopBar() {
   const [open, setOpen] = useState(false);
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 60));
-  const t = useT().nav;
+  const fullT = useT();
+  const t = fullT.nav;
 
   return (
     <header
@@ -696,8 +671,27 @@ function TopBar() {
       <div
         className={`mx-auto flex max-w-7xl items-center justify-between gap-x-6 px-6 md:px-10 transition-all duration-500 ${scrolled ? "py-3" : "py-5"}`}
       >
-        <a href="#top" className="text-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-          <Wordmark dark compact={scrolled} />
+        <a
+          href="#top"
+          className="flex items-center gap-3 text-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+        >
+          <img
+            src={logoIconWhite}
+            alt=""
+            className={`${scrolled ? "h-7" : "h-10"} w-auto transition-[height] duration-500`}
+          />
+          <div className="flex flex-col leading-none">
+            <span
+              className={`font-serif ${scrolled ? "text-xl" : "text-2xl"} tracking-[0.35em] transition-all duration-500`}
+            >
+              MAJMA
+            </span>
+            {!scrolled && (
+              <span className="mt-1 text-[10px] uppercase tracking-[0.4em] text-cream/60">
+                {fullT.wordmarkSubtitle}
+              </span>
+            )}
+          </div>
         </a>
         <nav className="hidden items-center gap-6 text-xs uppercase tracking-[0.25em] text-cream/85 md:flex lg:gap-7 lg:tracking-[0.3em]">
           {t.links.map((l) => (
@@ -1348,6 +1342,22 @@ function LiveWeather() {
 
 /* ─────────── Mapa de cercanía (radar) ─────────── */
 
+function compassRosePoints(
+  cx: number,
+  cy: number,
+  rOuter: number,
+  rInner: number,
+  spikes: number,
+  rotationDeg = 0,
+) {
+  const total = spikes * 2;
+  return Array.from({ length: total }, (_, i) => {
+    const angle = ((i * 360) / total + rotationDeg) * (Math.PI / 180);
+    const r = i % 2 === 0 ? rOuter : rInner;
+    return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+  }).join(" ");
+}
+
 function ProximityMap() {
   const t = useT().guia;
   const points = t.radarPoints;
@@ -1368,39 +1378,39 @@ function ProximityMap() {
           role="img"
           aria-label={t.proximityMapLabel}
         >
-          {/* Anillo de referencia lento, atmósfera de "mapa vivo" */}
-          {!reduce && (
-            <motion.circle
-              cx={cx}
-              cy={cy}
-              r={maxR + 34}
+          {/* Rosa de los vientos: el bastidor decorativo en vez de un radar
+              de sonar — más brújula antigua que interfaz de escáner. */}
+          <motion.g
+            animate={!reduce ? { rotate: 360 } : undefined}
+            transition={{ duration: 220, repeat: Infinity, ease: "linear" }}
+            style={{ transformOrigin: `${cx}px ${cy}px` }}
+          >
+            <polygon
+              points={compassRosePoints(cx, cy, 186, 54, 4, 0)}
               fill="none"
               stroke="var(--color-gold)"
-              strokeOpacity="0.12"
-              strokeDasharray="1 10"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 140, repeat: Infinity, ease: "linear" }}
-              style={{ transformOrigin: `${cx}px ${cy}px` }}
+              strokeOpacity="0.16"
+              strokeWidth="1"
+              strokeLinejoin="round"
             />
-          )}
-
-          {/* Pulsos de sonar desde MAJMA */}
-          {!reduce &&
-            [0, 1, 2].map((i) => (
-              <motion.circle
-                key={`pulse-${i}`}
-                cx={cx}
-                cy={cy}
-                r={maxR}
-                fill="none"
-                stroke="var(--color-gold)"
-                strokeWidth="1.5"
-                initial={{ opacity: 0.45, scale: 0.3 }}
-                animate={{ opacity: 0, scale: 1.12 }}
-                transition={{ duration: 3.6, repeat: Infinity, delay: i * 1.2, ease: "easeOut" }}
-                style={{ transformOrigin: `${cx}px ${cy}px` }}
-              />
-            ))}
+            <polygon
+              points={compassRosePoints(cx, cy, 150, 46, 4, 45)}
+              fill="none"
+              stroke="var(--color-gold)"
+              strokeOpacity="0.1"
+              strokeWidth="1"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+          <circle
+            cx={cx}
+            cy={cy}
+            r={maxR + 34}
+            fill="none"
+            stroke="var(--color-gold)"
+            strokeOpacity="0.15"
+            strokeWidth="1"
+          />
 
           <circle
             cx={cx}
@@ -1409,7 +1419,7 @@ function ProximityMap() {
             fill="none"
             stroke="var(--color-gold)"
             strokeOpacity="0.3"
-            strokeDasharray="2 6"
+            strokeDasharray="1 4"
             strokeLinecap="round"
           />
           <circle
@@ -1419,7 +1429,7 @@ function ProximityMap() {
             fill="none"
             stroke="var(--color-gold)"
             strokeOpacity="0.16"
-            strokeDasharray="2 6"
+            strokeDasharray="1 4"
             strokeLinecap="round"
           />
           <text
@@ -1564,6 +1574,15 @@ function ProximityMap() {
             animate={reduce ? { opacity: 0.15 } : { opacity: [0.12, 0.32, 0.12] }}
             transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
             style={{ filter: "blur(10px)" }}
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r="29"
+            fill="none"
+            stroke="var(--color-gold)"
+            strokeOpacity="0.35"
+            strokeWidth="1"
           />
           <circle
             cx={cx}
