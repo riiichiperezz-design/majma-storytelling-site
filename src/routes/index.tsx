@@ -57,6 +57,7 @@ import cocinaImg from "@/assets/cocina.webp";
 import banoImg from "@/assets/bano.webp";
 import terrazaImg from "@/assets/terraza.webp";
 import fachadaImg from "@/assets/fachada.webp";
+import logoFull from "@/assets/logo-full.webp";
 
 /* ─────────── Datos reales ─────────── */
 // Dominio placeholder (igual que robots.txt/sitemap.xml): swap por el dominio
@@ -157,6 +158,7 @@ export const Route = createFileRoute("/")({
           description:
             "Tres apartamentos turísticos independientes en el casco histórico de Cáceres, a dos minutos de la Iglesia de San Juan, Ciudad Patrimonio de la Humanidad.",
           image: new URL(heroImg, SITE_URL).toString(),
+          logo: new URL(logoFull, SITE_URL).toString(),
           telephone: PHONE_TEL,
           url: SITE_URL,
           address: {
@@ -2209,7 +2211,7 @@ function Footer() {
     <footer className="border-t border-border bg-cream py-16 pb-28 text-ink md:pb-16">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 md:grid-cols-3 md:px-10">
         <div>
-          <Wordmark />
+          <img src={logoFull} alt="MAJMA · Apartamentos turísticos" className="h-16 w-auto" />
           <p className="mt-6 max-w-xs text-sm text-muted-foreground">{t.tagline}</p>
         </div>
         <div>
