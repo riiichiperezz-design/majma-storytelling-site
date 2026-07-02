@@ -311,6 +311,8 @@ export const content = {
       hoursLabel: "Horario",
       priceLabel: "Precio",
       mapTapHint: "Toca o pasa el cursor sobre un edificio",
+      discoverLabel: "Descubre Cáceres",
+      scaleLabel: "Escala aproximada",
       placeSingular: "lugar",
       placePlural: "lugares",
       radarPoints: [
@@ -943,6 +945,8 @@ export const content = {
       hoursLabel: "Hours",
       priceLabel: "Price",
       mapTapHint: "Tap or hover a building",
+      discoverLabel: "Discover Cáceres",
+      scaleLabel: "Approximate scale",
       placeSingular: "place",
       placePlural: "places",
       radarPoints: [

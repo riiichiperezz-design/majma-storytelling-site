@@ -1717,6 +1717,8 @@ function ExperienceMap() {
     const gy = r * Math.sin(rad);
     return { ...p, gx, gy, glyph: LANDMARK_ICON[p.name], depth: gx + gy };
   });
+  const byTime = [...items].sort((a, b) => a.time - b.time);
+  const numByName = new Map(byTime.map((it, i) => [it.name, i + 1]));
   const sorted = [...items].sort((a, b) => a.depth - b.depth);
   const activeItem = items.find((it) => it.name === active) ?? null;
   const majmaGround = isoProject(0, 0, 0);
@@ -1808,6 +1810,31 @@ function ExperienceMap() {
                   >
                     <circle cx={0} cy={-24} r={40} fill="transparent" />
                     <IsoBuilding type={it.glyph} opacity={1} />
+                    <motion.g
+                      animate={{ scale: isActive ? 1.18 : 1 }}
+                      transition={{ duration: 0.3, ease: EASE }}
+                      style={{ transformOrigin: "0px -84px" }}
+                    >
+                      <circle
+                        cx={0}
+                        cy={-84}
+                        r={11}
+                        fill="var(--color-ink)"
+                        stroke="var(--color-gold)"
+                        strokeWidth={isActive ? 1.75 : 1.1}
+                      />
+                      <text
+                        x={0}
+                        y={-80.5}
+                        textAnchor="middle"
+                        fontSize="10"
+                        fontFamily="var(--font-serif)"
+                        fill="var(--color-gold)"
+                        style={{ pointerEvents: "none" }}
+                      >
+                        {numByName.get(it.name)}
+                      </text>
+                    </motion.g>
                   </motion.g>
                 </motion.g>
               );
@@ -1838,6 +1865,63 @@ function ExperienceMap() {
             >
               MAJMA
             </text>
+
+            {/* Recorrido: un punto dorado camina desde MAJMA hasta el lugar activo */}
+            {!reduce &&
+              activeItem &&
+              (() => {
+                const g = isoProject(activeItem.gx, activeItem.gy, 0);
+                return (
+                  <motion.circle
+                    key={`walker-${activeItem.name}`}
+                    r={3.5}
+                    fill="var(--color-gold)"
+                    initial={{ cx: majmaGround.x, cy: majmaGround.y, opacity: 0 }}
+                    animate={{
+                      cx: [majmaGround.x, g.x],
+                      cy: [majmaGround.y, g.y],
+                      opacity: [0, 1, 1, 0],
+                    }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ filter: "drop-shadow(0 0 3px var(--color-gold))" }}
+                  />
+                );
+              })()}
+
+            {/* Rosa de los vientos */}
+            <g transform="translate(348, -212)" opacity={0.55}>
+              <circle r={22} fill="none" stroke="var(--color-gold)" strokeWidth={1} opacity={0.6} />
+              <path d="M0,-16 L5,3 L0,-2 L-5,3 Z" fill="var(--color-gold)" />
+              <text
+                x={0}
+                y={32}
+                textAnchor="middle"
+                fontSize="9"
+                letterSpacing="1"
+                fill="var(--color-cream)"
+                fillOpacity={0.6}
+              >
+                N
+              </text>
+            </g>
+
+            {/* Escala */}
+            <g transform="translate(-372, 198)" opacity={0.5}>
+              <line x1={0} y1={0} x2={64} y2={0} stroke="var(--color-cream)" strokeWidth={1} />
+              <line x1={0} y1={-4} x2={0} y2={4} stroke="var(--color-cream)" strokeWidth={1} />
+              <line x1={64} y1={-4} x2={64} y2={4} stroke="var(--color-cream)" strokeWidth={1} />
+              <text
+                x={32}
+                y={16}
+                textAnchor="middle"
+                fontSize="8"
+                letterSpacing="0.5"
+                fill="var(--color-cream)"
+                fillOpacity={0.65}
+              >
+                {t.scaleLabel}
+              </text>
+            </g>
 
             {sorted.map((it) => {
               const g = isoProject(it.gx, it.gy, 0);
@@ -1874,6 +1958,9 @@ function ExperienceMap() {
                 className="overflow-hidden border border-gold/30 bg-ink shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
               >
                 <div className="flex items-center gap-3 border-b border-cream/10 bg-gold/[0.08] px-5 py-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gold/50 font-serif text-xs text-gold">
+                    {numByName.get(activeItem.name)}
+                  </span>
                   <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-gold">
                     <LandmarkGlyph
                       type={activeItem.glyph}
@@ -1941,6 +2028,41 @@ function ExperienceMap() {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+      </div>
+
+      <div className="mt-10 border-t border-cream/10 pt-8 md:mt-12">
+        <p className="mb-5 text-center text-xs uppercase tracking-[0.3em] text-gold/70 md:text-left">
+          {t.discoverLabel}
+        </p>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
+          {byTime.map((it, i) => {
+            const isActive = active === it.name;
+            return (
+              <button
+                key={it.name}
+                type="button"
+                onMouseEnter={() => setActive(it.name)}
+                onMouseLeave={() => setActive((a) => (a === it.name ? null : a))}
+                onClick={() => setActive(it.name)}
+                onFocus={() => setActive(it.name)}
+                className={`flex items-center gap-2.5 border-b py-1.5 text-left transition-colors duration-300 ${
+                  isActive
+                    ? "border-gold/50 text-gold"
+                    : "border-transparent text-cream/60 hover:text-cream/90"
+                }`}
+              >
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-serif text-[10px] transition-colors duration-300 ${
+                    isActive ? "border-gold text-gold" : "border-cream/30 text-cream/50"
+                  }`}
+                >
+                  {i + 1}
+                </span>
+                <span className="truncate text-xs">{it.name}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
