@@ -26,7 +26,7 @@ export const content = {
       titleLine1: "Dormir dentro",
       titleLine2: "de la Historia.",
       subtitle:
-        "A dos minutos de la Iglesia de San Juan, en el corazón amurallado de Cáceres. Tres apartamentos. Una ciudad Patrimonio de la Humanidad a tus pies.",
+        "A dos minutos de la Iglesia de San Juan, en el corazón amurallado de Cáceres. Tres apartamentos turísticos independientes. Una ciudad Patrimonio de la Humanidad a tus pies.",
       ctaBooking: "Reservar en Booking",
       ctaDiscover: "Descubre los apartamentos",
       scrollHint: "Baja para entrar",
@@ -41,7 +41,7 @@ export const content = {
       titleEm: "piedra",
       p1: "Cáceres no se visita: se recorre despacio, como quien lee un libro escrito en piedra. Calles que huelen a siglos, plazas que han visto pasar romanos, árabes y renacentistas, y una muralla que todavía vigila la ciudad desde lo alto.",
       p2: "MAJMA está ahí, a dos pasos de la Iglesia de San Juan, para que cada noche termine — y cada mañana empiece — dentro de esa historia.",
-      facadeAlt: "Fachada de piedra en el casco histórico de Cáceres",
+      facadeAlt: "Vista del casco histórico amurallado de Cáceres, Patrimonio de la Humanidad",
       facts: [
         {
           k: 1986,
@@ -306,7 +306,7 @@ export const content = {
       proximityMapLabel:
         "Mapa de cercanía: distancias a pie desde MAJMA a los puntos de interés de Cáceres",
       minWalk: "MIN A PIE",
-      mapHint: "Toca o pasa el cursor sobre un punto del mapa",
+      mapHint: "Tu punto de partida",
       howToGetThere: "Cómo llegar a pie",
       placeSingular: "lugar",
       placePlural: "lugares",
@@ -643,7 +643,7 @@ export const content = {
       titleLine1: "Sleep inside",
       titleLine2: "History.",
       subtitle:
-        "Two minutes from the Iglesia de San Juan, in the walled heart of Cáceres. Three apartments. A World Heritage city at your feet.",
+        "Two minutes from the Iglesia de San Juan, in the walled heart of Cáceres. Three independent tourist apartments. A World Heritage city at your feet.",
       ctaBooking: "Book on Booking.com",
       ctaDiscover: "Discover the apartments",
       scrollHint: "Scroll to enter",
@@ -658,7 +658,7 @@ export const content = {
       titleEm: "stone",
       p1: "Cáceres isn't visited: it's walked slowly, like reading a book written in stone. Streets that smell of centuries, squares that have seen Romans, Moors and Renaissance nobles pass through, and a city wall that still watches over the town from above.",
       p2: "MAJMA sits right there, two steps from the Iglesia de San Juan, so every night ends — and every morning begins — inside that history.",
-      facadeAlt: "Stone façade in the old town of Cáceres",
+      facadeAlt: "View of Cáceres' walled UNESCO World Heritage old town",
       facts: [
         { k: 1986, kSuffix: "", label: "Declared a UNESCO World Heritage City." },
         {
@@ -919,7 +919,7 @@ export const content = {
       proximityMapLabel:
         "Proximity map: walking distances from MAJMA to Cáceres' points of interest",
       minWalk: "MIN WALK",
-      mapHint: "Tap or hover a point on the map",
+      mapHint: "Your starting point",
       howToGetThere: "Walking directions",
       placeSingular: "place",
       placePlural: "places",
