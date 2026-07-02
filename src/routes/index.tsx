@@ -52,14 +52,46 @@ import { useT, useLang } from "@/lib/i18n";
 
 import heroImg from "@/assets/hero-caceres.webp";
 import heroVideo from "@/assets/hero-video.mp4";
-import salonImg from "@/assets/salon.webp";
-import dormitorioImg from "@/assets/dormitorio.webp";
-import cocinaImg from "@/assets/cocina.webp";
-import banoImg from "@/assets/bano.webp";
-import terrazaImg from "@/assets/terraza.webp";
 import fachadaImg from "@/assets/fachada.webp";
 import logoFull from "@/assets/logo-full.webp";
 import logoIconWhite from "@/assets/logo-icon-white.webp";
+import apto1Salon from "@/assets/apto1-salon.webp";
+import apto1Dormitorio from "@/assets/apto1-dormitorio.webp";
+import apto1Cocina from "@/assets/apto1-cocina.webp";
+import apto1Bano from "@/assets/apto1-bano.webp";
+import apto1Comedor from "@/assets/apto1-comedor.webp";
+import apto2Salon from "@/assets/apto2-salon.webp";
+import apto2Dormitorio from "@/assets/apto2-dormitorio.webp";
+import apto2Cocina from "@/assets/apto2-cocina.webp";
+import apto2Bano from "@/assets/apto2-bano.webp";
+import apto3Salon from "@/assets/apto3-salon.webp";
+import apto3Comedor from "@/assets/apto3-salon2.webp";
+import apto3Dormitorio from "@/assets/apto3-dormitorio.webp";
+import apto3Terraza from "@/assets/apto3-terraza.webp";
+import apto3Vistas from "@/assets/apto3-vistas.webp";
+
+const APARTMENT_IMAGES: Record<string, Record<string, string>> = {
+  apto1: {
+    salon: apto1Salon,
+    dormitorio: apto1Dormitorio,
+    cocina: apto1Cocina,
+    bano: apto1Bano,
+    comedor: apto1Comedor,
+  },
+  apto2: {
+    salon: apto2Salon,
+    dormitorio: apto2Dormitorio,
+    cocina: apto2Cocina,
+    bano: apto2Bano,
+  },
+  apto3: {
+    salon: apto3Salon,
+    comedor: apto3Comedor,
+    dormitorio: apto3Dormitorio,
+    terraza: apto3Terraza,
+    vistas: apto3Vistas,
+  },
+};
 
 /* ─────────── Datos reales ─────────── */
 // Dominio placeholder (igual que robots.txt/sitemap.xml): swap por el dominio
@@ -1028,7 +1060,7 @@ function Apartamento() {
           </div>
         </Reveal>
         <Reveal delay={0.15}>
-          <TiltImage src={salonImg} alt={t.salonAlt} className="aspect-[4/5]" />
+          <TiltImage src={apto1Salon} alt={t.salonAlt} className="aspect-[4/5]" />
         </Reveal>
       </div>
     </section>
@@ -1040,11 +1072,12 @@ function Apartamento() {
 function Galeria() {
   const t = useT().galeria;
   const gallery = [
-    { src: terrazaImg, alt: t.alts.terraza, span: "md:col-span-2 md:row-span-2" },
-    { src: dormitorioImg, alt: t.alts.dormitorio, span: "" },
-    { src: banoImg, alt: t.alts.bano, span: "" },
-    { src: cocinaImg, alt: t.alts.cocina, span: "" },
-    { src: fachadaImg, alt: t.alts.fachada, span: "" },
+    { src: apto3Terraza, alt: t.alts.apto3Terraza, span: "md:col-span-2 md:row-span-2" },
+    { src: apto1Salon, alt: t.alts.apto1Salon, span: "" },
+    { src: apto2Salon, alt: t.alts.apto2Salon, span: "" },
+    { src: apto1Comedor, alt: t.alts.apto1Comedor, span: "" },
+    { src: apto2Dormitorio, alt: t.alts.apto2Dormitorio, span: "" },
+    { src: apto3Vistas, alt: t.alts.apto3Vistas, span: "" },
   ];
   const [lb, setLb] = useState<number | null>(null);
   return (
@@ -1086,10 +1119,11 @@ function Galeria() {
 
 function Distribucion() {
   const t = useT().distribucion;
-  const roomImages = [salonImg, dormitorioImg, cocinaImg, banoImg, terrazaImg];
-  const rooms: Room[] = t.rooms.map((r, i) => ({
+  const [activeApt, setActiveApt] = useState(0);
+  const apt = t.apartments[activeApt];
+  const rooms: Room[] = apt.rooms.map((r) => ({
     title: r.title,
-    img: roomImages[i],
+    img: APARTMENT_IMAGES[apt.id][r.key],
     details: r.details,
   }));
 
@@ -1106,16 +1140,53 @@ function Distribucion() {
             </h2>
           </div>
         </Reveal>
-        <p className="mb-12 text-xs uppercase tracking-[0.3em] text-muted-foreground">{t.hint}</p>
+        <p className="mb-10 text-xs uppercase tracking-[0.3em] text-muted-foreground">{t.hint}</p>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {rooms.map((r, i) => (
-            <Reveal key={i} delay={i * 0.08}>
-              <FlipCard room={r} />
-            </Reveal>
-          ))}
+        <div className="mb-12 flex flex-wrap gap-3 border-b border-border">
+          {t.apartments.map((a, i) => {
+            const isActive = activeApt === i;
+            return (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => setActiveApt(i)}
+                className={`group relative px-1 pb-4 pt-1 text-left transition-colors ${
+                  isActive ? "text-ink" : "text-muted-foreground hover:text-ink/70"
+                }`}
+              >
+                <span className="font-serif text-xl">{a.name}</span>
+                <span className="ml-3 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                  {a.size} {t.sizeLabel} · {a.guests} {t.guestsLabel}
+                </span>
+                <span className="mt-1 block text-xs italic text-muted-foreground">{a.style}</span>
+                {isActive && (
+                  <motion.span
+                    layoutId="apt-tab-underline"
+                    className="absolute inset-x-0 -bottom-px h-[2px] bg-gold"
+                    transition={{ duration: 0.3, ease: EASE }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
-        <p className="mt-8 text-sm italic leading-relaxed text-muted-foreground">{t.disclaimer}</p>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={apt.id}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35, ease: EASE }}
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {rooms.map((r, i) => (
+              <Reveal key={r.title} delay={i * 0.08}>
+                <FlipCard room={r} />
+              </Reveal>
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </section>
   );
