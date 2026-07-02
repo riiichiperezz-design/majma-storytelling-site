@@ -185,6 +185,8 @@ export const content = {
       minWalk: "MIN A PIE",
       mapHint: "Toca o pasa el cursor sobre un punto del mapa",
       howToGetThere: "Cómo llegar a pie",
+      placeSingular: "lugar",
+      placePlural: "lugares",
       radarPoints: [
         {
           name: "Iglesia de San Juan",
@@ -237,27 +239,61 @@ export const content = {
       ],
       groups: [
         {
+          label: "Logística",
+          items: [
+            {
+              name: "¿Se puede entrar en coche?",
+              time: "Acceso restringido",
+              text: "La Ciudad Monumental está vigilada por cámaras de la Policía Local: solo entran residentes y taxis. Para descargar maletas avísanos con antelación y gestionamos un permiso temporal con tu matrícula.",
+              skipDirections: true,
+            },
+            {
+              name: "Parking Obispo Galarza",
+              time: "12,45 € / día",
+              text: "La opción más cómoda: su ascensor público te deja en la Plaza Mayor en un par de minutos.",
+              badge: "RECOMENDADO",
+            },
+            {
+              name: "Barrio de San Blas",
+              time: "5-8 min a pie · gratis",
+              text: "Calle Trujillo y los alrededores de la Plaza de las Canterías: fácil encontrar hueco entre semana.",
+            },
+            {
+              name: "Plaza de Italia",
+              time: "Gratis",
+              text: "Junto a la entrada superior del parking Galarza: bajas a la Plaza Mayor en su ascensor.",
+            },
+            {
+              name: "Parque de Cánovas",
+              time: "10 min a pie",
+              text: "Zona azul entre semana (menos de 0,60 €/hora); gratis sábados, domingos y festivos.",
+            },
+          ],
+        },
+        {
           label: "Patrimonio",
           items: [
             {
-              name: "Plaza Mayor",
-              time: "6 min a pie",
-              text: "El salón de la ciudad, con la Torre de Bujaco vigilando desde lo alto. Punto de partida perfecto para perderse por el casco.",
-            },
-            {
               name: "Concatedral de Santa María",
               time: "7 min a pie",
-              text: "El templo gótico-renacentista donde antaño se juraba fidelidad a los Reyes Católicos. Sube al campanario para las mejores vistas de la ciudad.",
+              text: "En la Plaza de Santa María, junto al Palacio de Mayoralgo. Sube a la torre para ver la ciudad «a vista de cigüeña».",
+              aside:
+                "Toca los pies de la estatua de San Pedro de Alcántara: dicen que trae suerte.",
             },
             {
-              name: "Museo de Cáceres · Casa de las Veletas",
+              name: "Plaza de San Jorge",
+              time: "6 min a pie",
+              text: "Las torres blancas de San Francisco Javier y el Palacio de los Golfines de Abajo, donde se alojaron los Reyes Católicos.",
+            },
+            {
+              name: "Aljibe árabe · Museo de Cáceres",
               time: "5 min a pie",
-              text: "Un palacio del siglo XVI construido sobre un aljibe árabe casi intacto. Entrada gratuita para ciudadanos de la Unión Europea.",
+              text: "Uno de los mejor conservados del mundo. Sus arcos de herradura reflejados en el agua son la foto más bella de la ciudad.",
             },
             {
-              name: "Barrio judío · Adarve del Padre Rocha",
+              name: "Judería Vieja",
               time: "4 min a pie",
-              text: "Calles estrechas y silenciosas que conservan el trazado medieval de la antigua judería cacereña.",
+              text: "Casitas blancas y calles con desnivel que contrastan con la sobriedad de piedra del resto del casco.",
             },
           ],
         },
@@ -265,19 +301,37 @@ export const content = {
           label: "Sabores",
           items: [
             {
-              name: "Terrazas de la Plaza Mayor",
-              time: "6 min a pie",
-              text: "Tapa y caña con la muralla de testigo, a cualquier hora del día.",
+              name: "La Minerva",
+              time: "Plaza Mayor",
+              text: "Desde jamón ibérico hasta un canelón de pato.",
+              badge: "SOLETE REPSOL",
             },
             {
-              name: "Tabernas del casco histórico",
-              time: "5-8 min a pie",
-              text: "Cocina extremeña tradicional en locales con siglos de historia entre sus paredes.",
+              name: "Tapería Boss",
+              time: "Plaza Mayor",
+              text: "Su bizcocho de migas extremeñas con huevo de codorniz es toda una firma.",
             },
             {
-              name: "Mercado y tiendas gourmet",
-              time: "5 min a pie",
-              text: "Ideal para llevarte un trozo de Extremadura en la maleta: quesos, embutidos y aceite de la tierra.",
+              name: "Torre de Sande",
+              time: "Casco histórico",
+              text: "Cocina moderna dentro de una torre del siglo XV.",
+              badge: "1 SOL REPSOL",
+            },
+            {
+              name: "El Figón de Eustaquio",
+              time: "Plaza de San Juan",
+              text: "Cocina tradicional cacereña. Una institución desde 1947.",
+            },
+            {
+              name: "Atrio",
+              time: "Plaza de San Mateo",
+              text: "Alta vanguardia gastronómica mundial.",
+              badge: "3 SOLES REPSOL · 2★ MICHELIN",
+            },
+            {
+              name: "Zeris Coffee",
+              time: "Café de especialidad",
+              text: "Prueba también las yemas de San Pablo o los dulces de las monjas Jerónimas.",
             },
           ],
         },
@@ -285,22 +339,34 @@ export const content = {
           label: "Planes",
           items: [
             {
-              name: "Atardecer en el Foro de los Balbos",
-              time: "8 min a pie",
-              text: "Uno de los mejores miradores sobre la muralla y la ciudad vieja. Imprescindible al caer el sol.",
+              name: "Cáceres de noche",
+              time: "Visita guiada",
+              text: "Recorridos de leyendas y misterios por rincones como la Casa del Mono o el Cristo Negro.",
             },
             {
-              name: "Ruta de las torres medievales",
-              time: "A tu ritmo",
-              text: "Cáceres conserva buena parte de sus treinta torres originales. Recorrerlas es una forma distinta de ver la ciudad, mirando siempre hacia arriba.",
+              name: "Museo Helga de Alvear",
+              time: "5-7 min desde Plaza Mayor",
+              text: "Una de las colecciones privadas de arte contemporáneo más completas de Europa.",
             },
             {
-              name: "Semana Santa y WOMAD",
-              time: "Marzo/abril · mayo",
-              text: "Dos citas imprescindibles del calendario cacereño, si tu estancia coincide con ellas.",
+              name: "Santuario de la Virgen de la Montaña",
+              time: "621 m de altitud",
+              text: "El mejor balcón sobre la ciudad. Se llega en coche o andando por la ruta del Portanchito.",
+            },
+            {
+              name: "Cáceres al Fresco",
+              time: "Verano 2026",
+              text: "Agenda cultural de verano, con visitas gratuitas por el 40 aniversario de la ciudad como Patrimonio de la Humanidad.",
             },
           ],
         },
+      ],
+      plazaMayorNote: "Distancias aproximadas a pie desde la Plaza Mayor, el corazón de la ciudad:",
+      plazaMayorDistances: [
+        { name: "Arco de la Estrella", time: "1 min" },
+        { name: "Museo Helga de Alvear", time: "5-7 min" },
+        { name: "Calle Pintores", time: "2 min" },
+        { name: "Parque del Príncipe", time: "15 min" },
       ],
     },
     testimonios: {
@@ -328,7 +394,7 @@ export const content = {
         },
         {
           q: "¿Dónde se puede aparcar?",
-          a: "El casco histórico es peatonal, pero hay opciones de aparcamiento gratuito cerca según nos comentan otros huéspedes. Te indicamos la opción más cómoda al confirmar tu reserva.",
+          a: "La Ciudad Monumental es peatonal y de acceso restringido. La opción más cómoda es el Parking Obispo Galarza (12,45 €/día), con ascensor directo a la Plaza Mayor. También hay aparcamiento gratuito en el Barrio de San Blas o en el Parque de Cánovas (zona azul entre semana, gratis fines de semana y festivos).",
         },
         {
           q: "¿Se admiten niños?",
@@ -609,6 +675,8 @@ export const content = {
       minWalk: "MIN WALK",
       mapHint: "Tap or hover a point on the map",
       howToGetThere: "Walking directions",
+      placeSingular: "place",
+      placePlural: "places",
       radarPoints: [
         {
           name: "Iglesia de San Juan",
@@ -661,27 +729,61 @@ export const content = {
       ],
       groups: [
         {
+          label: "Getting here",
+          items: [
+            {
+              name: "Can I drive in?",
+              time: "Restricted access",
+              text: "The Monumental City is monitored by Local Police cameras: only residents and taxis get through. To unload luggage, let us know in advance and we'll arrange a temporary permit for your plate.",
+              skipDirections: true,
+            },
+            {
+              name: "Obispo Galarza car park",
+              time: "€12.45 / day",
+              text: "The easiest option: its public lift drops you at Plaza Mayor in a couple of minutes.",
+              badge: "RECOMMENDED",
+            },
+            {
+              name: "San Blas neighbourhood",
+              time: "5-8 min walk · free",
+              text: "Calle Trujillo and around Plaza de las Canterías: easy to find a spot on weekdays.",
+            },
+            {
+              name: "Plaza de Italia",
+              time: "Free",
+              text: "Right by the upper entrance of the Galarza car park: take its lift down to Plaza Mayor.",
+            },
+            {
+              name: "Parque de Cánovas",
+              time: "10 min walk",
+              text: "Metered parking on weekdays (under €0.60/hour); free on Saturdays, Sundays and holidays.",
+            },
+          ],
+        },
+        {
           label: "Heritage",
           items: [
             {
-              name: "Plaza Mayor",
-              time: "6 min walk",
-              text: "The city's living room, with the Torre de Bujaco watching from above. The perfect starting point to get lost in the old town.",
-            },
-            {
               name: "Concatedral de Santa María",
               time: "7 min walk",
-              text: "The Gothic-Renaissance church where the Catholic Monarchs were once sworn allegiance. Climb the bell tower for the best views of the city.",
+              text: "On Plaza de Santa María, next to Palacio de Mayoralgo. Climb the tower for a stork's-eye view of the city.",
+              aside:
+                "Touch the feet of the San Pedro de Alcántara statue — it's said to bring luck.",
             },
             {
-              name: "Museo de Cáceres · Casa de las Veletas",
+              name: "Plaza de San Jorge",
+              time: "6 min walk",
+              text: "The white towers of San Francisco Javier and the Palacio de los Golfines de Abajo, where the Catholic Monarchs once stayed.",
+            },
+            {
+              name: "Arab cistern · Museo de Cáceres",
               time: "5 min walk",
-              text: "A 16th-century palace built over an almost intact Arab cistern. Free entry for EU citizens.",
+              text: "One of the best preserved in the world. Its horseshoe arches reflected in the water make the city's most beautiful photo.",
             },
             {
-              name: "Barrio judío · Adarve del Padre Rocha",
+              name: "Judería Vieja",
               time: "4 min walk",
-              text: "Narrow, quiet streets that still trace the medieval layout of the old Jewish quarter.",
+              text: "Whitewashed houses and sloping streets that contrast with the stone sobriety of the rest of the old town.",
             },
           ],
         },
@@ -689,19 +791,37 @@ export const content = {
           label: "Flavors",
           items: [
             {
-              name: "Terrazas de la Plaza Mayor",
-              time: "6 min walk",
-              text: "Tapas and a cold beer with the city wall as your backdrop, any time of day.",
+              name: "La Minerva",
+              time: "Plaza Mayor",
+              text: "From Iberian ham to a duck cannelloni.",
+              badge: "SOLETE REPSOL",
             },
             {
-              name: "Old-town taverns",
-              time: "5-8 min walk",
-              text: "Traditional Extremaduran cooking in rooms with centuries of history in their walls.",
+              name: "Tapería Boss",
+              time: "Plaza Mayor",
+              text: "Its Extremaduran migas sponge cake with quail egg is a signature dish.",
             },
             {
-              name: "Mercado y tiendas gourmet",
-              time: "5 min walk",
-              text: "Ideal for taking a piece of Extremadura home: cheeses, cured meats and local olive oil.",
+              name: "Torre de Sande",
+              time: "Old town",
+              text: "Modern cooking inside a 15th-century tower.",
+              badge: "1 SOL REPSOL",
+            },
+            {
+              name: "El Figón de Eustaquio",
+              time: "Plaza de San Juan",
+              text: "Traditional Cáceres cooking. An institution since 1947.",
+            },
+            {
+              name: "Atrio",
+              time: "Plaza de San Mateo",
+              text: "World-class culinary avant-garde.",
+              badge: "3 SOLES REPSOL · 2★ MICHELIN",
+            },
+            {
+              name: "Zeris Coffee",
+              time: "Specialty coffee",
+              text: "Also try the yemas de San Pablo or the sweets from the Jerónimas nuns.",
             },
           ],
         },
@@ -709,22 +829,34 @@ export const content = {
           label: "Plans",
           items: [
             {
-              name: "Atardecer en el Foro de los Balbos",
-              time: "8 min walk",
-              text: "One of the best viewpoints over the city wall and the old town. A must at sunset.",
+              name: "Cáceres by night",
+              time: "Guided tour",
+              text: "Legend and mystery tours through spots like the Casa del Mono or the Cristo Negro.",
             },
             {
-              name: "Ruta de las torres medievales",
-              time: "At your own pace",
-              text: "Cáceres still holds a good number of its thirty original towers. Tracing them is a different way to see the city — always looking up.",
+              name: "Museo Helga de Alvear",
+              time: "5-7 min from Plaza Mayor",
+              text: "One of the most complete private contemporary art collections in Europe.",
             },
             {
-              name: "Semana Santa y WOMAD",
-              time: "March/April · May",
-              text: "Two unmissable dates on the Cáceres calendar, if your stay lines up with them.",
+              name: "Santuario de la Virgen de la Montaña",
+              time: "621 m altitude",
+              text: "The best balcony over the city. Reachable by car or on foot via the Portanchito trail.",
+            },
+            {
+              name: "Cáceres al Fresco",
+              time: "Summer 2026",
+              text: "The summer cultural programme, with free tours for the city's 40th anniversary as a World Heritage Site.",
             },
           ],
         },
+      ],
+      plazaMayorNote: "Approximate walking distances from Plaza Mayor, the city's heart:",
+      plazaMayorDistances: [
+        { name: "Arco de la Estrella", time: "1 min" },
+        { name: "Museo Helga de Alvear", time: "5-7 min" },
+        { name: "Calle Pintores", time: "2 min" },
+        { name: "Parque del Príncipe", time: "15 min" },
       ],
     },
     testimonios: {
@@ -752,7 +884,7 @@ export const content = {
         },
         {
           q: "Where can I park?",
-          a: "The old town is pedestrian-only, but other guests tell us there are free parking options nearby. We'll point you to the easiest option once your booking is confirmed.",
+          a: "The Monumental City is pedestrian-only with restricted access. The easiest option is the Obispo Galarza car park (€12.45/day), with a lift straight to Plaza Mayor. There's also free parking in the San Blas neighbourhood or at Parque de Cánovas (metered on weekdays, free on weekends and holidays).",
         },
         {
           q: "Are children allowed?",
