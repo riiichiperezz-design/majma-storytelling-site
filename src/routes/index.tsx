@@ -1537,60 +1537,411 @@ function LandmarkGlyph({
   }
 }
 
+/* Proyección isométrica: una maqueta de bronce del casco histórico, no un
+   plano técnico. Los edificios se agrupan en tres caras (superior, derecha,
+   izquierda) con distinta opacidad de dorado sobre el fondo tinta — así el
+   propio color hace de sombreado, como una pieza de metal fundido bajo luz
+   cenital. */
+const ISO_TW = 34;
+const ISO_TH = 17;
+
+function isoProject(gx: number, gy: number, gz: number) {
+  return { x: (gx - gy) * ISO_TW, y: (gx + gy) * ISO_TH - gz };
+}
+
+function isoPts(pts: { x: number; y: number }[]) {
+  return pts.map((p) => `${p.x},${p.y}`).join(" ");
+}
+
+function isoBoxFaces(cx: number, cy: number, a: number, h: number) {
+  const A = { x: cx - a, y: cy - a };
+  const B = { x: cx + a, y: cy - a };
+  const C = { x: cx + a, y: cy + a };
+  const D = { x: cx - a, y: cy + a };
+  const p = (pt: { x: number; y: number }, z: number) => isoProject(pt.x, pt.y, z);
+  return {
+    top: isoPts([p(A, h), p(B, h), p(C, h), p(D, h)]),
+    right: isoPts([p(B, h), p(C, h), p(C, 0), p(B, 0)]),
+    left: isoPts([p(C, h), p(D, h), p(D, 0), p(C, 0)]),
+    apex: p({ x: cx, y: cy }, h),
+    ground: p({ x: cx, y: cy }, 0),
+  };
+}
+
+function IsoBox({
+  cx,
+  cy,
+  a,
+  h,
+  opacity,
+}: {
+  cx: number;
+  cy: number;
+  a: number;
+  h: number;
+  opacity: number;
+}) {
+  const f = isoBoxFaces(cx, cy, a, h);
+  return (
+    <g>
+      <polygon points={f.left} fill="var(--color-gold)" opacity={opacity * 0.28} />
+      <polygon points={f.right} fill="var(--color-gold)" opacity={opacity * 0.5} />
+      <polygon points={f.top} fill="var(--color-gold)" opacity={opacity} />
+    </g>
+  );
+}
+
+/* Escala de la "huella" de cada edificio: cx/cy/a se definen con números
+   cómodos de leer (en píxeles-ish) y aquí se reducen a la unidad de
+   rejilla real que espera isoProject/isoBoxFaces. La altura (h) no se
+   escala: ya se resta directamente en píxeles dentro de la proyección. */
+const FOOT = 1 / 30;
+
+function IsoBuilding({ type, opacity }: { type: LandmarkType; opacity: number }) {
+  const line = { stroke: "var(--color-ink)", strokeWidth: 1, opacity: opacity * 0.5 };
+  const box = (cx: number, cy: number, a: number, h: number) => (
+    <IsoBox cx={cx * FOOT} cy={cy * FOOT} a={a * FOOT} h={h} opacity={opacity} />
+  );
+  switch (type) {
+    case "tower": {
+      const capH = 64 + 8;
+      const a = 15 * FOOT;
+      const edgeB = isoProject(a, -a, capH);
+      const edgeC = isoProject(a, a, capH);
+      const merlons = [0.12, 0.38, 0.62, 0.88].map((frac) => ({
+        x: edgeB.x + (edgeC.x - edgeB.x) * frac,
+        y: edgeB.y + (edgeC.y - edgeB.y) * frac,
+      }));
+      return (
+        <g>
+          {box(0, 0, 13, 64)}
+          {box(0, 0, 15, 8)}
+          {merlons.map((m, i) => (
+            <rect
+              key={i}
+              x={m.x - 3}
+              y={m.y - 10}
+              width={6}
+              height={10}
+              fill="var(--color-gold)"
+              opacity={opacity}
+            />
+          ))}
+        </g>
+      );
+    }
+    case "church": {
+      const apex = isoProject(0, 0, 58);
+      const l = isoProject(-13 * FOOT, -13 * FOOT, 40);
+      const r = isoProject(13 * FOOT, -13 * FOOT, 40);
+      return (
+        <g>
+          {box(0, 0, 13, 40)}
+          <polygon
+            points={isoPts([{ x: l.x, y: l.y }, apex, { x: r.x, y: r.y }])}
+            fill="var(--color-gold)"
+            opacity={opacity * 0.85}
+          />
+          <line x1={apex.x} y1={apex.y} x2={apex.x} y2={apex.y - 14} {...line} />
+        </g>
+      );
+    }
+    case "museum": {
+      const apex = isoProject(0, -2 * FOOT, 46);
+      const l = isoProject(-18 * FOOT, -8 * FOOT, 34);
+      const r = isoProject(18 * FOOT, -8 * FOOT, 34);
+      return (
+        <g>
+          {box(0, 0, 18, 34)}
+          <polygon
+            points={isoPts([{ x: l.x, y: l.y }, apex, { x: r.x, y: r.y }])}
+            fill="var(--color-gold)"
+            opacity={opacity * 0.85}
+          />
+        </g>
+      );
+    }
+    case "plaza":
+      return (
+        <g>
+          {box(0, 0, 22, 4)}
+          {box(0, 0, 3, 16)}
+        </g>
+      );
+    case "steps":
+      return (
+        <g>
+          {box(0, 0, 20, 5)}
+          {box(-2, -2, 12, 12)}
+        </g>
+      );
+    case "arch":
+      return (
+        <g>
+          {box(0, 0, 16, 13)}
+          {box(-11, -1, 5, 32)}
+          {box(11, -1, 5, 32)}
+        </g>
+      );
+    case "ruins":
+      return (
+        <g>
+          {box(-11, -6, 3, 14)}
+          {box(7, -10, 3, 24)}
+          {box(10, 7, 3, 17)}
+          {box(-6, 9, 3, 9)}
+        </g>
+      );
+    case "quarter":
+      return (
+        <g>
+          {box(-9, 4, 8, 24)}
+          {box(9, -4, 7, 19)}
+        </g>
+      );
+    default:
+      return null;
+  }
+}
+
 function ExperienceMap() {
   const t = useT().guia;
-  const points = [...t.radarPoints].sort((a, b) => a.time - b.time);
   const reduce = useReducedMotionSafe();
+  const [active, setActive] = useState<string | null>(null);
+  const toGridR = (min: number) => 1.4 + min * 0.62;
+
+  const items = t.radarPoints.map((p) => {
+    const rad = (p.angle * Math.PI) / 180;
+    const r = toGridR(p.time);
+    const gx = r * Math.cos(rad);
+    const gy = r * Math.sin(rad);
+    return { ...p, gx, gy, glyph: LANDMARK_ICON[p.name], depth: gx + gy };
+  });
+  const sorted = [...items].sort((a, b) => a.depth - b.depth);
+  const activeItem = items.find((it) => it.name === active) ?? null;
+  const majmaGround = isoProject(0, 0, 0);
+  const mapsHref = activeItem
+    ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+        MAJMA_ADDRESS,
+      )}&destination=${encodeURIComponent(`${activeItem.name}, Cáceres`)}&travelmode=walking`
+    : null;
 
   return (
-    <div role="list" aria-label={t.proximityMapLabel}>
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
-        {/* MAJMA como punto de partida, no como centro de un radar */}
-        <Reveal className="col-span-2 flex flex-col justify-between border border-gold/40 bg-gold/[0.08] p-5 sm:col-span-1">
-          <svg viewBox="0 0 24 24" className="h-8 w-8 text-gold">
-            <LandmarkGlyph type="tower" stroke="currentColor" strokeWidth={1.5} />
-          </svg>
-          <div className="mt-4">
-            <h3 className="font-serif text-xl text-cream">MAJMA</h3>
-            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold/80">{t.mapHint}</p>
-          </div>
-        </Reveal>
+    <div className="stone-grain-dark relative border border-cream/10 bg-ink/70 p-4 md:p-8">
+      <p className="mb-4 text-center text-xs uppercase tracking-[0.3em] text-cream/40 md:hidden">
+        {t.mapTapHint}
+      </p>
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_320px] md:items-center md:gap-12">
+        <div className="relative mx-auto aspect-[5/3] w-full max-w-xl">
+          <svg
+            viewBox="-400 -260 800 480"
+            className="h-full w-full overflow-visible"
+            role="img"
+            aria-label={t.proximityMapLabel}
+          >
+            {/* Rutas: se iluminan solo cuando su edificio está activo */}
+            {items.map((it) => {
+              const g = isoProject(it.gx, it.gy, 0);
+              const isActive = active === it.name;
+              return (
+                <motion.line
+                  key={it.name}
+                  x1={majmaGround.x}
+                  y1={majmaGround.y}
+                  x2={g.x}
+                  y2={g.y}
+                  stroke="var(--color-gold)"
+                  strokeDasharray="1 5"
+                  strokeLinecap="round"
+                  animate={{
+                    strokeOpacity: isActive ? 0.9 : 0.12,
+                    strokeWidth: isActive ? 1.5 : 1,
+                  }}
+                  transition={{ duration: 0.35, ease: EASE }}
+                />
+              );
+            })}
 
-        {points.map((p, i) => {
-          const glyph = LANDMARK_ICON[p.name];
-          const mapsHref = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
-            MAJMA_ADDRESS,
-          )}&destination=${encodeURIComponent(`${p.name}, Cáceres`)}&travelmode=walking`;
-          return (
-            <Reveal
-              key={p.name}
-              delay={reduce ? 0 : 0.05 + i * 0.05}
-              className="group flex flex-col justify-between border border-cream/10 bg-cream/[0.02] p-5 transition-colors duration-300 hover:border-gold/40 hover:bg-cream/[0.05]"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-gold">
-                  <LandmarkGlyph type={glyph} stroke="currentColor" strokeWidth={1.5} />
-                </svg>
-                <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-gold/80">
-                  {p.time} {t.minWalk}
-                </span>
-              </div>
-              <div className="mt-4">
-                <h3 className="font-serif text-lg leading-tight text-cream">{p.name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-cream/60">{p.desc}</p>
-                <a
-                  href={mapsHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+            {/* Sombra tenue de base para asentar cada volumen en el plano */}
+            {sorted.map((it) => {
+              const f = isoBoxFaces(it.gx, it.gy, 16, 0);
+              return (
+                <ellipse
+                  key={`shadow-${it.name}`}
+                  cx={f.ground.x}
+                  cy={f.ground.y + 3}
+                  rx={20}
+                  ry={9}
+                  fill="var(--color-ink)"
+                  opacity={0.35}
+                />
+              );
+            })}
+
+            {sorted.map((it, i) => {
+              const isActive = active === it.name;
+              const dimmed = active !== null && !isActive;
+              const opacity = dimmed ? 0.32 : isActive ? 1 : 0.72;
+              return (
+                <motion.g
+                  key={it.name}
+                  initial={{ opacity: reduce ? undefined : 0, y: reduce ? 0 : 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: reduce ? 0 : 0.05 * i, ease: EASE }}
+                  style={{
+                    transformOrigin: `${isoProject(it.gx, it.gy, 0).x}px ${isoProject(it.gx, it.gy, 0).y}px`,
+                  }}
                 >
-                  {t.howToGetThere}
-                  <ArrowRight className="h-3 w-3" />
-                </a>
-              </div>
-            </Reveal>
-          );
-        })}
+                  <motion.g
+                    animate={{ opacity }}
+                    transition={{ duration: 0.35, ease: EASE }}
+                    transform={`translate(${isoProject(it.gx, it.gy, 0).x}, ${isoProject(it.gx, it.gy, 0).y})`}
+                    onMouseEnter={() => setActive(it.name)}
+                    onMouseLeave={() => setActive((a) => (a === it.name ? null : a))}
+                    onClick={() => setActive(it.name)}
+                    onFocus={() => setActive(it.name)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${it.name}, ${it.time} ${t.minWalk}`}
+                    className="cursor-pointer outline-none"
+                  >
+                    <circle cx={0} cy={-24} r={40} fill="transparent" />
+                    <IsoBuilding type={it.glyph} opacity={1} />
+                  </motion.g>
+                </motion.g>
+              );
+            })}
+
+            {/* MAJMA: la maqueta se sostiene sobre su propio brillo */}
+            <motion.circle
+              cx={majmaGround.x}
+              cy={majmaGround.y - 30}
+              r={30}
+              fill="var(--color-gold)"
+              initial={{ opacity: 0.1 }}
+              animate={reduce ? { opacity: 0.1 } : { opacity: [0.08, 0.22, 0.08] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              style={{ filter: "blur(14px)" }}
+            />
+            <g transform={`translate(${majmaGround.x}, ${majmaGround.y})`}>
+              <IsoBuilding type="tower" opacity={1} />
+            </g>
+            <text
+              x={majmaGround.x}
+              y={majmaGround.y + 22}
+              textAnchor="middle"
+              fill="var(--color-gold)"
+              fontSize="12"
+              letterSpacing="2"
+              fontFamily="var(--font-serif)"
+            >
+              MAJMA
+            </text>
+
+            {sorted.map((it) => {
+              const g = isoProject(it.gx, it.gy, 0);
+              const isActive = active === it.name;
+              const dimmed = active !== null && !isActive;
+              return (
+                <text
+                  key={`label-${it.name}`}
+                  x={g.x}
+                  y={g.y + 16}
+                  textAnchor="middle"
+                  fill={isActive ? "var(--color-gold)" : "var(--color-cream)"}
+                  fillOpacity={dimmed ? 0.3 : isActive ? 1 : 0.7}
+                  fontSize="10"
+                  letterSpacing="0.5"
+                  style={{ pointerEvents: "none" }}
+                >
+                  {it.time} {t.minWalk}
+                </text>
+              );
+            })}
+          </svg>
+        </div>
+
+        <div className="relative min-h-[220px] md:min-h-[260px]">
+          <AnimatePresence mode="wait">
+            {activeItem ? (
+              <motion.div
+                key={activeItem.name}
+                initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: EASE }}
+                className="overflow-hidden border border-gold/30 bg-ink shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
+              >
+                <div className="flex items-center gap-3 border-b border-cream/10 bg-gold/[0.08] px-5 py-4">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-gold">
+                    <LandmarkGlyph
+                      type={activeItem.glyph}
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    />
+                  </svg>
+                  <div>
+                    <h3 className="font-serif text-lg leading-tight text-cream">
+                      {activeItem.name}
+                    </h3>
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-gold/80">
+                      {activeItem.time} {t.minWalk}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <p className="text-sm leading-relaxed text-cream/70">{activeItem.desc}</p>
+                  <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-cream/10 pt-4">
+                    <div>
+                      <dt className="text-[10px] uppercase tracking-[0.2em] text-cream/40">
+                        {t.hoursLabel}
+                      </dt>
+                      <dd className="mt-1 text-xs leading-relaxed text-cream/80">
+                        {activeItem.hours}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-[10px] uppercase tracking-[0.2em] text-cream/40">
+                        {t.priceLabel}
+                      </dt>
+                      <dd className="mt-1 text-xs leading-relaxed text-cream/80">
+                        {activeItem.price}
+                      </dd>
+                    </div>
+                  </dl>
+                  {mapsHref && (
+                    <a
+                      href={mapsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                    >
+                      {t.howToGetThere}
+                      <ArrowRight className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="idle"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex h-full min-h-[220px] flex-col items-center justify-center gap-4 border border-cream/10 p-8 text-center md:min-h-[260px]"
+              >
+                <svg viewBox="0 0 24 24" className="h-6 w-6 text-gold/60">
+                  <LandmarkGlyph type="tower" stroke="currentColor" strokeWidth={1.25} />
+                </svg>
+                <p className="max-w-[24ch] text-xs uppercase tracking-[0.3em] text-cream/40">
+                  {t.mapHint}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
