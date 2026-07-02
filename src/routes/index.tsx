@@ -29,6 +29,7 @@ import {
   Landmark,
   UtensilsCrossed,
   Compass,
+  Car,
   Sunset,
   CloudSun,
   Cloud,
@@ -1609,12 +1610,21 @@ function ProximityMap() {
 
 /* ─────────── Guía de Cáceres ─────────── */
 
-type GuideItem = { name: string; time: string; text: string };
+type GuideItem = {
+  name: string;
+  time: string;
+  text: string;
+  badge?: string;
+  aside?: string;
+  skipDirections?: boolean;
+};
 type GuideGroup = { label: string; icon: typeof Landmark; items: GuideItem[] };
+
+const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "VI"];
 
 function GuiaCaceres() {
   const t = useT().guia;
-  const groupIcons = [Landmark, UtensilsCrossed, Compass];
+  const groupIcons = [Car, Landmark, UtensilsCrossed, Compass];
   const groups: GuideGroup[] = t.groups.map((g, i) => ({ ...g, icon: groupIcons[i] }));
   const [activeTab, setActiveTab] = useState(0);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -1643,104 +1653,153 @@ function GuiaCaceres() {
           </Reveal>
         </div>
 
-        <div className="mt-24">
-          <div className="flex flex-wrap gap-x-8 gap-y-2 border-b border-cream/15">
-            {groups.map((g, gi) => (
-              <button
-                key={gi}
-                type="button"
-                onClick={() => {
-                  setActiveTab(gi);
-                  setExpanded(null);
-                }}
-                className={`flex items-center gap-2 border-b-2 py-4 text-xs uppercase tracking-[0.3em] transition-colors ${
-                  activeTab === gi
-                    ? "border-gold text-gold"
-                    : "border-transparent text-cream/50 hover:text-cream/80"
-                }`}
-              >
-                <g.icon className="h-4 w-4" strokeWidth={1.25} />
-                {g.label}
-              </button>
-            ))}
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: EASE }}
-              className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2"
-            >
-              {active.items.map((it, i) => {
-                const isOpen = expanded === it.name;
-                const mapsHref = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
-                  "Calle Cornudilla 3, Cáceres",
-                )}&destination=${encodeURIComponent(`${it.name}, Cáceres`)}&travelmode=walking`;
-                return (
-                  <motion.div
-                    key={it.name}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: i * 0.06, ease: EASE }}
-                    className={`border p-6 transition-colors ${
-                      isOpen
-                        ? "border-gold/50 bg-cream/[0.06]"
-                        : "border-cream/10 bg-cream/[0.03] hover:border-gold/30"
+        {/* Índice de capítulos, como en un cuaderno de viaje: numeración romana
+            en vez de pestañas genéricas de aplicación. */}
+        <div className="mt-24 grid grid-cols-1 gap-10 md:grid-cols-[260px_1fr] md:gap-16">
+          <div className="flex gap-3 overflow-x-auto pb-2 md:sticky md:top-32 md:h-fit md:flex-col md:gap-1 md:overflow-visible md:pb-0">
+            {groups.map((g, gi) => {
+              const isActive = activeTab === gi;
+              return (
+                <button
+                  key={gi}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(gi);
+                    setExpanded(null);
+                  }}
+                  className={`group flex shrink-0 items-baseline gap-4 border-l-2 py-3 pl-5 text-left transition-colors md:shrink ${
+                    isActive ? "border-gold" : "border-cream/10 hover:border-cream/30"
+                  }`}
+                >
+                  <span
+                    className={`font-serif text-2xl leading-none transition-colors ${
+                      isActive ? "text-gold" : "text-cream/30 group-hover:text-cream/50"
                     }`}
                   >
-                    <button
-                      type="button"
-                      onClick={() => setExpanded(isOpen ? null : it.name)}
-                      className="flex w-full items-start justify-between gap-4 text-left"
+                    {ROMAN_NUMERALS[gi]}
+                  </span>
+                  <span className="flex flex-col">
+                    <span
+                      className={`text-xs uppercase tracking-[0.25em] transition-colors ${
+                        isActive ? "text-cream" : "text-cream/50 group-hover:text-cream/70"
+                      }`}
                     >
-                      <div className="flex gap-4">
-                        <active.icon
-                          className="mt-1 h-4 w-4 shrink-0 text-gold"
-                          strokeWidth={1.25}
-                        />
-                        <div>
-                          <span className="font-serif text-lg text-cream">{it.name}</span>
-                          <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-gold">
-                            {it.time}
+                      {g.label}
+                    </span>
+                    <span className="hidden text-[10px] text-cream/35 md:inline">
+                      {g.items.length} {g.items.length === 1 ? t.placeSingular : t.placePlural}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35, ease: EASE }}
+                className="grid grid-cols-1 gap-5 md:grid-cols-2"
+              >
+                {active.items.map((it, i) => {
+                  const isOpen = expanded === it.name;
+                  const mapsHref = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+                    "Calle Cornudilla 3, Cáceres",
+                  )}&destination=${encodeURIComponent(`${it.name}, Cáceres`)}&travelmode=walking`;
+                  return (
+                    <motion.div
+                      key={it.name}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: i * 0.06, ease: EASE }}
+                      className={`border p-6 transition-colors ${
+                        isOpen
+                          ? "border-gold/50 bg-cream/[0.06]"
+                          : "border-cream/10 bg-cream/[0.03] hover:border-gold/30"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpanded(isOpen ? null : it.name)}
+                        className="flex w-full items-start justify-between gap-4 text-left"
+                      >
+                        <div className="flex gap-4">
+                          <active.icon
+                            className="mt-1 h-4 w-4 shrink-0 text-gold"
+                            strokeWidth={1.25}
+                          />
+                          <div>
+                            <span className="font-serif text-lg text-cream">{it.name}</span>
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              <span className="text-[10px] uppercase tracking-[0.25em] text-gold">
+                                {it.time}
+                              </span>
+                              {it.badge && (
+                                <span className="border border-gold/40 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.15em] text-gold-soft">
+                                  {it.badge}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <ChevronDown
-                        className={`mt-1 h-4 w-4 shrink-0 text-cream/40 transition-transform ${
-                          isOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: EASE }}
-                          className="overflow-hidden"
-                        >
-                          <p className="mt-4 text-sm leading-relaxed text-cream/70">{it.text}</p>
-                          <a
-                            href={mapsHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-gold hover:text-gold-soft"
+                        <ChevronDown
+                          className={`mt-1 h-4 w-4 shrink-0 text-cream/40 transition-transform ${
+                            isOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      <AnimatePresence initial={false}>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: EASE }}
+                            className="overflow-hidden"
                           >
-                            <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
-                            {t.howToGetThere}
-                          </a>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </AnimatePresence>
+                            <p className="mt-4 text-sm leading-relaxed text-cream/70">{it.text}</p>
+                            {it.aside && (
+                              <p className="mt-3 border-l-2 border-gold/50 pl-3 text-sm italic leading-relaxed text-gold-soft/90">
+                                {it.aside}
+                              </p>
+                            )}
+                            {!it.skipDirections && (
+                              <a
+                                href={mapsHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-gold hover:text-gold-soft"
+                              >
+                                <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
+                                {t.howToGetThere}
+                              </a>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="mt-16 border-t border-cream/10 pt-8">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-cream/40">
+                {t.plazaMayorNote}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-cream/70">
+                {t.plazaMayorDistances.map((d) => (
+                  <span key={d.name}>
+                    {d.name} <span className="text-gold">· {d.time}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
