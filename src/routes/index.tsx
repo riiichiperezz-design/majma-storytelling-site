@@ -40,6 +40,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Footprints,
 } from "lucide-react";
 import {
   Accordion,
@@ -1411,288 +1412,378 @@ function LiveWeather() {
   );
 }
 
-/* ─────────── Mapa de cercanía (radar) ─────────── */
+/* ─────────── Mapa experiencial de cercanía ─────────── */
 
-function compassRosePoints(
-  cx: number,
-  cy: number,
-  rOuter: number,
-  rInner: number,
-  spikes: number,
-  rotationDeg = 0,
-) {
-  const total = spikes * 2;
-  return Array.from({ length: total }, (_, i) => {
-    const angle = ((i * 360) / total + rotationDeg) * (Math.PI / 180);
-    const r = i % 2 === 0 ? rOuter : rInner;
-    return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
-  }).join(" ");
+type LandmarkType =
+  | "church"
+  | "quarter"
+  | "museum"
+  | "plaza"
+  | "steps"
+  | "tower"
+  | "arch"
+  | "ruins";
+
+const LANDMARK_ICON: Record<string, LandmarkType> = {
+  "Iglesia de San Juan": "church",
+  "Barrio judío": "quarter",
+  "Museo de Cáceres": "museum",
+  "Plaza Mayor": "plaza",
+  "Plaza de San Jorge": "steps",
+  "Torre de Bujaco": "tower",
+  "Arco de la Estrella": "arch",
+  "Foro de los Balbos": "ruins",
+};
+
+/* Iconos lineales trazados a mano para cada monumento — nada de pines
+   genéricos, cada lugar tiene su propio glifo (24×24). */
+function LandmarkGlyph({
+  type,
+  stroke = "currentColor",
+  strokeWidth = 1.5,
+}: {
+  type: LandmarkType;
+  stroke?: string;
+  strokeWidth?: number;
+}) {
+  const p = {
+    fill: "none",
+    stroke,
+    strokeWidth,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+  switch (type) {
+    case "church":
+      return (
+        <g {...p}>
+          <path d="M6 21V11l6-5 6 5v10" />
+          <path d="M9 21v-6h6v6" />
+          <path d="M12 6V3M10.5 4h3" />
+        </g>
+      );
+    case "quarter":
+      return (
+        <g {...p}>
+          <path d="M4 21V9l3-2 3 2v12" />
+          <path d="M14 21V7l3-2.5L20 7v14" />
+          <path d="M12 15.5v2.5" />
+        </g>
+      );
+    case "museum":
+      return (
+        <g {...p}>
+          <path d="M3 21h18" />
+          <path d="M4 21V10M8 21V10M12 21V10M16 21V10M20 21V10" />
+          <path d="M2.5 10 12 4l9.5 6" />
+        </g>
+      );
+    case "plaza":
+      return (
+        <g {...p}>
+          <path d="M4 21v-8.5a2.5 2.5 0 0 1 5 0V21" />
+          <path d="M9.5 21v-8.5a2.5 2.5 0 0 1 5 0V21" />
+          <path d="M15 21v-8.5a2.5 2.5 0 0 1 4.6-1.4" />
+          <path d="M3 21h19" />
+        </g>
+      );
+    case "steps":
+      return (
+        <g {...p}>
+          <path d="M4 21v-4h4v-4h4v-4h4v-4h4" />
+        </g>
+      );
+    case "tower":
+      return (
+        <g {...p}>
+          <path d="M7 21V9h10v12" />
+          <path d="M7 9V6h2V4h2v2h2V4h2v2h2v3" />
+          <path d="M10 21v-5h4v5" />
+        </g>
+      );
+    case "arch":
+      return (
+        <g {...p}>
+          <path d="M5 21V11a7 7 0 0 1 14 0v10" />
+          <path d="M5 21h14" />
+          <path d="M8 21v-8M16 21v-8" />
+        </g>
+      );
+    case "ruins":
+      return (
+        <g {...p}>
+          <path d="M3 21h18" />
+          <path d="M6 21V9M11 21V5M16 21v-9M20 21V11" />
+        </g>
+      );
+    default:
+      return null;
+  }
 }
 
-function ProximityMap() {
+function ExperienceMap() {
   const t = useT().guia;
   const points = t.radarPoints;
   const reduce = useReducedMotionSafe();
   const [active, setActive] = useState<string | null>(null);
   const cx = 200;
   const cy = 200;
-  const toRadius = (min: number) => 30 + min * 14;
-  const maxR = toRadius(10);
+  const toRadius = (min: number) => 36 + min * 15;
   const activePoint = points.find((p) => p.name === active) ?? null;
 
   return (
-    <div>
-      <div className="relative mx-auto aspect-square w-full max-w-md">
-        <svg
-          viewBox="0 0 400 400"
-          className="h-full w-full overflow-visible"
-          role="img"
-          aria-label={t.proximityMapLabel}
-        >
-          {/* Rosa de los vientos: el bastidor decorativo en vez de un radar
-              de sonar — más brújula antigua que interfaz de escáner. */}
-          <motion.g
-            animate={!reduce ? { rotate: 360 } : undefined}
-            transition={{ duration: 220, repeat: Infinity, ease: "linear" }}
-            style={{ transformOrigin: `${cx}px ${cy}px` }}
+    <div className="stone-grain-dark relative border border-cream/10 bg-ink/70 p-6 md:p-10">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-gold/[0.04] via-transparent to-transparent" />
+      <div className="relative grid grid-cols-1 gap-10 md:grid-cols-[1fr_340px] md:items-center md:gap-14">
+        <div className="relative mx-auto aspect-square w-full max-w-lg">
+          <svg
+            viewBox="0 0 400 400"
+            className="h-full w-full overflow-visible"
+            role="img"
+            aria-label={t.proximityMapLabel}
           >
-            <polygon
-              points={compassRosePoints(cx, cy, 186, 54, 4, 0)}
+            {/* Guía circular casi imperceptible: referencia de escala, no un radar */}
+            <circle
+              cx={cx}
+              cy={cy}
+              r={toRadius(10) + 8}
               fill="none"
               stroke="var(--color-gold)"
-              strokeOpacity="0.16"
+              strokeOpacity="0.08"
               strokeWidth="1"
-              strokeLinejoin="round"
             />
-            <polygon
-              points={compassRosePoints(cx, cy, 150, 46, 4, 45)}
-              fill="none"
-              stroke="var(--color-gold)"
-              strokeOpacity="0.1"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-          </motion.g>
-          <circle
-            cx={cx}
-            cy={cy}
-            r={maxR + 34}
-            fill="none"
-            stroke="var(--color-gold)"
-            strokeOpacity="0.15"
-            strokeWidth="1"
-          />
 
-          <circle
-            cx={cx}
-            cy={cy}
-            r={toRadius(5)}
-            fill="none"
-            stroke="var(--color-gold)"
-            strokeOpacity="0.3"
-            strokeDasharray="1 4"
-            strokeLinecap="round"
-          />
-          <circle
-            cx={cx}
-            cy={cy}
-            r={toRadius(10)}
-            fill="none"
-            stroke="var(--color-gold)"
-            strokeOpacity="0.16"
-            strokeDasharray="1 4"
-            strokeLinecap="round"
-          />
-          <text
-            x={cx}
-            y={cy - toRadius(5) - 8}
-            textAnchor="middle"
-            fill="var(--color-cream)"
-            fillOpacity="0.45"
-            fontSize="9"
-            letterSpacing="2"
-          >
-            5 MIN
-          </text>
-          <text
-            x={cx}
-            y={cy - toRadius(10) - 8}
-            textAnchor="middle"
-            fill="var(--color-cream)"
-            fillOpacity="0.3"
-            fontSize="9"
-            letterSpacing="2"
-          >
-            10 MIN
-          </text>
+            {points.map((p, i) => {
+              const rad = (p.angle * Math.PI) / 180;
+              const r = toRadius(p.time);
+              const x = cx + r * Math.cos(rad);
+              const y = cy + r * Math.sin(rad);
+              const labelR = r + 30;
+              const lx = cx + labelR * Math.cos(rad);
+              const ly = cy + labelR * Math.sin(rad);
+              const cos = Math.cos(rad);
+              const anchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
+              const isActive = active === p.name;
+              const dimmed = active !== null && !isActive;
+              const glyph = LANDMARK_ICON[p.name];
 
-          {points.map((p, i) => {
-            const rad = (p.angle * Math.PI) / 180;
-            const r = toRadius(p.time);
-            const x = cx + r * Math.cos(rad);
-            const y = cy + r * Math.sin(rad);
-            const labelR = r + 34;
-            const lx = cx + labelR * Math.cos(rad);
-            const ly = cy + labelR * Math.sin(rad);
-            const cos = Math.cos(rad);
-            const anchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
-            const isActive = active === p.name;
-            return (
-              <g key={p.name}>
-                <motion.line
-                  x1={cx}
-                  y1={cy}
-                  x2={x}
-                  y2={y}
-                  stroke="var(--color-gold)"
-                  strokeWidth={isActive ? 1.5 : 1}
-                  strokeOpacity={isActive ? 0.9 : 0.3}
-                  initial={{ pathLength: reduce ? 1 : 0 }}
-                  whileInView={{ pathLength: 1 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    duration: reduce ? 0 : 0.8,
-                    delay: reduce ? 0 : 0.15 + i * 0.08,
-                    ease: EASE,
-                  }}
-                />
-
-                {/* Caminante que va y vuelve, refuerza "todo a pie" */}
-                {!reduce && (
-                  <motion.circle
-                    r="2.2"
-                    fill="var(--color-cream)"
-                    initial={{ cx, cy, opacity: 0 }}
-                    animate={{ cx: [cx, x, cx], cy: [cy, y, cy], opacity: [0, 0.85, 0] }}
+              return (
+                <g key={p.name}>
+                  {/* Ruta: línea dorada fina que se ilumina al pasar el cursor */}
+                  <motion.line
+                    x1={cx}
+                    y1={cy}
+                    x2={x}
+                    y2={y}
+                    stroke="var(--color-gold)"
+                    strokeWidth={isActive ? 1.5 : 1}
+                    initial={{ pathLength: reduce ? 1 : 0 }}
+                    whileInView={{ pathLength: 1 }}
+                    viewport={{ once: true }}
+                    animate={{ strokeOpacity: isActive ? 0.9 : dimmed ? 0.1 : 0.3 }}
                     transition={{
-                      duration: 3.5 + (i % 3),
-                      repeat: Infinity,
-                      delay: 2 + i * 0.4,
-                      ease: "easeInOut",
+                      pathLength: {
+                        duration: reduce ? 0 : 0.9,
+                        delay: reduce ? 0 : 0.2 + i * 0.09,
+                        ease: EASE,
+                      },
+                      strokeOpacity: { duration: 0.4, ease: EASE },
                     }}
                   />
-                )}
 
-                <g
-                  onMouseEnter={() => setActive(p.name)}
-                  onMouseLeave={() => setActive((a) => (a === p.name ? null : a))}
-                  onClick={() => setActive(p.name)}
-                  className="cursor-pointer"
-                >
-                  <circle cx={x} cy={y} r="16" fill="transparent" />
-                  {isActive && !reduce && (
+                  {/* Caminante: un punto que va y vuelve, recuerda que todo se hace a pie */}
+                  {!reduce && (
+                    <motion.circle
+                      r="2"
+                      fill="var(--color-cream)"
+                      initial={{ cx, cy, opacity: 0 }}
+                      animate={{
+                        cx: [cx, x, cx],
+                        cy: [cy, y, cy],
+                        opacity: dimmed ? [0, 0, 0] : [0, 0.7, 0],
+                      }}
+                      transition={{
+                        duration: 4 + (i % 3),
+                        repeat: Infinity,
+                        delay: 2 + i * 0.5,
+                        ease: "easeInOut",
+                      }}
+                    />
+                  )}
+
+                  <motion.g
+                    onMouseEnter={() => setActive(p.name)}
+                    onMouseLeave={() => setActive((a) => (a === p.name ? null : a))}
+                    onClick={() => setActive(p.name)}
+                    onFocus={() => setActive(p.name)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${p.name}, ${p.time} ${t.minWalk}`}
+                    className="cursor-pointer outline-none"
+                    animate={{ opacity: dimmed ? 0.35 : 1 }}
+                    transition={{ duration: 0.4, ease: EASE }}
+                  >
+                    <circle cx={x} cy={y} r="20" fill="transparent" />
+                    {isActive && !reduce && (
+                      <motion.circle
+                        cx={x}
+                        cy={y}
+                        r="15"
+                        fill="none"
+                        stroke="var(--color-gold)"
+                        strokeWidth="1"
+                        initial={{ opacity: 0.6, scale: 1 }}
+                        animate={{ opacity: 0, scale: 1.9 }}
+                        transition={{ duration: 1.3, repeat: Infinity, ease: "easeOut" }}
+                        style={{ transformOrigin: `${x}px ${y}px` }}
+                      />
+                    )}
                     <motion.circle
                       cx={x}
                       cy={y}
-                      r="5"
-                      fill="none"
+                      r={isActive ? 15 : 12}
+                      fill="var(--color-ink)"
                       stroke="var(--color-gold)"
-                      strokeWidth="1.5"
-                      initial={{ opacity: 0.7, scale: 0.8 }}
-                      animate={{ opacity: 0, scale: 2.4 }}
-                      transition={{ duration: 1.1, repeat: Infinity, ease: "easeOut" }}
-                      style={{ transformOrigin: `${x}px ${y}px` }}
+                      strokeWidth={isActive ? 1.5 : 1}
+                      initial={{ scale: reduce ? 1 : 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 280,
+                        damping: 18,
+                        delay: reduce ? 0 : 0.4 + i * 0.09,
+                      }}
                     />
-                  )}
-                  <motion.circle
-                    cx={x}
-                    cy={y}
-                    r={isActive ? 6.5 : 4.5}
-                    fill="var(--color-gold)"
-                    stroke={isActive ? "var(--color-cream)" : "none"}
-                    strokeWidth="1.5"
-                    initial={{ scale: reduce ? 1 : 0 }}
-                    whileInView={{ scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 16,
-                      delay: reduce ? 0 : 0.35 + i * 0.08,
-                    }}
-                  />
-                  <text
-                    x={lx}
-                    y={ly - 3}
-                    textAnchor={anchor}
-                    fill={isActive ? "var(--color-gold)" : "var(--color-cream)"}
-                    fontSize={isActive ? "12" : "11"}
-                    fontFamily="var(--font-serif)"
-                  >
-                    {p.name}
-                  </text>
-                  <text
-                    x={lx}
-                    y={ly + 11}
-                    textAnchor={anchor}
-                    fill="var(--color-gold)"
-                    fontSize="9"
-                    letterSpacing="1"
-                  >
-                    {p.time} {t.minWalk}
-                  </text>
+                    <g
+                      transform={`translate(${x - (isActive ? 8 : 7)}, ${y - (isActive ? 8 : 7)}) scale(${
+                        (isActive ? 16 : 14) / 24
+                      })`}
+                    >
+                      <LandmarkGlyph
+                        type={glyph}
+                        stroke={isActive ? "var(--color-gold)" : "var(--color-cream)"}
+                        strokeWidth={2}
+                      />
+                    </g>
+                    <text
+                      x={lx}
+                      y={ly - 3}
+                      textAnchor={anchor}
+                      fill={isActive ? "var(--color-gold)" : "var(--color-cream)"}
+                      fontSize={isActive ? "12" : "11"}
+                      fontFamily="var(--font-serif)"
+                    >
+                      {p.name}
+                    </text>
+                    <text
+                      x={lx}
+                      y={ly + 11}
+                      textAnchor={anchor}
+                      fill="var(--color-gold)"
+                      fontSize="9"
+                      letterSpacing="1"
+                    >
+                      {p.time} {t.minWalk}
+                    </text>
+                  </motion.g>
                 </g>
-              </g>
-            );
-          })}
+              );
+            })}
 
-          <motion.circle
-            cx={cx}
-            cy={cy}
-            r="34"
-            fill="var(--color-gold)"
-            initial={{ opacity: 0.15 }}
-            animate={reduce ? { opacity: 0.15 } : { opacity: [0.12, 0.32, 0.12] }}
-            transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-            style={{ filter: "blur(10px)" }}
-          />
-          <circle
-            cx={cx}
-            cy={cy}
-            r="29"
-            fill="none"
-            stroke="var(--color-gold)"
-            strokeOpacity="0.35"
-            strokeWidth="1"
-          />
-          <circle
-            cx={cx}
-            cy={cy}
-            r="24"
-            fill="var(--color-ink)"
-            stroke="var(--color-gold)"
-            strokeWidth="1.5"
-          />
-          <text
-            x={cx}
-            y={cy + 4}
-            textAnchor="middle"
-            fill="var(--color-gold)"
-            fontSize="10"
-            letterSpacing="1"
-            fontFamily="var(--font-serif)"
-          >
-            MAJMA
-          </text>
-        </svg>
-      </div>
+            {/* MAJMA, el centro de la experiencia, con un brillo sutil */}
+            <motion.circle
+              cx={cx}
+              cy={cy}
+              r="36"
+              fill="var(--color-gold)"
+              initial={{ opacity: 0.12 }}
+              animate={reduce ? { opacity: 0.12 } : { opacity: [0.1, 0.26, 0.1] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              style={{ filter: "blur(12px)" }}
+            />
+            <circle
+              cx={cx}
+              cy={cy}
+              r="29"
+              fill="none"
+              stroke="var(--color-gold)"
+              strokeOpacity="0.3"
+              strokeWidth="1"
+            />
+            <circle
+              cx={cx}
+              cy={cy}
+              r="24"
+              fill="var(--color-ink)"
+              stroke="var(--color-gold)"
+              strokeWidth="1.5"
+            />
+            <g transform={`translate(${cx - 7}, ${cy - 15})`}>
+              <LandmarkGlyph type="tower" stroke="var(--color-gold)" strokeWidth={2.2} />
+            </g>
+            <text
+              x={cx}
+              y={cy + 15}
+              textAnchor="middle"
+              fill="var(--color-gold)"
+              fontSize="10"
+              letterSpacing="1.5"
+              fontFamily="var(--font-serif)"
+            >
+              MAJMA
+            </text>
+          </svg>
+        </div>
 
-      <div className="mt-8 min-h-[68px] border-t border-cream/15 pt-5">
-        {activePoint ? (
-          <div>
-            <div className="flex items-baseline justify-between gap-4">
-              <span className="font-serif text-lg text-cream">{activePoint.name}</span>
-              <span className="whitespace-nowrap text-xs uppercase tracking-[0.25em] text-gold">
-                {activePoint.time} {t.minWalk}
-              </span>
-            </div>
-            <p className="mt-2 text-sm leading-relaxed text-cream/70">{activePoint.desc}</p>
-          </div>
-        ) : (
-          <p className="text-center text-xs uppercase tracking-[0.3em] text-cream/40">
-            {t.mapHint}
-          </p>
-        )}
+        {/* Tarjeta postal: aparece al pasar el cursor por un punto */}
+        <div className="relative min-h-[240px] md:min-h-[280px]">
+          <AnimatePresence mode="wait">
+            {activePoint ? (
+              <motion.div
+                key={activePoint.name}
+                initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                transition={{ duration: 0.35, ease: EASE }}
+                className="overflow-hidden border border-gold/30 bg-ink shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
+              >
+                <div className="stone-grain-dark relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br from-gold/[0.14] via-ink to-ink">
+                  <svg viewBox="0 0 24 24" className="h-16 w-16 text-gold/25">
+                    <LandmarkGlyph
+                      type={LANDMARK_ICON[activePoint.name]}
+                      stroke="currentColor"
+                      strokeWidth={1}
+                    />
+                  </svg>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-serif text-2xl leading-tight text-cream">
+                    {activePoint.name}
+                  </h3>
+                  <span className="mt-2 inline-block text-xs uppercase tracking-[0.25em] text-gold">
+                    {activePoint.time} {t.minWalk}
+                  </span>
+                  <p className="mt-4 text-sm leading-relaxed text-cream/70">{activePoint.desc}</p>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="idle"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex h-full min-h-[240px] flex-col items-center justify-center gap-4 border border-cream/10 p-8 text-center md:min-h-[280px]"
+              >
+                <Footprints className="h-6 w-6 text-gold/60" strokeWidth={1.25} />
+                <p className="max-w-[22ch] text-xs uppercase tracking-[0.3em] text-cream/40">
+                  {t.mapHint}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
@@ -1723,25 +1814,26 @@ function GuiaCaceres() {
   return (
     <section id="guia" className="relative overflow-hidden bg-ink py-32 text-cream md:py-48">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <div className="grid grid-cols-1 items-center gap-16 md:grid-cols-2">
-          <Reveal>
-            <div className="max-w-xl">
-              <SectionNumber n="06" label={t.sectionLabel} dark />
-              <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-cream md:text-6xl">
-                {t.titlePre}
-                <br />
-                <em className="text-gold-soft">{t.titleEm}</em>.
-              </h2>
-              <p className="mt-8 text-lg leading-relaxed text-cream/80">{t.p1}</p>
-              <div className="mt-8">
-                <LiveWeather />
-              </div>
+        <Reveal>
+          <div className="max-w-2xl">
+            <SectionNumber n="06" label={t.sectionLabel} dark />
+            <h2 className="mt-6 font-serif text-5xl leading-[1.02] text-cream md:text-6xl">
+              {t.titlePre}
+              <br />
+              <em className="text-gold-soft">{t.titleEm}</em>.
+            </h2>
+            <p className="mt-8 text-lg leading-relaxed text-cream/80">{t.p1}</p>
+            <div className="mt-8">
+              <LiveWeather />
             </div>
-          </Reveal>
-          <Reveal delay={0.15}>
-            <ProximityMap />
-          </Reveal>
-        </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.15}>
+          <div className="mt-16 md:mt-20">
+            <ExperienceMap />
+          </div>
+        </Reveal>
 
         {/* Índice de capítulos, como en un cuaderno de viaje: numeración romana
             en vez de pestañas genéricas de aplicación. */}
