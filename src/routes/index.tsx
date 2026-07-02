@@ -40,7 +40,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Footprints,
 } from "lucide-react";
 import {
   Accordion,
@@ -53,7 +52,7 @@ import { useT, useLang } from "@/lib/i18n";
 
 import heroImg from "@/assets/hero-caceres.webp";
 import heroVideo from "@/assets/hero-video.mp4";
-import fachadaImg from "@/assets/fachada.webp";
+import caceresSkylineImg from "@/assets/caceres-skyline.webp";
 import logoFull from "@/assets/logo-full.webp";
 import logoIconWhite from "@/assets/logo-icon-white.webp";
 import apto1Salon from "@/assets/apto1-salon.webp";
@@ -106,6 +105,20 @@ const WA_URL =
   "https://wa.me/34722247436?text=Hola,%20me%20interesa%20reservar%20en%20MAJMA.%20%C2%BFTen%C3%A9is%20disponibilidad%3F";
 const GOOGLE_MAPS_URL =
   "https://www.google.com/maps?q=Calle+Cornudilla+3,+10003+C%C3%A1ceres,+Spain";
+
+// Términos de búsqueda reales por los que un huésped encontraría MAJMA:
+// intención de reserva ("apartamentos turísticos Cáceres") + intención
+// informativa ("qué ver en Cáceres") que ya cubre la Guía.
+const KEYWORDS = [
+  "apartamentos turísticos Cáceres",
+  "alojamiento Cáceres centro histórico",
+  "apartamentos casco antiguo Cáceres",
+  "dónde dormir en Cáceres",
+  "alquiler vacacional Cáceres",
+  "apartamentos cerca Plaza Mayor Cáceres",
+  "apartamentos Iglesia de San Juan Cáceres",
+  "qué ver en Cáceres",
+];
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -168,17 +181,18 @@ const FAQS = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MAJMA · Apartamentos turísticos en el casco histórico de Cáceres" },
+      { title: "Apartamentos Turísticos en Cáceres | MAJMA · Casco Histórico" },
       {
         name: "description",
         content:
-          "Apartamentos turísticos MAJMA: a 2 minutos de la Iglesia de San Juan, en pleno casco histórico de Cáceres, Ciudad Patrimonio de la Humanidad. Tres apartamentos independientes, totalmente equipados.",
+          "Apartamentos turísticos en el casco histórico de Cáceres, Patrimonio de la Humanidad. 3 apartamentos independientes junto a la Iglesia de San Juan. Reserva directa.",
       },
-      { property: "og:title", content: "MAJMA · Dormir dentro de la Historia — Cáceres" },
+      { name: "keywords", content: KEYWORDS.join(", ") },
+      { property: "og:title", content: "MAJMA · Apartamentos Turísticos en Cáceres" },
       {
         property: "og:description",
         content:
-          "Tres apartamentos en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
+          "Tres apartamentos turísticos en el corazón amurallado de Cáceres (Patrimonio de la Humanidad), a dos pasos de la Iglesia de San Juan.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE_URL },
@@ -189,13 +203,14 @@ export const Route = createFileRoute("/")({
         "script:ld+json": {
           "@context": "https://schema.org",
           "@type": "LodgingBusiness",
-          name: "Apartamentos turísticos MAJMA",
+          name: "MAJMA Apartamentos Turísticos Cáceres",
           description:
             "Tres apartamentos turísticos independientes en el casco histórico de Cáceres, a dos minutos de la Iglesia de San Juan, Ciudad Patrimonio de la Humanidad.",
           image: new URL(heroImg, SITE_URL).toString(),
           logo: new URL(logoFull, SITE_URL).toString(),
           telephone: PHONE_TEL,
           url: SITE_URL,
+          sameAs: [BOOKING_URL.split("?")[0]],
           address: {
             "@type": "PostalAddress",
             streetAddress: "Calle Cornudilla, 3",
@@ -993,7 +1008,11 @@ function Territorio() {
 
         <div className="md:col-span-7">
           <Reveal delay={0.1}>
-            <TiltImage src={fachadaImg} alt={t.facadeAlt} className="aspect-[4/5] w-full" />
+            <TiltImage
+              src={caceresSkylineImg}
+              alt={t.facadeAlt}
+              className="aspect-[16/10] w-full"
+            />
           </Reveal>
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
             {facts.map((f, i) => (
@@ -1015,12 +1034,9 @@ function Territorio() {
 
 /* ─────────── Section number ─────────── */
 
-function SectionNumber({ n, label, dark = false }: { n: string; label: string; dark?: boolean }) {
+function SectionNumber({ label, dark = false }: { n?: string; label: string; dark?: boolean }) {
   return (
-    <div className="flex items-baseline gap-3">
-      <span className={`font-serif text-lg leading-none ${dark ? "text-gold-soft" : "text-gold"}`}>
-        {n}
-      </span>
+    <div className="flex items-baseline">
       <span
         className={`text-[10px] uppercase tracking-[0.5em] ${dark ? "text-cream/60" : "text-stone-deep"}`}
       >
@@ -1523,267 +1539,58 @@ function LandmarkGlyph({
 
 function ExperienceMap() {
   const t = useT().guia;
-  const points = t.radarPoints;
+  const points = [...t.radarPoints].sort((a, b) => a.time - b.time);
   const reduce = useReducedMotionSafe();
-  const [active, setActive] = useState<string | null>(null);
-  const cx = 200;
-  const cy = 200;
-  const toRadius = (min: number) => 36 + min * 15;
-  const activePoint = points.find((p) => p.name === active) ?? null;
 
   return (
-    <div className="stone-grain-dark relative border border-cream/10 bg-ink/70 p-6 md:p-10">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-gold/[0.04] via-transparent to-transparent" />
-      <div className="relative grid grid-cols-1 gap-10 md:grid-cols-[1fr_340px] md:items-center md:gap-14">
-        <div className="relative mx-auto aspect-square w-full max-w-lg">
-          <svg
-            viewBox="0 0 400 400"
-            className="h-full w-full overflow-visible"
-            role="img"
-            aria-label={t.proximityMapLabel}
-          >
-            {/* Guía circular casi imperceptible: referencia de escala, no un radar */}
-            <circle
-              cx={cx}
-              cy={cy}
-              r={toRadius(10) + 8}
-              fill="none"
-              stroke="var(--color-gold)"
-              strokeOpacity="0.08"
-              strokeWidth="1"
-            />
-
-            {points.map((p, i) => {
-              const rad = (p.angle * Math.PI) / 180;
-              const r = toRadius(p.time);
-              const x = cx + r * Math.cos(rad);
-              const y = cy + r * Math.sin(rad);
-              const labelR = r + 30;
-              const lx = cx + labelR * Math.cos(rad);
-              const ly = cy + labelR * Math.sin(rad);
-              const cos = Math.cos(rad);
-              const anchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
-              const isActive = active === p.name;
-              const dimmed = active !== null && !isActive;
-              const glyph = LANDMARK_ICON[p.name];
-
-              return (
-                <g key={p.name}>
-                  {/* Ruta: línea dorada fina que se ilumina al pasar el cursor */}
-                  <motion.line
-                    x1={cx}
-                    y1={cy}
-                    x2={x}
-                    y2={y}
-                    stroke="var(--color-gold)"
-                    strokeWidth={isActive ? 1.5 : 1}
-                    initial={{ pathLength: reduce ? 1 : 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    animate={{ strokeOpacity: isActive ? 0.9 : dimmed ? 0.1 : 0.3 }}
-                    transition={{
-                      pathLength: {
-                        duration: reduce ? 0 : 0.9,
-                        delay: reduce ? 0 : 0.2 + i * 0.09,
-                        ease: EASE,
-                      },
-                      strokeOpacity: { duration: 0.4, ease: EASE },
-                    }}
-                  />
-
-                  {/* Caminante: un punto que va y vuelve, recuerda que todo se hace a pie */}
-                  {!reduce && (
-                    <motion.circle
-                      r="2"
-                      fill="var(--color-cream)"
-                      initial={{ cx, cy, opacity: 0 }}
-                      animate={{
-                        cx: [cx, x, cx],
-                        cy: [cy, y, cy],
-                        opacity: dimmed ? [0, 0, 0] : [0, 0.7, 0],
-                      }}
-                      transition={{
-                        duration: 4 + (i % 3),
-                        repeat: Infinity,
-                        delay: 2 + i * 0.5,
-                        ease: "easeInOut",
-                      }}
-                    />
-                  )}
-
-                  <motion.g
-                    onMouseEnter={() => setActive(p.name)}
-                    onMouseLeave={() => setActive((a) => (a === p.name ? null : a))}
-                    onClick={() => setActive(p.name)}
-                    onFocus={() => setActive(p.name)}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`${p.name}, ${p.time} ${t.minWalk}`}
-                    className="cursor-pointer outline-none"
-                    animate={{ opacity: dimmed ? 0.35 : 1 }}
-                    transition={{ duration: 0.4, ease: EASE }}
-                  >
-                    <circle cx={x} cy={y} r="20" fill="transparent" />
-                    {isActive && !reduce && (
-                      <motion.circle
-                        cx={x}
-                        cy={y}
-                        r="15"
-                        fill="none"
-                        stroke="var(--color-gold)"
-                        strokeWidth="1"
-                        initial={{ opacity: 0.6, scale: 1 }}
-                        animate={{ opacity: 0, scale: 1.9 }}
-                        transition={{ duration: 1.3, repeat: Infinity, ease: "easeOut" }}
-                        style={{ transformOrigin: `${x}px ${y}px` }}
-                      />
-                    )}
-                    <motion.circle
-                      cx={x}
-                      cy={y}
-                      r={isActive ? 15 : 12}
-                      fill="var(--color-ink)"
-                      stroke="var(--color-gold)"
-                      strokeWidth={isActive ? 1.5 : 1}
-                      initial={{ scale: reduce ? 1 : 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 280,
-                        damping: 18,
-                        delay: reduce ? 0 : 0.4 + i * 0.09,
-                      }}
-                    />
-                    <g
-                      transform={`translate(${x - (isActive ? 8 : 7)}, ${y - (isActive ? 8 : 7)}) scale(${
-                        (isActive ? 16 : 14) / 24
-                      })`}
-                    >
-                      <LandmarkGlyph
-                        type={glyph}
-                        stroke={isActive ? "var(--color-gold)" : "var(--color-cream)"}
-                        strokeWidth={2}
-                      />
-                    </g>
-                    <text
-                      x={lx}
-                      y={ly - 3}
-                      textAnchor={anchor}
-                      fill={isActive ? "var(--color-gold)" : "var(--color-cream)"}
-                      fontSize={isActive ? "12" : "11"}
-                      fontFamily="var(--font-serif)"
-                    >
-                      {p.name}
-                    </text>
-                    <text
-                      x={lx}
-                      y={ly + 11}
-                      textAnchor={anchor}
-                      fill="var(--color-gold)"
-                      fontSize="9"
-                      letterSpacing="1"
-                    >
-                      {p.time} {t.minWalk}
-                    </text>
-                  </motion.g>
-                </g>
-              );
-            })}
-
-            {/* MAJMA, el centro de la experiencia, con un brillo sutil */}
-            <motion.circle
-              cx={cx}
-              cy={cy}
-              r="36"
-              fill="var(--color-gold)"
-              initial={{ opacity: 0.12 }}
-              animate={reduce ? { opacity: 0.12 } : { opacity: [0.1, 0.26, 0.1] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              style={{ filter: "blur(12px)" }}
-            />
-            <circle
-              cx={cx}
-              cy={cy}
-              r="29"
-              fill="none"
-              stroke="var(--color-gold)"
-              strokeOpacity="0.3"
-              strokeWidth="1"
-            />
-            <circle
-              cx={cx}
-              cy={cy}
-              r="24"
-              fill="var(--color-ink)"
-              stroke="var(--color-gold)"
-              strokeWidth="1.5"
-            />
-            <g transform={`translate(${cx - 7}, ${cy - 15})`}>
-              <LandmarkGlyph type="tower" stroke="var(--color-gold)" strokeWidth={2.2} />
-            </g>
-            <text
-              x={cx}
-              y={cy + 15}
-              textAnchor="middle"
-              fill="var(--color-gold)"
-              fontSize="10"
-              letterSpacing="1.5"
-              fontFamily="var(--font-serif)"
-            >
-              MAJMA
-            </text>
+    <div role="list" aria-label={t.proximityMapLabel}>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
+        {/* MAJMA como punto de partida, no como centro de un radar */}
+        <Reveal className="col-span-2 flex flex-col justify-between border border-gold/40 bg-gold/[0.08] p-5 sm:col-span-1">
+          <svg viewBox="0 0 24 24" className="h-8 w-8 text-gold">
+            <LandmarkGlyph type="tower" stroke="currentColor" strokeWidth={1.5} />
           </svg>
-        </div>
+          <div className="mt-4">
+            <h3 className="font-serif text-xl text-cream">MAJMA</h3>
+            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold/80">{t.mapHint}</p>
+          </div>
+        </Reveal>
 
-        {/* Tarjeta postal: aparece al pasar el cursor por un punto */}
-        <div className="relative min-h-[240px] md:min-h-[280px]">
-          <AnimatePresence mode="wait">
-            {activePoint ? (
-              <motion.div
-                key={activePoint.name}
-                initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                transition={{ duration: 0.35, ease: EASE }}
-                className="overflow-hidden border border-gold/30 bg-ink shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
-              >
-                <div className="stone-grain-dark relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br from-gold/[0.14] via-ink to-ink">
-                  <svg viewBox="0 0 24 24" className="h-16 w-16 text-gold/25">
-                    <LandmarkGlyph
-                      type={LANDMARK_ICON[activePoint.name]}
-                      stroke="currentColor"
-                      strokeWidth={1}
-                    />
-                  </svg>
-                </div>
-                <div className="p-6">
-                  <h3 className="font-serif text-2xl leading-tight text-cream">
-                    {activePoint.name}
-                  </h3>
-                  <span className="mt-2 inline-block text-xs uppercase tracking-[0.25em] text-gold">
-                    {activePoint.time} {t.minWalk}
-                  </span>
-                  <p className="mt-4 text-sm leading-relaxed text-cream/70">{activePoint.desc}</p>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="idle"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="flex h-full min-h-[240px] flex-col items-center justify-center gap-4 border border-cream/10 p-8 text-center md:min-h-[280px]"
-              >
-                <Footprints className="h-6 w-6 text-gold/60" strokeWidth={1.25} />
-                <p className="max-w-[22ch] text-xs uppercase tracking-[0.3em] text-cream/40">
-                  {t.mapHint}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {points.map((p, i) => {
+          const glyph = LANDMARK_ICON[p.name];
+          const mapsHref = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+            MAJMA_ADDRESS,
+          )}&destination=${encodeURIComponent(`${p.name}, Cáceres`)}&travelmode=walking`;
+          return (
+            <Reveal
+              key={p.name}
+              delay={reduce ? 0 : 0.05 + i * 0.05}
+              className="group flex flex-col justify-between border border-cream/10 bg-cream/[0.02] p-5 transition-colors duration-300 hover:border-gold/40 hover:bg-cream/[0.05]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-gold">
+                  <LandmarkGlyph type={glyph} stroke="currentColor" strokeWidth={1.5} />
+                </svg>
+                <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-gold/80">
+                  {p.time} {t.minWalk}
+                </span>
+              </div>
+              <div className="mt-4">
+                <h3 className="font-serif text-lg leading-tight text-cream">{p.name}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-cream/60">{p.desc}</p>
+                <a
+                  href={mapsHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                >
+                  {t.howToGetThere}
+                  <ArrowRight className="h-3 w-3" />
+                </a>
+              </div>
+            </Reveal>
+          );
+        })}
       </div>
     </div>
   );

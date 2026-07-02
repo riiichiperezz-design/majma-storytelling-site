@@ -75,34 +75,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "MAJMA · Apartamentos turísticos en el casco histórico de Cáceres" },
+      { title: "Apartamentos Turísticos en Cáceres | MAJMA · Casco Histórico" },
       {
         name: "description",
         content:
-          "Apartamentos turísticos MAJMA, a dos minutos de la Iglesia de San Juan, en pleno casco histórico de Cáceres, Ciudad Patrimonio de la Humanidad.",
+          "Apartamentos turísticos en el casco histórico de Cáceres, Patrimonio de la Humanidad. 3 apartamentos independientes junto a la Iglesia de San Juan. Reserva directa.",
       },
       { name: "author", content: "MAJMA Apartamentos Turísticos" },
-      { property: "og:site_name", content: "MAJMA · Cáceres" },
+      { property: "og:site_name", content: "MAJMA · Apartamentos Turísticos Cáceres" },
       {
         property: "og:title",
-        content: "MAJMA · Apartamentos turísticos en el casco histórico de Cáceres",
+        content: "MAJMA · Apartamentos Turísticos en Cáceres",
       },
       {
         property: "og:description",
         content:
-          "Tres apartamentos en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
+          "Tres apartamentos turísticos en el corazón amurallado de Cáceres (Patrimonio de la Humanidad), a dos pasos de la Iglesia de San Juan.",
       },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "es_ES" },
+      { property: "og:locale:alternate", content: "en_US" },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
-        content: "MAJMA · Apartamentos turísticos en el casco histórico de Cáceres",
+        content: "MAJMA · Apartamentos Turísticos en Cáceres",
       },
       {
         name: "twitter:description",
         content:
-          "Tres apartamentos en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
+          "Tres apartamentos turísticos en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
       },
       { name: "robots", content: "index, follow" },
       { name: "theme-color", content: "#14110C" },
