@@ -389,6 +389,32 @@ export const content = {
           hours: "Acceso libre todo el día",
           price: "Gratuito",
         },
+        {
+          // TODO: tiempo a pie estimado por proximidad a puntos ya verificados
+          // (no confirmado por el propietario) — verificar el minutaje real.
+          id: 9,
+          name: "Iglesia de San Mateo",
+          time: 6,
+          desc: "Templo histórico en la parte alta del casco antiguo, una de las zonas monumentales más representativas de Cáceres.",
+          hours: "Consultar horario actualizado",
+          price: "Consultar",
+        },
+        {
+          id: 10,
+          name: "Concatedral de Santa María",
+          time: 7,
+          desc: "Uno de los principales templos históricos de Cáceres, en pleno conjunto monumental.",
+          hours: "Consultar horario actualizado",
+          price: "Consultar",
+        },
+        {
+          id: 11,
+          name: "Iglesia de Santiago",
+          time: 9,
+          desc: "Iglesia histórica en el entorno oeste del casco antiguo, junto al trazado tradicional de la ciudad.",
+          hours: "Consultar horario actualizado",
+          price: "Consultar",
+        },
       ],
       groups: [
         {
@@ -1028,6 +1054,32 @@ export const content = {
           desc: "Narrow streets tracing the medieval quarter.",
           hours: "Open access all day",
           price: "Free",
+        },
+        {
+          // TODO: walking time estimated from proximity to already-verified
+          // points (not confirmed by the owner) — verify the real minutes.
+          id: 9,
+          name: "Iglesia de San Mateo",
+          time: 6,
+          desc: "A historic church in the upper old town, one of Cáceres' most iconic monumental areas.",
+          hours: "Check current opening hours",
+          price: "Check",
+        },
+        {
+          id: 10,
+          name: "Concatedral de Santa María",
+          time: 7,
+          desc: "One of Cáceres' main historic churches, right in the heart of the monumental quarter.",
+          hours: "Check current opening hours",
+          price: "Check",
+        },
+        {
+          id: 11,
+          name: "Iglesia de Santiago",
+          time: 9,
+          desc: "A historic church on the western edge of the old town, along its traditional street layout.",
+          hours: "Check current opening hours",
+          price: "Check",
         },
       ],
       groups: [
