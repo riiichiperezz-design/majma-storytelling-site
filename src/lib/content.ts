@@ -6,6 +6,7 @@ export type Lang = "es" | "en";
 
 export const content = {
   es: {
+    skipToContent: "Saltar al contenido",
     nav: {
       links: [
         { href: "#territorio", label: "Cáceres" },
@@ -647,6 +648,8 @@ export const content = {
       contacto: "Contacto",
       whatsapp: "WhatsApp",
       direccion: "Casco histórico de Cáceres",
+      share: "Compartir esta web",
+      linkCopied: "Enlace copiado",
       legal: "Legal",
       avisoLegal: "Aviso legal",
       privacidad: "Política de privacidad",
@@ -696,6 +699,7 @@ export const content = {
     },
   },
   en: {
+    skipToContent: "Skip to content",
     nav: {
       links: [
         { href: "#territorio", label: "Cáceres" },
@@ -1330,6 +1334,8 @@ export const content = {
       contacto: "Contact",
       whatsapp: "WhatsApp",
       direccion: "Old town of Cáceres",
+      share: "Share this site",
+      linkCopied: "Link copied",
       legal: "Legal",
       avisoLegal: "Legal notice",
       privacidad: "Privacy policy",
