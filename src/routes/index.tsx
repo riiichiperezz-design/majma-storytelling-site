@@ -1420,11 +1420,11 @@ function LiveWeather() {
 /* ─────────── Descubre Cáceres: mapa 3D interactivo ─────────── */
 
 // Posición del pin de Apartamentos MAJMA sobre mapa3d.webp, en % del ancho y
-// alto de la imagen (1672×941 px). Es una estimación visual — MAJMA está
-// junto a la Iglesia de San Juan, "a la vuelta de la esquina". Ajusta estos
+// alto de la imagen (1672×941 px). Reubicada según la marca del propietario
+// sobre una captura real de la sección — si no encaja del todo, ajusta estos
 // dos números comparando con la sección renderizada hasta que el pin caiga
 // exactamente sobre el edificio real.
-const MAJMA_MAP_POSITION = { x: 44.3, y: 59.5 };
+const MAJMA_MAP_POSITION = { x: 80.5, y: 58.5 };
 
 // Ritmo de paseo urbano usado solo para estimar una distancia en metros a
 // partir del tiempo a pie ya verificado (content.ts → guia.radarPoints). No
@@ -1472,6 +1472,13 @@ function DiscoverCaceresMap() {
 
   const openPoint = (id: number) => setActive(id);
   const releasePoint = (id: number) => setActive((a) => (a === id ? null : a));
+  // Solo el ratón real cierra al salir (hover); un tap táctil no tiene "salir
+  // del elemento" y en algunos navegadores/emuladores puede disparar un
+  // pointerleave sintético justo después del tap — sin este filtro, eso
+  // cierra la tarjeta apenas se abre en móvil.
+  const releaseOnMouseLeave = (id: number) => (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") releasePoint(id);
+  };
   const closeCard = () => setActive(null);
 
   // Ancla la tarjeta junto al pin y la "voltea" hacia el lado contrario
@@ -1504,7 +1511,19 @@ function DiscoverCaceresMap() {
           draggable={false}
         />
 
-        {/* Ruta a pie: se dibuja desde MAJMA hasta el punto activo */}
+        {/* Al activar un punto, el mapa se oscurece para que la ruta dorada
+            resalte por contraste — un efecto "foco" en vez de recortar nada. */}
+        <motion.div
+          aria-hidden="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: activePoint ? 0.5 : 0 }}
+          transition={{ duration: 0.35, ease: EASE }}
+          className="pointer-events-none absolute inset-0 bg-ink"
+        />
+
+        {/* Ruta a pie: línea discontinua dorada desde MAJMA hasta el punto
+            activo, con un brillo (drop-shadow) y un flujo continuo de los
+            guiones que la hace leer como "iluminada" / en movimiento. */}
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
@@ -1517,19 +1536,31 @@ function DiscoverCaceresMap() {
                 d={routePath}
                 fill="none"
                 stroke="var(--color-gold)"
-                strokeWidth={0.4}
+                strokeWidth={0.55}
                 strokeLinecap="round"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 0.9 }}
+                strokeDasharray="1.6 1.4"
+                initial={{ opacity: 0, strokeDashoffset: 0 }}
+                animate={{
+                  opacity: 1,
+                  strokeDashoffset: reduce ? 0 : [0, -12],
+                }}
                 exit={{ opacity: 0 }}
                 transition={
                   reduce
                     ? { duration: 0.15 }
                     : {
-                        pathLength: { duration: 0.65, ease: EASE },
-                        opacity: { duration: 0.2 },
+                        opacity: { duration: 0.3, ease: EASE },
+                        strokeDashoffset: {
+                          duration: 1.4,
+                          repeat: Infinity,
+                          ease: "linear",
+                        },
                       }
                 }
+                style={{
+                  filter:
+                    "drop-shadow(0 0 2px var(--color-gold)) drop-shadow(0 0 6px var(--color-gold))",
+                }}
               />
             )}
           </AnimatePresence>
@@ -1556,8 +1587,8 @@ function DiscoverCaceresMap() {
             <button
               key={p.id}
               type="button"
-              onMouseEnter={() => openPoint(p.id)}
-              onMouseLeave={() => releasePoint(p.id)}
+              onPointerEnter={() => openPoint(p.id)}
+              onPointerLeave={releaseOnMouseLeave(p.id)}
               onFocus={() => openPoint(p.id)}
               onClick={() => openPoint(p.id)}
               aria-label={`${p.name} — ${p.time} ${t.minWalk}`}
@@ -1606,8 +1637,8 @@ function DiscoverCaceresMap() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.2, ease: EASE }}
-                onMouseEnter={() => openPoint(activePoint.id)}
-                onMouseLeave={() => releasePoint(activePoint.id)}
+                onPointerEnter={() => openPoint(activePoint.id)}
+                onPointerLeave={releaseOnMouseLeave(activePoint.id)}
                 className="border border-gold/30 bg-cream text-ink shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)]"
               >
                 <button
