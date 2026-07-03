@@ -42,6 +42,8 @@ import {
   ChevronDown,
   Home,
   CalendarCheck,
+  Share2,
+  Link2,
 } from "lucide-react";
 import {
   Accordion,
@@ -599,8 +601,15 @@ function Lightbox({
 /* ─────────── Página ─────────── */
 
 function MajmaLanding() {
+  const t = useT();
   return (
     <div className="relative min-h-screen bg-background text-foreground">
+      <a
+        href="#top"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-gold focus:px-4 focus:py-2 focus:text-xs focus:uppercase focus:tracking-[0.2em] focus:text-ink"
+      >
+        {t.skipToContent}
+      </a>
       <ReadingProgress />
       <TopBar />
       <Hero />
@@ -2442,6 +2451,43 @@ function Reserva() {
 
 /* ─────────── Footer ─────────── */
 
+function ShareButton() {
+  const t = useT().footer;
+  const [copied, setCopied] = useState(false);
+
+  const share = async () => {
+    const shareData = { title: document.title, url: SITE_URL };
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share(shareData);
+        trackEvent("share", { method: "native" });
+      } catch {
+        // El usuario canceló el diálogo nativo — no hacemos nada.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(SITE_URL);
+      setCopied(true);
+      trackEvent("share", { method: "clipboard" });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard no disponible — silenciosamente no hacemos nada.
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={share}
+      className="inline-flex items-center gap-1.5 hover:text-gold"
+    >
+      {copied ? <Link2 className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+      {copied ? t.linkCopied : t.share}
+    </button>
+  );
+}
+
 function Footer() {
   const t = useT().footer;
   return (
@@ -2472,6 +2518,9 @@ function Footer() {
               </a>
             </li>
             <li>{t.direccion}</li>
+            <li>
+              <ShareButton />
+            </li>
           </ul>
         </div>
         <div>
