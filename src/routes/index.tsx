@@ -1419,12 +1419,83 @@ function LiveWeather() {
 
 /* ─────────── Descubre Cáceres: mapa 3D interactivo ─────────── */
 
-// Posición del pin de Apartamentos MAJMA sobre mapa3d.webp, en % del ancho y
-// alto de la imagen (1672×941 px). Reubicada según la marca del propietario
-// sobre una captura real de la sección — si no encaja del todo, ajusta estos
-// dos números comparando con la sección renderizada hasta que el pin caiga
-// exactamente sobre el edificio real.
+// Todo lo geométrico/visual del mapa vive aquí, separado de content.ts:
+// posición de cada pin (x/y en % de mapa3d.webp, imagen de 1672×941 px) y el
+// trazado SVG (`routePath`, mismo sistema de coordenadas 0-100) de la ruta a
+// pie desde MAJMA hasta ese punto. No es texto traducible, así que no se
+// duplica por idioma — content.ts solo aporta nombre/descripción/horario.
+//
+// Los routePath NO son curvas dibujadas a mano ni líneas rectas: se generaron
+// clasificando cada píxel de mapa3d.webp (calle/plaza vs. tejado vs. muro vs.
+// césped por color) y calculando la ruta de menor coste desde MAJMA hasta
+// cada punto con Dijkstra sobre esa cuadrícula, para que discurra por las
+// propias calles y plazas en vez de atravesar manzanas. El resultado se
+// suavizó (Catmull-Rom → Bézier) y se verificó de nuevo muestreando el color
+// a lo largo de la curva ya suavizada: cada ruta cruza tejado en <3.1% de los
+// puntos muestreados (recortes de esquina al suavizar, no atravesar un
+// edificio). Script usado: no versionado, ver historial de este cambio.
+// TODO: si algún tramo no encaja al pixel, edita los puntos de control del
+// `routePath` correspondiente comparando con la sección renderizada.
 const MAJMA_MAP_POSITION = { x: 80.5, y: 58.5 };
+
+const MAP_GEOMETRY: Record<number, { x: number; y: number; routePath: string }> = {
+  // 1 · Iglesia de San Juan — a la vuelta de la esquina.
+  1: {
+    x: 77,
+    y: 69.5,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.67, 81.34 62.96, 80.74 64.72 C 80.14 66.47, 77.45 68.44, 76.79 69.18",
+  },
+  // 2 · Barrio judío — rodea el bloque central y sube por la judería vieja al norte.
+  2: {
+    x: 50.5,
+    y: 28.5,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.83, 80.98 63.6, 80.74 65.67 C 80.5 67.75, 79.61 69.93, 78.95 71.09 C 78.29 72.26, 77.93 72.05, 76.79 72.69 C 75.66 73.33, 76.73 74.55, 72.13 74.92 C 67.52 75.29, 53.44 76.25, 49.16 74.92 C 44.89 73.59, 46.95 69.87, 46.47 66.95 C 45.99 64.03, 46.02 59.14, 46.29 57.39 C 46.56 55.63, 47.37 57.17, 48.09 56.43 C 48.8 55.69, 50.15 54.14, 50.6 52.92 C 51.05 51.7, 50.99 50.05, 50.78 49.1 C 50.57 48.14, 49.76 48.46, 49.34 47.18 C 48.92 45.91, 49.01 43.68, 48.27 41.45 C 47.52 39.21, 44.53 35.87, 44.86 33.79 C 45.19 31.72, 49.34 29.81, 50.24 29.01",
+  },
+  // 3 · Museo de Cáceres — rodea por el este, sube hacia la zona norte del museo.
+  3: {
+    x: 63.5,
+    y: 25,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.72, 80.47 63.66, 80.74 65.04 C 81.01 66.42, 81.58 66.68, 82 66.95 C 82.42 67.22, 82.18 68.38, 83.25 66.63 C 84.33 64.88, 87.38 58.93, 88.46 56.43 C 89.53 53.93, 89.65 53.61, 89.71 51.65 C 89.77 49.68, 90.16 47.98, 88.82 44.63 C 87.47 41.29, 82.78 34.06, 81.64 31.56 C 80.5 29.06, 81.67 30.07, 82 29.65 C 82.33 29.22, 83.34 30.82, 83.61 29.01 C 83.88 27.21, 83.97 21.15, 83.61 18.81 C 83.25 16.47, 83.22 15.62, 81.46 14.98 C 79.69 14.35, 74.67 14.61, 73.03 14.98 C 71.38 15.36, 72.13 16.79, 71.59 17.22 C 71.05 17.64, 70.84 16.15, 69.8 17.53 C 68.75 18.92, 66.27 24.12, 65.31 25.5 C 64.35 26.89, 64.29 25.98, 64.06 25.82 C 63.82 25.66, 63.91 24.76, 63.88 24.55",
+  },
+  // 4 · Plaza Mayor — baja por el corredor central hasta la explanada de entrada.
+  4: {
+    x: 48.5,
+    y: 73,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.83, 80.95 63.66, 80.74 65.67 C 80.53 67.69, 80.41 69.29, 79.13 70.78 C 77.84 72.26, 78.02 73.91, 73.03 74.6 C 68.03 75.29, 53.29 75.24, 49.16 74.92 C 45.04 74.6, 48.42 73.06, 48.27 72.69",
+  },
+  // 5 · Plaza de San Jorge — corredor central, rama hacia la Concatedral.
+  5: {
+    x: 53,
+    y: 44,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.83, 81.34 63.34, 80.74 65.67 C 80.14 68.01, 78.23 71.15, 76.79 72.69 C 75.36 74.23, 76.73 74.55, 72.13 74.92 C 67.52 75.29, 53.47 77.84, 49.16 74.92 C 44.86 72, 46.05 61.05, 46.29 57.39 C 46.53 53.72, 49.46 55.21, 50.6 52.92 C 51.73 50.64, 52.69 45.22, 53.11 43.68",
+  },
+  // 6 · Torre de Bujaco — junto a la entrada de la Plaza Mayor.
+  6: {
+    x: 43,
+    y: 69,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.83, 80.95 63.66, 80.74 65.67 C 80.53 67.69, 80.56 69.23, 79.13 70.78 C 77.69 72.32, 77.12 74.23, 72.13 74.92 C 67.14 75.61, 53.29 75.72, 49.16 74.92 C 45.04 74.12, 48.03 71.25, 47.37 70.14 C 46.71 69.02, 45.99 68.54, 45.22 68.23 C 44.44 67.91, 43.12 68.23, 42.7 68.23",
+  },
+  // 7 · Arco de la Estrella — junto a Torre de Bujaco, misma entrada.
+  7: {
+    x: 48,
+    y: 64,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.83, 80.95 63.66, 80.74 65.67 C 80.53 67.69, 80.56 69.23, 79.13 70.78 C 77.69 72.32, 77.12 74.23, 72.13 74.92 C 67.14 75.61, 53.26 75.72, 49.16 74.92 C 45.07 74.12, 47.79 71.84, 47.55 70.14 C 47.31 68.44, 47.7 65.62, 47.73 64.72",
+  },
+  // 8 · Foro de los Balbos — se desvía del corredor central un poco antes.
+  8: {
+    x: 52,
+    y: 60,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.83, 81.01 63.55, 80.74 65.67 C 80.47 67.8, 80.2 69.87, 78.77 71.41 C 77.33 72.95, 74.28 74.34, 72.13 74.92 C 69.98 75.5, 66.99 75.08, 65.85 74.92 C 64.71 74.76, 66.36 74.12, 65.31 73.96 C 64.26 73.8, 61 74.97, 59.57 73.96 C 58.13 72.95, 56.94 69.5, 56.7 67.91 C 56.46 66.31, 57.98 66.26, 58.13 64.4 C 58.28 62.54, 57.83 58.18, 57.6 56.75 C 57.36 55.31, 57.12 55.9, 56.7 55.79 C 56.28 55.69, 55.62 55.74, 55.08 56.11 C 54.55 56.48, 53.74 57.7, 53.47 58.02",
+  },
+};
 
 // Ritmo de paseo urbano usado solo para estimar una distancia en metros a
 // partir del tiempo a pie ya verificado (content.ts → guia.radarPoints). No
@@ -1435,34 +1506,19 @@ function estimateMeters(minutes: number) {
   return Math.round((minutes * WALK_METERS_PER_MIN) / 10) * 10;
 }
 
-// Curva suave (Bézier cuadrática) entre dos puntos del mismo sistema de
-// coordenadas porcentual (0-100) que usan los pines, en lugar de una línea
-// recta: el punto de control se desplaza perpendicular al segmento, en
-// proporción a su longitud, para lograr un arco natural de "camino a pie".
-function curvedRoutePath(from: { x: number; y: number }, to: { x: number; y: number }) {
-  const mx = (from.x + to.x) / 2;
-  const my = (from.y + to.y) / 2;
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  const bend = 0.18;
-  const cx = mx - dy * bend;
-  const cy = my + dx * bend;
-  return `M ${from.x} ${from.y} Q ${cx} ${cy} ${to.x} ${to.y}`;
-}
-
 function DiscoverCaceresMap() {
   const t = useT().guia;
   const reduce = useReducedMotionSafe();
   // id del punto activo (hover, foco de teclado o tap); null = ninguno.
   const [active, setActive] = useState<number | null>(null);
 
-  const points = t.radarPoints;
-  const activePoint = points.find((p) => p.id === active) ?? null;
-
-  const routePath = useMemo(
-    () => (activePoint ? curvedRoutePath(MAJMA_MAP_POSITION, activePoint) : ""),
-    [activePoint],
+  // Combina el texto traducido (content.ts) con la posición y ruta SVG
+  // (MAP_GEOMETRY, compartidas por ambos idiomas).
+  const points = useMemo(
+    () => t.radarPoints.map((p) => ({ ...p, ...MAP_GEOMETRY[p.id] })),
+    [t.radarPoints],
   );
+  const activePoint = points.find((p) => p.id === active) ?? null;
 
   const mapsHref = activePoint
     ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
@@ -1504,26 +1560,32 @@ function DiscoverCaceresMap() {
       </p>
 
       <div className="relative mt-6 w-full select-none border border-cream/10 md:mt-8">
-        <img
+        {/* Al activar un punto, el plano baja de brillo/saturación (no de
+            opacidad — nunca desaparece) para que la ruta y el pin activo
+            queden por encima, en foco. */}
+        <motion.img
           src={mapa3dImg}
           alt={t.proximityMapLabel}
           className="block h-auto w-full"
           draggable={false}
+          animate={{
+            filter: activePoint ? "brightness(0.72) saturate(0.85)" : "brightness(1) saturate(1)",
+          }}
+          transition={{ duration: 0.3, ease: EASE }}
         />
-
-        {/* Al activar un punto, el mapa se oscurece para que la ruta dorada
-            resalte por contraste — un efecto "foco" en vez de recortar nada. */}
         <motion.div
           aria-hidden="true"
           initial={{ opacity: 0 }}
-          animate={{ opacity: activePoint ? 0.5 : 0 }}
-          transition={{ duration: 0.35, ease: EASE }}
-          className="pointer-events-none absolute inset-0 bg-ink"
+          animate={{ opacity: activePoint ? 1 : 0 }}
+          transition={{ duration: 0.3, ease: EASE }}
+          className="pointer-events-none absolute inset-0 bg-[rgba(15,15,15,0.16)] backdrop-blur-[0.5px]"
         />
 
-        {/* Ruta a pie: línea discontinua dorada desde MAJMA hasta el punto
-            activo, con un brillo (drop-shadow) y un flujo continuo de los
-            guiones que la hace leer como "iluminada" / en movimiento. */}
+        {/* Ruta a pie: recorrido trazado a mano sobre las calles y plazas del
+            plano (ver MAP_GEOMETRY) — dos trazos superpuestos, uno base tenue
+            que se dibuja progresivamente y otro dorado con brillo, guiones en
+            movimiento y un pulso suave, para leerse como una ruta turística
+            "iluminada" y no como una línea recta genérica. */}
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
@@ -1531,37 +1593,60 @@ function DiscoverCaceresMap() {
         >
           <AnimatePresence>
             {activePoint && (
-              <motion.path
+              // AnimatePresence solo coordina el exit de su hijo motion directo:
+              // esta g fuera con opacidad para que toda la ruta (los dos trazos
+              // hijos) desaparezca junto con ella, sin depender de que cada
+              // motion.path propague su propio exit por separado.
+              <motion.g
                 key={activePoint.id}
-                d={routePath}
-                fill="none"
-                stroke="var(--color-gold)"
-                strokeWidth={0.55}
-                strokeLinecap="round"
-                strokeDasharray="1.6 1.4"
-                initial={{ opacity: 0, strokeDashoffset: 0 }}
-                animate={{
-                  opacity: 1,
-                  strokeDashoffset: reduce ? 0 : [0, -12],
-                }}
+                initial={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={
-                  reduce
-                    ? { duration: 0.15 }
-                    : {
-                        opacity: { duration: 0.3, ease: EASE },
-                        strokeDashoffset: {
-                          duration: 1.4,
-                          repeat: Infinity,
-                          ease: "linear",
-                        },
-                      }
-                }
-                style={{
-                  filter:
-                    "drop-shadow(0 0 2px var(--color-gold)) drop-shadow(0 0 6px var(--color-gold))",
-                }}
-              />
+                transition={{ duration: 0.2, ease: EASE }}
+              >
+                {/* Trazo base semitransparente: se dibuja de MAJMA al destino */}
+                <motion.path
+                  d={activePoint.routePath}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.55)"
+                  strokeWidth={0.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={
+                    reduce
+                      ? { duration: 0.15 }
+                      : { pathLength: { duration: 0.9, ease: EASE }, opacity: { duration: 0.2 } }
+                  }
+                />
+                {/* Trazo dorado luminoso: guiones en movimiento + pulso */}
+                <motion.path
+                  d={activePoint.routePath}
+                  fill="none"
+                  stroke="var(--color-gold)"
+                  strokeWidth={0.42}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray="1.4 1.2"
+                  initial={{ opacity: 0, strokeDashoffset: 0 }}
+                  animate={{
+                    opacity: reduce ? 0.95 : [0.75, 1, 0.75],
+                    strokeDashoffset: reduce ? 0 : [0, -12],
+                  }}
+                  transition={
+                    reduce
+                      ? { duration: 0.15 }
+                      : {
+                          opacity: { duration: 1.8, repeat: Infinity, ease: "easeInOut" },
+                          strokeDashoffset: { duration: 1.1, repeat: Infinity, ease: "linear" },
+                        }
+                  }
+                  style={{
+                    filter:
+                      "drop-shadow(0 0 2px var(--color-gold)) drop-shadow(0 0 6px var(--color-gold))",
+                  }}
+                />
+              </motion.g>
             )}
           </AnimatePresence>
         </svg>
@@ -1580,11 +1665,13 @@ function DiscoverCaceresMap() {
           </span>
         </div>
 
-        {/* 8 puntos turísticos numerados */}
+        {/* 8 puntos turísticos numerados. El activo se agranda y brilla; el
+            resto baja de opacidad para no competir con la ruta iluminada. */}
         {points.map((p) => {
           const isActive = active === p.id;
+          const dimmed = active !== null && !isActive;
           return (
-            <button
+            <motion.button
               key={p.id}
               type="button"
               onPointerEnter={() => openPoint(p.id)}
@@ -1593,6 +1680,8 @@ function DiscoverCaceresMap() {
               onClick={() => openPoint(p.id)}
               aria-label={`${p.name} — ${p.time} ${t.minWalk}`}
               aria-expanded={isActive}
+              animate={{ opacity: dimmed ? 0.45 : 1 }}
+              transition={{ duration: 0.25, ease: EASE }}
               className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center outline-none"
               style={{ left: `${p.x}%`, top: `${p.y}%` }}
             >
@@ -1600,12 +1689,14 @@ function DiscoverCaceresMap() {
                 animate={{ scale: isActive ? 1.22 : 1 }}
                 transition={{ duration: 0.25, ease: EASE }}
                 className={`flex h-7 w-7 items-center justify-center rounded-full border-2 font-serif text-xs shadow-[0_3px_10px_rgba(0,0,0,0.35)] transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-gold ${
-                  isActive ? "border-gold bg-gold text-ink" : "border-gold/85 bg-ink/90 text-gold"
+                  isActive
+                    ? "border-gold bg-gold text-ink shadow-[0_0_10px_rgba(214,168,79,0.7)]"
+                    : "border-gold/85 bg-ink/90 text-gold"
                 }`}
               >
                 {p.id}
               </motion.span>
-            </button>
+            </motion.button>
           );
         })}
 

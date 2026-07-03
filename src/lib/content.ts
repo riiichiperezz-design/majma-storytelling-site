@@ -320,19 +320,15 @@ export const content = {
       majmaPinLabel: "Apartamentos MAJMA",
       placeSingular: "lugar",
       placePlural: "lugares",
-      // Posiciones (x, y en % sobre mapa3d.webp, imagen de 1672×941 px)
-      // recalculadas cruzando el plano oficial numerado del propietario
-      // (mismo dibujo con leyenda) contra esta ilustración. Siguen siendo
-      // una lectura visual, no una medición exacta: ajusta los valores
-      // mirando la sección "Descubre Cáceres" en el navegador si algún pin
-      // no cae justo sobre su edificio.
+      // La posición (x, y %) y la ruta SVG de cada punto viven en
+      // MAP_GEOMETRY (src/routes/index.tsx), no aquí — son datos de diseño
+      // compartidos por ambos idiomas, no texto traducible. Este array solo
+      // aporta el texto y debe mantener los mismos `id` que MAP_GEOMETRY.
       radarPoints: [
         {
           id: 1,
           name: "Iglesia de San Juan",
           time: 2,
-          x: 82.0,
-          y: 50.5,
           desc: "A la vuelta de la esquina de MAJMA.",
           hours: "Abierta mañana y tarde (cerrada al mediodía)",
           price: "Entrada libre",
@@ -341,8 +337,6 @@ export const content = {
           id: 4,
           name: "Plaza Mayor",
           time: 6,
-          x: 42.0,
-          y: 75.0,
           desc: "El salón de la ciudad, animado a cualquier hora del día.",
           hours: "Acceso libre todo el día",
           price: "Gratuito",
@@ -351,8 +345,6 @@ export const content = {
           id: 5,
           name: "Plaza de San Jorge",
           time: 6,
-          x: 49.5,
-          y: 65.0,
           desc: "Escalinata escondida a los pies de la muralla.",
           hours: "Acceso libre todo el día",
           price: "Gratuito",
@@ -361,8 +353,6 @@ export const content = {
           id: 3,
           name: "Museo de Cáceres",
           time: 5,
-          x: 75.0,
-          y: 45.0,
           desc: "Palacio del siglo XVI construido sobre un aljibe árabe.",
           hours: "De martes a domingo, cerrado los lunes",
           price: "1,20 € · gratis domingos, UE y menores de 18",
@@ -371,8 +361,6 @@ export const content = {
           id: 6,
           name: "Torre de Bujaco",
           time: 6,
-          x: 64.0,
-          y: 66.0,
           desc: "La atalaya que vigila la Plaza Mayor desde lo alto.",
           hours: "10:00-14:00 y tarde, cerrada los martes",
           price: "2,50 €",
@@ -381,8 +369,6 @@ export const content = {
           id: 8,
           name: "Foro de los Balbos",
           time: 8,
-          x: 68.5,
-          y: 61.0,
           desc: "Uno de los mejores miradores sobre la muralla.",
           hours: "Acceso libre todo el día",
           price: "Gratuito",
@@ -391,8 +377,6 @@ export const content = {
           id: 7,
           name: "Arco de la Estrella",
           time: 7,
-          x: 61.0,
-          y: 63.5,
           desc: "La puerta monumental de entrada al casco antiguo.",
           hours: "Acceso libre todo el día",
           price: "Gratuito",
@@ -401,8 +385,6 @@ export const content = {
           id: 2,
           name: "Barrio judío",
           time: 4,
-          x: 76.0,
-          y: 64.5,
           desc: "Calles estrechas del trazado medieval cacereño.",
           hours: "Acceso libre todo el día",
           price: "Gratuito",
@@ -979,16 +961,14 @@ export const content = {
       majmaPinLabel: "Apartamentos MAJMA",
       placeSingular: "place",
       placePlural: "places",
-      // Positions (x, y in % over mapa3d.webp, a 1672×941px image) are visual
-      // estimates — a starting point. Fine-tune by eye against the rendered
-      // "Discover Cáceres" section until each pin sits exactly on its building.
+      // Position (x, y %) and the SVG route for each point live in
+      // MAP_GEOMETRY (src/routes/index.tsx), not here — design data shared
+      // across languages, not translatable text. Keep the same `id`s.
       radarPoints: [
         {
           id: 1,
           name: "Iglesia de San Juan",
           time: 2,
-          x: 82.0,
-          y: 50.5,
           desc: "Right around the corner from MAJMA.",
           hours: "Open morning and evening (closed midday)",
           price: "Free entry",
@@ -997,8 +977,6 @@ export const content = {
           id: 4,
           name: "Plaza Mayor",
           time: 6,
-          x: 42.0,
-          y: 75.0,
           desc: "The city's living room, lively any time of day.",
           hours: "Open access all day",
           price: "Free",
@@ -1007,8 +985,6 @@ export const content = {
           id: 5,
           name: "Plaza de San Jorge",
           time: 6,
-          x: 49.5,
-          y: 65.0,
           desc: "A hidden staircase at the foot of the wall.",
           hours: "Open access all day",
           price: "Free",
@@ -1017,8 +993,6 @@ export const content = {
           id: 3,
           name: "Museo de Cáceres",
           time: 5,
-          x: 75.0,
-          y: 45.0,
           desc: "A 16th-century palace built over an Arab cistern.",
           hours: "Tuesday to Sunday, closed Mondays",
           price: "€1.20 · free on Sundays, for EU citizens and under-18s",
@@ -1027,8 +1001,6 @@ export const content = {
           id: 6,
           name: "Torre de Bujaco",
           time: 6,
-          x: 64.0,
-          y: 66.0,
           desc: "The watchtower keeping guard over Plaza Mayor.",
           hours: "10:00-14:00 and afternoons, closed Tuesdays",
           price: "€2.50",
@@ -1037,8 +1009,6 @@ export const content = {
           id: 8,
           name: "Foro de los Balbos",
           time: 8,
-          x: 68.5,
-          y: 61.0,
           desc: "One of the best viewpoints over the city wall.",
           hours: "Open access all day",
           price: "Free",
@@ -1047,8 +1017,6 @@ export const content = {
           id: 7,
           name: "Arco de la Estrella",
           time: 7,
-          x: 61.0,
-          y: 63.5,
           desc: "The monumental gate into the old town.",
           hours: "Open access all day",
           price: "Free",
@@ -1057,8 +1025,6 @@ export const content = {
           id: 2,
           name: "Barrio judío",
           time: 4,
-          x: 76.0,
-          y: 64.5,
           desc: "Narrow streets tracing the medieval quarter.",
           hours: "Open access all day",
           price: "Free",
