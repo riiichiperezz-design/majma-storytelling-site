@@ -572,8 +572,16 @@ export const content = {
           a: "El check-in es autónomo mediante caja de llaves segura. Antes de tu llegada te enviamos instrucciones detalladas y un contacto directo por si necesitas ayuda en cualquier momento.",
         },
         {
+          q: "¿A qué distancia está la Plaza Mayor?",
+          a: "A solo 6 minutos caminando. Estás en pleno casco histórico amurallado de Cáceres, junto a la Iglesia de San Juan.",
+        },
+        {
           q: "¿Dónde se puede aparcar?",
           a: "La Ciudad Monumental es peatonal y de acceso restringido. La opción más cómoda es el Parking Obispo Galarza (12,45 €/día), con ascensor directo a la Plaza Mayor. También hay aparcamiento gratuito en el Barrio de San Blas o en el Parque de Cánovas (zona azul entre semana, gratis fines de semana y festivos).",
+        },
+        {
+          q: "¿Hay traslado al aeropuerto?",
+          a: "Sí, disponible bajo consulta. Escríbenos por WhatsApp con los datos de tu vuelo y te confirmamos.",
         },
         {
           q: "¿Se admiten niños?",
@@ -592,12 +600,20 @@ export const content = {
           a: "MAJMA son 3 apartamentos independientes: dos de 40 m² para hasta 4 huéspedes y uno de 27 m² para hasta 3, todos con cama doble y sofá cama.",
         },
         {
+          q: "¿Los apartamentos comparten cocina o baño?",
+          a: "No. Los tres son totalmente independientes entre sí, cada uno con su propia cocina, baño y terraza o balcón — no comparten ninguna estancia.",
+        },
+        {
           q: "¿Cuál es la política de cancelación?",
           a: "Depende de la tarifa elegida en el momento de la reserva. Puedes consultar las condiciones exactas antes de confirmar en la propia página de Booking.",
         },
         {
           q: "¿Hay wifi y climatización?",
           a: "Sí, wifi de alta velocidad gratuito y aire acondicionado/calefacción en todas las estancias del apartamento.",
+        },
+        {
+          q: "¿Por qué reservar directamente con vosotros en vez de por Booking?",
+          a: "Al escribirnos por WhatsApp evitas comisiones de intermediarios y te confirmamos la disponibilidad real al momento, resolviendo cualquier duda directamente con nosotros.",
         },
       ],
     },
@@ -664,6 +680,7 @@ export const content = {
       noMatch:
         "No he encontrado una respuesta exacta a eso. Escríbenos por WhatsApp y te ayudamos enseguida.",
       whatsappCta: "Escribir por WhatsApp",
+      bookCta: "Ver disponibilidad",
       close: "Cerrar",
     },
     notFound: {
@@ -1238,8 +1255,16 @@ export const content = {
           a: "Check-in is self-service via a secure key box. Before you arrive we'll send you detailed instructions and a direct contact in case you need help at any point.",
         },
         {
+          q: "How far is Plaza Mayor?",
+          a: "Just a 6-minute walk. You're right in the heart of Cáceres' walled old town, next to the Church of San Juan.",
+        },
+        {
           q: "Where can I park?",
           a: "The Monumental City is pedestrian-only with restricted access. The easiest option is the Obispo Galarza car park (€12.45/day), with a lift straight to Plaza Mayor. There's also free parking in the San Blas neighbourhood or at Parque de Cánovas (metered on weekdays, free on weekends and holidays).",
+        },
+        {
+          q: "Is there an airport transfer?",
+          a: "Yes, available on request. Message us on WhatsApp with your flight details and we'll confirm.",
         },
         {
           q: "Are children allowed?",
@@ -1258,12 +1283,20 @@ export const content = {
           a: "MAJMA is 3 independent apartments: two of 40 m² for up to 4 guests, and one of 27 m² for up to 3, all with a double bed and a sofa bed.",
         },
         {
+          q: "Do the apartments share a kitchen or bathroom?",
+          a: "No. All three are fully independent, each with its own kitchen, bathroom and terrace or balcony — nothing is shared.",
+        },
+        {
           q: "What's the cancellation policy?",
           a: "It depends on the rate you choose when booking. You can check the exact conditions before confirming on the Booking.com page itself.",
         },
         {
           q: "Is there wifi and air conditioning?",
           a: "Yes, free high-speed wifi and air conditioning/heating throughout the apartment.",
+        },
+        {
+          q: "Why book directly with you instead of through Booking.com?",
+          a: "Messaging us on WhatsApp skips intermediary commissions and lets us confirm real availability right away, sorting out any question directly with us.",
         },
       ],
     },
@@ -1330,6 +1363,7 @@ export const content = {
       noMatch:
         "I couldn't find an exact answer to that. Message us on WhatsApp and we'll help right away.",
       whatsappCta: "Message on WhatsApp",
+      bookCta: "Check availability",
       close: "Close",
     },
     notFound: {

@@ -41,6 +41,7 @@ import {
   ChevronRight,
   ChevronDown,
   Home,
+  CalendarCheck,
 } from "lucide-react";
 import {
   Accordion,
@@ -50,6 +51,7 @@ import {
 } from "@/components/ui/accordion";
 import { trackEvent } from "@/lib/analytics";
 import { useT, useLang } from "@/lib/i18n";
+import { content } from "@/lib/content";
 
 import heroImg from "@/assets/hero-caceres.webp";
 import heroVideo from "@/assets/hero-video.mp4";
@@ -142,45 +144,10 @@ const CACERES_LAT = 39.472231;
 const CACERES_LON = -6.372929;
 const MAJMA_ADDRESS = "Calle Cornudilla, 3, 10003 Cáceres, España";
 
-/* Preguntas frecuentes — compartidas entre la sección y el JSON-LD de SEO */
-const FAQS = [
-  {
-    q: "¿A qué hora son el check-in y el check-out?",
-    a: "El check-in es de 15:00h a 22:00h y el check-out de 11:00h a 12:00h. Si necesitas un horario distinto, avísanos con antelación por WhatsApp.",
-  },
-  {
-    q: "¿Cómo funciona la llegada? ¿Hay alguien esperando?",
-    a: "El check-in es autónomo mediante caja de llaves segura. Antes de tu llegada te enviamos instrucciones detalladas y un contacto directo por si necesitas ayuda en cualquier momento.",
-  },
-  {
-    q: "¿Dónde se puede aparcar?",
-    a: "El casco histórico es peatonal, pero hay opciones de aparcamiento gratuito cerca según nos comentan otros huéspedes. Te indicamos la opción más cómoda al confirmar tu reserva.",
-  },
-  {
-    q: "¿Se admiten niños?",
-    a: "Sí, se admiten niños de cualquier edad. Ten en cuenta que no disponemos de cunas ni camas adicionales para bebés.",
-  },
-  {
-    q: "¿Se admiten mascotas?",
-    a: "No, actualmente los apartamentos no admiten mascotas.",
-  },
-  {
-    q: "¿Se permiten despedidas de soltero/a u otro tipo de fiestas?",
-    a: "No, los apartamentos no están pensados para despedidas de soltero/a ni eventos similares.",
-  },
-  {
-    q: "¿Cuántos huéspedes caben como máximo?",
-    a: "MAJMA son 3 apartamentos independientes: dos de 40 m² para hasta 4 huéspedes y uno de 27 m² para hasta 3, todos con cama doble y sofá cama.",
-  },
-  {
-    q: "¿Cuál es la política de cancelación?",
-    a: "Depende de la tarifa elegida en el momento de la reserva. Puedes consultar las condiciones exactas antes de confirmar en la propia página de Booking.",
-  },
-  {
-    q: "¿Hay wifi y climatización?",
-    a: "Sí, wifi de alta velocidad gratuito y aire acondicionado/calefacción en todas las estancias del apartamento.",
-  },
-];
+/* Preguntas frecuentes para el JSON-LD de SEO — reutiliza content.es.faq.items
+   (la misma fuente que alimenta la sección visible y el chatbot) para que el
+   rich snippet de Google nunca quede desincronizado con lo que ve el usuario. */
+const FAQS = content.es.faq.items;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -734,7 +701,11 @@ function TopBar() {
         </a>
         <nav className="hidden items-center gap-6 text-xs uppercase tracking-[0.25em] text-cream/85 md:flex lg:gap-7 lg:tracking-[0.3em]">
           {t.links.map((l) => (
-            <a key={l.href} href={l.href} className="hover:text-gold transition-colors">
+            <a
+              key={l.href}
+              href={l.href}
+              className="hover:text-gold transition-colors duration-300"
+            >
               {l.label}
             </a>
           ))}
@@ -743,7 +714,7 @@ function TopBar() {
           <LangToggle />
           <a
             href="#reserva"
-            className="inline-flex items-center gap-2 border border-gold/60 px-5 py-2 text-xs uppercase tracking-[0.3em] text-cream transition-all hover:bg-gold hover:text-ink"
+            className="inline-flex items-center gap-2 border border-gold/60 px-5 py-2 text-xs uppercase tracking-[0.3em] text-cream transition-all duration-300 hover:bg-gold hover:text-ink"
           >
             {t.reservar}
           </a>
@@ -929,7 +900,7 @@ function Hero() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent("click_booking", { location: "hero" })}
-            className="group relative inline-flex items-center gap-3 overflow-hidden bg-gold px-8 py-4 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:-translate-y-[1px] active:scale-[0.98]"
+            className="group relative inline-flex items-center gap-3 overflow-hidden bg-gold px-8 py-4 text-xs uppercase tracking-[0.3em] text-ink transition-all duration-300 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:-translate-y-[1px] active:scale-[0.98]"
           >
             <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cream/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             {t.ctaBooking}
@@ -937,7 +908,7 @@ function Hero() {
           </a>
           <a
             href="#apartamento"
-            className="inline-flex items-center gap-3 border border-cream/40 px-8 py-4 text-xs uppercase tracking-[0.3em] text-cream transition-all hover:border-gold hover:text-gold active:scale-[0.98]"
+            className="inline-flex items-center gap-3 border border-cream/40 px-8 py-4 text-xs uppercase tracking-[0.3em] text-cream transition-all duration-300 hover:border-gold hover:text-gold active:scale-[0.98]"
           >
             {t.ctaDiscover}
           </a>
@@ -1158,7 +1129,7 @@ function Distribucion() {
                 key={a.id}
                 type="button"
                 onClick={() => setActiveApt(i)}
-                className={`group relative px-1 pb-4 pt-1 text-left transition-colors ${
+                className={`group relative px-1 pb-4 pt-1 text-left transition-colors duration-300 ${
                   isActive ? "text-ink" : "text-muted-foreground hover:text-ink/70"
                 }`}
               >
@@ -1325,7 +1296,7 @@ function Ubicacion() {
               href={GOOGLE_MAPS_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute bottom-4 right-4 inline-flex items-center gap-2 bg-cream px-4 py-2.5 text-[10px] uppercase tracking-[0.3em] text-ink shadow-[0_6px_20px_-8px_rgba(0,0,0,0.6)] transition-colors hover:bg-gold"
+              className="absolute bottom-4 right-4 inline-flex items-center gap-2 bg-cream px-4 py-2.5 text-[10px] uppercase tracking-[0.3em] text-ink shadow-[0_6px_20px_-8px_rgba(0,0,0,0.6)] transition-colors duration-300 hover:bg-gold"
             >
               <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
               {t.mapOpenLink}
@@ -1765,7 +1736,7 @@ function DiscoverCaceresMap() {
                   type="button"
                   onClick={closeCard}
                   aria-label={t.closeCard}
-                  className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-ink/40 transition-colors hover:bg-ink/5 hover:text-ink"
+                  className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-ink/40 transition-colors duration-300 hover:bg-ink/5 hover:text-ink"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -1874,12 +1845,12 @@ function GuiaCaceres() {
                     setActiveTab(gi);
                     setExpanded(null);
                   }}
-                  className={`group flex shrink-0 items-baseline gap-4 border-l-2 py-3 pl-5 text-left transition-colors md:shrink ${
+                  className={`group flex shrink-0 items-baseline gap-4 border-l-2 py-3 pl-5 text-left transition-colors duration-300 md:shrink ${
                     isActive ? "border-gold" : "border-cream/10 hover:border-cream/30"
                   }`}
                 >
                   <span
-                    className={`font-serif text-2xl leading-none transition-colors ${
+                    className={`font-serif text-2xl leading-none transition-colors duration-300 ${
                       isActive ? "text-gold" : "text-cream/30 group-hover:text-cream/50"
                     }`}
                   >
@@ -1887,7 +1858,7 @@ function GuiaCaceres() {
                   </span>
                   <span className="flex flex-col">
                     <span
-                      className={`text-xs uppercase tracking-[0.25em] transition-colors ${
+                      className={`text-xs uppercase tracking-[0.25em] transition-colors duration-300 ${
                         isActive ? "text-cream" : "text-cream/50 group-hover:text-cream/70"
                       }`}
                     >
@@ -1923,7 +1894,7 @@ function GuiaCaceres() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: i * 0.06, ease: EASE }}
-                      className={`border p-6 transition-colors ${
+                      className={`border p-6 transition-colors duration-300 ${
                         isOpen
                           ? "border-gold/50 bg-cream/[0.06]"
                           : "border-cream/10 bg-cream/[0.03] hover:border-gold/30"
@@ -2237,7 +2208,7 @@ function BookingCalendar() {
             aria-label="Mes anterior"
             disabled={!canGoPrevMonth}
             onClick={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
-            className="text-ink/50 transition-colors hover:text-gold disabled:opacity-20 disabled:hover:text-ink/50"
+            className="text-ink/50 transition-colors duration-300 hover:text-gold disabled:opacity-20 disabled:hover:text-ink/50"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -2246,7 +2217,7 @@ function BookingCalendar() {
             type="button"
             aria-label="Mes siguiente"
             onClick={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-            className="text-ink/50 transition-colors hover:text-gold"
+            className="text-ink/50 transition-colors duration-300 hover:text-gold"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -2269,7 +2240,7 @@ function BookingCalendar() {
                 type="button"
                 disabled={past}
                 onClick={() => handlePick(d)}
-                className={`relative py-2 text-sm transition-colors ${
+                className={`relative py-2 text-sm transition-colors duration-300 ${
                   past
                     ? "cursor-not-allowed text-ink/20"
                     : selected
@@ -2326,7 +2297,7 @@ function BookingCalendar() {
               checkout: checkOut ? toISODate(checkOut) : "",
             })
           }
-          className="mt-5 flex items-center justify-center gap-3 bg-gold px-6 py-3.5 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+          className="mt-5 flex items-center justify-center gap-3 bg-gold px-6 py-3.5 text-xs uppercase tracking-[0.3em] text-ink transition-all duration-300 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.5)] active:scale-[0.98]"
         >
           {t.cta}
           <ArrowRight className="h-4 w-4" />
@@ -2392,7 +2363,7 @@ function BookingCalendar() {
                   guests: guestCount,
                 })
               }
-              className="mt-4 flex items-center justify-center gap-3 border border-ink/20 px-6 py-3.5 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:border-gold hover:text-gold active:scale-[0.98]"
+              className="mt-4 flex items-center justify-center gap-3 border border-ink/20 px-6 py-3.5 text-xs uppercase tracking-[0.3em] text-ink transition-all duration-300 hover:border-gold hover:text-gold active:scale-[0.98]"
             >
               <MessageCircle className="h-4 w-4" />
               {t.directCta}
@@ -2431,7 +2402,7 @@ function Reserva() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent("click_booking", { location: "reserva" })}
-              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden bg-gold px-8 py-4 text-xs uppercase tracking-[0.3em] text-ink transition-all hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:-translate-y-[1px] active:scale-[0.98]"
+              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden bg-gold px-8 py-4 text-xs uppercase tracking-[0.3em] text-ink transition-all duration-300 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:-translate-y-[1px] active:scale-[0.98]"
             >
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cream/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               {t.ctaBooking}
@@ -2442,7 +2413,7 @@ function Reserva() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent("click_whatsapp", { location: "reserva" })}
-              className="inline-flex items-center justify-center gap-3 border border-cream/40 px-8 py-4 text-xs uppercase tracking-[0.3em] text-cream transition-all hover:border-gold hover:text-gold active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-3 border border-cream/40 px-8 py-4 text-xs uppercase tracking-[0.3em] text-cream transition-all duration-300 hover:border-gold hover:text-gold active:scale-[0.98]"
             >
               <MessageCircle className="h-4 w-4" />
               {t.ctaWhatsapp}
@@ -2450,7 +2421,7 @@ function Reserva() {
             <a
               href={`tel:${PHONE_TEL}`}
               onClick={() => trackEvent("click_phone", { location: "reserva" })}
-              className="inline-flex items-center justify-center gap-3 px-4 py-4 text-xs uppercase tracking-[0.3em] text-cream/80 transition-colors hover:text-gold"
+              className="inline-flex items-center justify-center gap-3 px-4 py-4 text-xs uppercase tracking-[0.3em] text-cream/80 transition-colors duration-300 hover:text-gold"
             >
               <Phone className="h-4 w-4" />
               {PHONE_HUMAN}
@@ -2604,8 +2575,14 @@ function ChatbotWidget() {
   const t = useT().chatbot;
   const faqItems = useT().faq.items;
   const [open, setOpen] = useState(false);
+  const [everOpened, setEverOpened] = useState(false);
   const [query, setQuery] = useState("");
   const [thread, setThread] = useState<ChatMessage[]>([]);
+
+  const toggleOpen = () => {
+    setOpen((o) => !o);
+    setEverOpened(true);
+  };
 
   const ask = (question: string) => {
     if (!question.trim()) return;
@@ -2635,13 +2612,16 @@ function ChatbotWidget() {
     <>
       <motion.button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggleOpen}
         aria-label={t.label}
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, delay: 1, ease: EASE }}
         className="fixed bottom-24 left-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-ink shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-transform hover:scale-105 md:bottom-6"
       >
+        {!everOpened && (
+          <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-gold/60" />
+        )}
         {open ? <X className="h-5 w-5" /> : <BattlementMark className="h-5 w-5" />}
       </motion.button>
 
@@ -2664,6 +2644,29 @@ function ChatbotWidget() {
               </div>
             </div>
 
+            <div className="flex divide-x divide-ink/10 border-b border-ink/10 bg-cream">
+              <a
+                href={BOOKING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("click_booking", { location: "chatbot" })}
+                className="flex flex-1 items-center justify-center gap-2 py-2.5 text-xs uppercase tracking-[0.15em] text-ink/80 transition-colors duration-300 hover:bg-gold/10 hover:text-gold"
+              >
+                <CalendarCheck className="h-3.5 w-3.5" />
+                {t.bookCta}
+              </a>
+              <a
+                href={WA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("click_whatsapp", { location: "chatbot_bar" })}
+                className="flex flex-1 items-center justify-center gap-2 py-2.5 text-xs uppercase tracking-[0.15em] text-ink/80 transition-colors duration-300 hover:bg-gold/10 hover:text-gold"
+              >
+                <MessageCircle className="h-3.5 w-3.5" />
+                {t.whatsappCta}
+              </a>
+            </div>
+
             <div className="stone-grain flex-1 space-y-3 overflow-y-auto p-4 text-ink">
               <p className="text-sm text-ink/70">{t.greeting}</p>
               {thread.length === 0 && (
@@ -2681,12 +2684,20 @@ function ChatbotWidget() {
                 </div>
               )}
               {thread.map((m, i) => (
-                <div
+                <motion.div
                   key={i}
-                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: EASE }}
+                  className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
+                  {m.role === "bot" && (
+                    <span className="mb-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-gold">
+                      <BattlementMark className="h-3 w-auto" />
+                    </span>
+                  )}
                   <div
-                    className={`max-w-[85%] px-4 py-2.5 text-sm leading-relaxed ${
+                    className={`max-w-[80%] px-4 py-2.5 text-sm leading-relaxed ${
                       m.role === "user"
                         ? "bg-gold text-ink"
                         : "border border-ink/10 bg-cream text-ink/85"
@@ -2706,7 +2717,7 @@ function ChatbotWidget() {
                       </a>
                     )}
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
 
@@ -2727,7 +2738,7 @@ function ChatbotWidget() {
               <button
                 type="submit"
                 aria-label={t.send}
-                className="flex h-9 w-9 shrink-0 items-center justify-center bg-gold text-ink transition-colors hover:bg-gold-soft"
+                className="flex h-9 w-9 shrink-0 items-center justify-center bg-gold text-ink transition-colors duration-300 hover:bg-gold-soft"
               >
                 <ArrowRight className="h-4 w-4" />
               </button>
@@ -2770,7 +2781,7 @@ function WhatsAppFab() {
       initial={{ opacity: 0, y: 20, scale: 0.9 }}
       animate={show ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 20, scale: 0.9 }}
       transition={{ duration: 0.45, ease: EASE }}
-      className="group fixed bottom-24 right-5 z-50 flex items-center gap-3 rounded-full bg-ink px-5 py-4 text-cream shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-all hover:bg-gold hover:text-ink md:bottom-6"
+      className="group fixed bottom-24 right-5 z-50 flex items-center gap-3 rounded-full bg-ink px-5 py-4 text-cream shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-all duration-300 hover:bg-gold hover:text-ink md:bottom-6"
     >
       <MessageCircle className="h-5 w-5" strokeWidth={1.75} />
       <motion.span
