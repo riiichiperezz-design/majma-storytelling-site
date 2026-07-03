@@ -8,7 +8,7 @@ import {
   useMotionValueEvent,
   useInView,
 } from "motion/react";
-import { useRef, useState, useCallback, useEffect, type MouseEvent } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo, type MouseEvent } from "react";
 import {
   Wifi,
   Snowflake,
@@ -40,6 +40,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Home,
 } from "lucide-react";
 import {
   Accordion,
@@ -54,7 +55,8 @@ import heroImg from "@/assets/hero-caceres.webp";
 import heroVideo from "@/assets/hero-video.mp4";
 import caceresSkylineImg from "@/assets/caceres-skyline.webp";
 import logoFull from "@/assets/logo-full.webp";
-import logoIconWhite from "@/assets/logo-icon-white.webp";
+import logoBlanco from "@/assets/logo-blanco.webp";
+import mapa3dImg from "@/assets/mapa3d.webp";
 import apto1Salon from "@/assets/apto1-salon.webp";
 import apto1Dormitorio from "@/assets/apto1-dormitorio.webp";
 import apto1Cocina from "@/assets/apto1-cocina.webp";
@@ -705,8 +707,7 @@ function TopBar() {
   const [open, setOpen] = useState(false);
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 60));
-  const fullT = useT();
-  const t = fullT.nav;
+  const t = useT().nav;
 
   return (
     <header
@@ -721,25 +722,13 @@ function TopBar() {
       >
         <a
           href="#top"
-          className="flex items-center gap-3 text-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+          className="flex items-center text-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
         >
           <img
-            src={logoIconWhite}
-            alt=""
-            className={`${scrolled ? "h-7" : "h-10"} w-auto transition-[height] duration-500`}
+            src={logoBlanco}
+            alt="MAJMA · Apartamentos turísticos"
+            className={`${scrolled ? "h-9" : "h-12"} w-auto transition-[height] duration-500`}
           />
-          <div className="flex flex-col leading-none">
-            <span
-              className={`font-serif ${scrolled ? "text-xl" : "text-2xl"} tracking-[0.35em] transition-all duration-500`}
-            >
-              MAJMA
-            </span>
-            {!scrolled && (
-              <span className="mt-1 text-[10px] uppercase tracking-[0.4em] text-cream/60">
-                {fullT.wordmarkSubtitle}
-              </span>
-            )}
-          </div>
         </a>
         <nav className="hidden items-center gap-6 text-xs uppercase tracking-[0.25em] text-cream/85 md:flex lg:gap-7 lg:tracking-[0.3em]">
           {t.links.map((l) => (
@@ -1428,573 +1417,229 @@ function LiveWeather() {
   );
 }
 
-/* ─────────── Mapa experiencial de cercanía ─────────── */
+/* ─────────── Descubre Cáceres: mapa 3D interactivo ─────────── */
 
-type LandmarkType =
-  | "church"
-  | "quarter"
-  | "museum"
-  | "plaza"
-  | "steps"
-  | "tower"
-  | "arch"
-  | "ruins";
+// Posición del pin de Apartamentos MAJMA sobre mapa3d.webp, en % del ancho y
+// alto de la imagen (1672×941 px). Es una estimación visual — MAJMA está
+// junto a la Iglesia de San Juan, "a la vuelta de la esquina". Ajusta estos
+// dos números comparando con la sección renderizada hasta que el pin caiga
+// exactamente sobre el edificio real.
+const MAJMA_MAP_POSITION = { x: 44.3, y: 59.5 };
 
-const LANDMARK_ICON: Record<string, LandmarkType> = {
-  "Iglesia de San Juan": "church",
-  "Barrio judío": "quarter",
-  "Museo de Cáceres": "museum",
-  "Plaza Mayor": "plaza",
-  "Plaza de San Jorge": "steps",
-  "Torre de Bujaco": "tower",
-  "Arco de la Estrella": "arch",
-  "Foro de los Balbos": "ruins",
-};
-
-/* Iconos lineales trazados a mano para cada monumento — nada de pines
-   genéricos, cada lugar tiene su propio glifo (24×24). */
-function LandmarkGlyph({
-  type,
-  stroke = "currentColor",
-  strokeWidth = 1.5,
-}: {
-  type: LandmarkType;
-  stroke?: string;
-  strokeWidth?: number;
-}) {
-  const p = {
-    fill: "none",
-    stroke,
-    strokeWidth,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-  };
-  switch (type) {
-    case "church":
-      return (
-        <g {...p}>
-          <path d="M6 21V11l6-5 6 5v10" />
-          <path d="M9 21v-6h6v6" />
-          <path d="M12 6V3M10.5 4h3" />
-        </g>
-      );
-    case "quarter":
-      return (
-        <g {...p}>
-          <path d="M4 21V9l3-2 3 2v12" />
-          <path d="M14 21V7l3-2.5L20 7v14" />
-          <path d="M12 15.5v2.5" />
-        </g>
-      );
-    case "museum":
-      return (
-        <g {...p}>
-          <path d="M3 21h18" />
-          <path d="M4 21V10M8 21V10M12 21V10M16 21V10M20 21V10" />
-          <path d="M2.5 10 12 4l9.5 6" />
-        </g>
-      );
-    case "plaza":
-      return (
-        <g {...p}>
-          <path d="M4 21v-8.5a2.5 2.5 0 0 1 5 0V21" />
-          <path d="M9.5 21v-8.5a2.5 2.5 0 0 1 5 0V21" />
-          <path d="M15 21v-8.5a2.5 2.5 0 0 1 4.6-1.4" />
-          <path d="M3 21h19" />
-        </g>
-      );
-    case "steps":
-      return (
-        <g {...p}>
-          <path d="M4 21v-4h4v-4h4v-4h4v-4h4" />
-        </g>
-      );
-    case "tower":
-      return (
-        <g {...p}>
-          <path d="M7 21V9h10v12" />
-          <path d="M7 9V6h2V4h2v2h2V4h2v2h2v3" />
-          <path d="M10 21v-5h4v5" />
-        </g>
-      );
-    case "arch":
-      return (
-        <g {...p}>
-          <path d="M5 21V11a7 7 0 0 1 14 0v10" />
-          <path d="M5 21h14" />
-          <path d="M8 21v-8M16 21v-8" />
-        </g>
-      );
-    case "ruins":
-      return (
-        <g {...p}>
-          <path d="M3 21h18" />
-          <path d="M6 21V9M11 21V5M16 21v-9M20 21V11" />
-        </g>
-      );
-    default:
-      return null;
-  }
+// Ritmo de paseo urbano usado solo para estimar una distancia en metros a
+// partir del tiempo a pie ya verificado (content.ts → guia.radarPoints). No
+// es una medición real del trayecto.
+// TODO: verificar la distancia exacta desde Apartamentos MAJMA a cada punto.
+const WALK_METERS_PER_MIN = 80;
+function estimateMeters(minutes: number) {
+  return Math.round((minutes * WALK_METERS_PER_MIN) / 10) * 10;
 }
 
-/* Proyección isométrica: una maqueta de bronce del casco histórico, no un
-   plano técnico. Los edificios se agrupan en tres caras (superior, derecha,
-   izquierda) con distinta opacidad de dorado sobre el fondo tinta — así el
-   propio color hace de sombreado, como una pieza de metal fundido bajo luz
-   cenital. */
-const ISO_TW = 34;
-const ISO_TH = 17;
-
-function isoProject(gx: number, gy: number, gz: number) {
-  return { x: (gx - gy) * ISO_TW, y: (gx + gy) * ISO_TH - gz };
+// Curva suave (Bézier cuadrática) entre dos puntos del mismo sistema de
+// coordenadas porcentual (0-100) que usan los pines, en lugar de una línea
+// recta: el punto de control se desplaza perpendicular al segmento, en
+// proporción a su longitud, para lograr un arco natural de "camino a pie".
+function curvedRoutePath(from: { x: number; y: number }, to: { x: number; y: number }) {
+  const mx = (from.x + to.x) / 2;
+  const my = (from.y + to.y) / 2;
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const bend = 0.18;
+  const cx = mx - dy * bend;
+  const cy = my + dx * bend;
+  return `M ${from.x} ${from.y} Q ${cx} ${cy} ${to.x} ${to.y}`;
 }
 
-function isoPts(pts: { x: number; y: number }[]) {
-  return pts.map((p) => `${p.x},${p.y}`).join(" ");
-}
-
-function isoBoxFaces(cx: number, cy: number, a: number, h: number) {
-  const A = { x: cx - a, y: cy - a };
-  const B = { x: cx + a, y: cy - a };
-  const C = { x: cx + a, y: cy + a };
-  const D = { x: cx - a, y: cy + a };
-  const p = (pt: { x: number; y: number }, z: number) => isoProject(pt.x, pt.y, z);
-  return {
-    top: isoPts([p(A, h), p(B, h), p(C, h), p(D, h)]),
-    right: isoPts([p(B, h), p(C, h), p(C, 0), p(B, 0)]),
-    left: isoPts([p(C, h), p(D, h), p(D, 0), p(C, 0)]),
-    apex: p({ x: cx, y: cy }, h),
-    ground: p({ x: cx, y: cy }, 0),
-  };
-}
-
-function IsoBox({
-  cx,
-  cy,
-  a,
-  h,
-  opacity,
-}: {
-  cx: number;
-  cy: number;
-  a: number;
-  h: number;
-  opacity: number;
-}) {
-  const f = isoBoxFaces(cx, cy, a, h);
-  return (
-    <g>
-      <polygon points={f.left} fill="var(--color-gold)" opacity={opacity * 0.28} />
-      <polygon points={f.right} fill="var(--color-gold)" opacity={opacity * 0.5} />
-      <polygon points={f.top} fill="var(--color-gold)" opacity={opacity} />
-    </g>
-  );
-}
-
-/* Escala de la "huella" de cada edificio: cx/cy/a se definen con números
-   cómodos de leer (en píxeles-ish) y aquí se reducen a la unidad de
-   rejilla real que espera isoProject/isoBoxFaces. La altura (h) no se
-   escala: ya se resta directamente en píxeles dentro de la proyección. */
-const FOOT = 1 / 30;
-
-function IsoBuilding({ type, opacity }: { type: LandmarkType; opacity: number }) {
-  const line = { stroke: "var(--color-ink)", strokeWidth: 1, opacity: opacity * 0.5 };
-  const box = (cx: number, cy: number, a: number, h: number) => (
-    <IsoBox cx={cx * FOOT} cy={cy * FOOT} a={a * FOOT} h={h} opacity={opacity} />
-  );
-  switch (type) {
-    case "tower": {
-      const capH = 64 + 8;
-      const a = 15 * FOOT;
-      const edgeB = isoProject(a, -a, capH);
-      const edgeC = isoProject(a, a, capH);
-      const merlons = [0.12, 0.38, 0.62, 0.88].map((frac) => ({
-        x: edgeB.x + (edgeC.x - edgeB.x) * frac,
-        y: edgeB.y + (edgeC.y - edgeB.y) * frac,
-      }));
-      return (
-        <g>
-          {box(0, 0, 13, 64)}
-          {box(0, 0, 15, 8)}
-          {merlons.map((m, i) => (
-            <rect
-              key={i}
-              x={m.x - 3}
-              y={m.y - 10}
-              width={6}
-              height={10}
-              fill="var(--color-gold)"
-              opacity={opacity}
-            />
-          ))}
-        </g>
-      );
-    }
-    case "church": {
-      const apex = isoProject(0, 0, 58);
-      const l = isoProject(-13 * FOOT, -13 * FOOT, 40);
-      const r = isoProject(13 * FOOT, -13 * FOOT, 40);
-      return (
-        <g>
-          {box(0, 0, 13, 40)}
-          <polygon
-            points={isoPts([{ x: l.x, y: l.y }, apex, { x: r.x, y: r.y }])}
-            fill="var(--color-gold)"
-            opacity={opacity * 0.85}
-          />
-          <line x1={apex.x} y1={apex.y} x2={apex.x} y2={apex.y - 14} {...line} />
-        </g>
-      );
-    }
-    case "museum": {
-      const apex = isoProject(0, -2 * FOOT, 46);
-      const l = isoProject(-18 * FOOT, -8 * FOOT, 34);
-      const r = isoProject(18 * FOOT, -8 * FOOT, 34);
-      return (
-        <g>
-          {box(0, 0, 18, 34)}
-          <polygon
-            points={isoPts([{ x: l.x, y: l.y }, apex, { x: r.x, y: r.y }])}
-            fill="var(--color-gold)"
-            opacity={opacity * 0.85}
-          />
-        </g>
-      );
-    }
-    case "plaza":
-      return (
-        <g>
-          {box(0, 0, 22, 4)}
-          {box(0, 0, 3, 16)}
-        </g>
-      );
-    case "steps":
-      return (
-        <g>
-          {box(0, 0, 20, 5)}
-          {box(-2, -2, 12, 12)}
-        </g>
-      );
-    case "arch":
-      return (
-        <g>
-          {box(0, 0, 16, 13)}
-          {box(-11, -1, 5, 32)}
-          {box(11, -1, 5, 32)}
-        </g>
-      );
-    case "ruins":
-      return (
-        <g>
-          {box(-11, -6, 3, 14)}
-          {box(7, -10, 3, 24)}
-          {box(10, 7, 3, 17)}
-          {box(-6, 9, 3, 9)}
-        </g>
-      );
-    case "quarter":
-      return (
-        <g>
-          {box(-9, 4, 8, 24)}
-          {box(9, -4, 7, 19)}
-        </g>
-      );
-    default:
-      return null;
-  }
-}
-
-function ExperienceMap() {
+function DiscoverCaceresMap() {
   const t = useT().guia;
   const reduce = useReducedMotionSafe();
-  const [active, setActive] = useState<string | null>(null);
-  const toGridR = (min: number) => 1.4 + min * 0.62;
+  // id del punto activo (hover, foco de teclado o tap); null = ninguno.
+  const [active, setActive] = useState<number | null>(null);
 
-  const items = t.radarPoints.map((p) => {
-    const rad = (p.angle * Math.PI) / 180;
-    const r = toGridR(p.time);
-    const gx = r * Math.cos(rad);
-    const gy = r * Math.sin(rad);
-    return { ...p, gx, gy, glyph: LANDMARK_ICON[p.name], depth: gx + gy };
-  });
-  const byTime = [...items].sort((a, b) => a.time - b.time);
-  const numByName = new Map(byTime.map((it, i) => [it.name, i + 1]));
-  const sorted = [...items].sort((a, b) => a.depth - b.depth);
-  const activeItem = items.find((it) => it.name === active) ?? null;
-  const majmaGround = isoProject(0, 0, 0);
-  const mapsHref = activeItem
+  const points = t.radarPoints;
+  const activePoint = points.find((p) => p.id === active) ?? null;
+
+  const routePath = useMemo(
+    () => (activePoint ? curvedRoutePath(MAJMA_MAP_POSITION, activePoint) : ""),
+    [activePoint],
+  );
+
+  const mapsHref = activePoint
     ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
         MAJMA_ADDRESS,
-      )}&destination=${encodeURIComponent(`${activeItem.name}, Cáceres`)}&travelmode=walking`
+      )}&destination=${encodeURIComponent(`${activePoint.name}, Cáceres`)}&travelmode=walking`
     : null;
 
+  const openPoint = (id: number) => setActive(id);
+  const releasePoint = (id: number) => setActive((a) => (a === id ? null : a));
+  const closeCard = () => setActive(null);
+
+  // Ancla la tarjeta junto al pin y la "voltea" hacia el lado contrario
+  // cuando el pin está cerca de un borde, para que no se salga del mapa.
+  // Las clases se escriben completas (no se concatena el prefijo "md:" en
+  // tiempo de ejecución) porque el escáner de Tailwind necesita ver cada
+  // nombre de clase entero y literal en el código fuente.
+  const flipX = activePoint ? activePoint.x > 55 : false;
+  const flipY = activePoint ? activePoint.y > 55 : false;
+  const cardXClass = flipX ? "md:-translate-x-[104%]" : "md:translate-x-[4%]";
+  const cardYClass = flipY ? "md:-translate-y-[104%]" : "md:translate-y-[4%]";
+
   return (
-    <div className="stone-grain-dark relative border border-cream/10 bg-ink/70 p-4 md:p-8">
-      <p className="mb-4 text-center text-xs uppercase tracking-[0.3em] text-cream/40 md:hidden">
+    <section id="descubre-caceres" aria-labelledby="descubre-caceres-heading">
+      <h3 id="descubre-caceres-heading" className="font-serif text-3xl text-cream md:text-4xl">
+        {t.discoverLabel}
+      </h3>
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-cream/70 md:text-base">
+        {t.discoverSubtitle}
+      </p>
+      <p className="mt-5 text-center text-xs uppercase tracking-[0.3em] text-cream/40 md:hidden">
         {t.mapTapHint}
       </p>
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_320px] md:items-center md:gap-12">
-        <div className="relative mx-auto aspect-[5/3] w-full max-w-xl">
-          <svg
-            viewBox="-400 -260 800 480"
-            className="h-full w-full overflow-visible"
-            role="img"
-            aria-label={t.proximityMapLabel}
-          >
-            {/* Rutas: se iluminan solo cuando su edificio está activo */}
-            {items.map((it) => {
-              const g = isoProject(it.gx, it.gy, 0);
-              const isActive = active === it.name;
-              return (
-                <motion.line
-                  key={it.name}
-                  x1={majmaGround.x}
-                  y1={majmaGround.y}
-                  x2={g.x}
-                  y2={g.y}
-                  stroke="var(--color-gold)"
-                  strokeDasharray="1 5"
-                  strokeLinecap="round"
-                  animate={{
-                    strokeOpacity: isActive ? 0.9 : 0.12,
-                    strokeWidth: isActive ? 1.5 : 1,
-                  }}
-                  transition={{ duration: 0.35, ease: EASE }}
-                />
-              );
-            })}
 
-            {/* Sombra tenue de base para asentar cada volumen en el plano */}
-            {sorted.map((it) => {
-              const f = isoBoxFaces(it.gx, it.gy, 16, 0);
-              return (
-                <ellipse
-                  key={`shadow-${it.name}`}
-                  cx={f.ground.x}
-                  cy={f.ground.y + 3}
-                  rx={20}
-                  ry={9}
-                  fill="var(--color-ink)"
-                  opacity={0.35}
-                />
-              );
-            })}
+      <div className="relative mt-6 w-full select-none border border-cream/10 md:mt-8">
+        <img
+          src={mapa3dImg}
+          alt={t.proximityMapLabel}
+          className="block h-auto w-full"
+          draggable={false}
+        />
 
-            {sorted.map((it, i) => {
-              const isActive = active === it.name;
-              const dimmed = active !== null && !isActive;
-              const opacity = dimmed ? 0.32 : isActive ? 1 : 0.72;
-              return (
-                <motion.g
-                  key={it.name}
-                  initial={{ opacity: reduce ? undefined : 0, y: reduce ? 0 : 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: reduce ? 0 : 0.05 * i, ease: EASE }}
-                  style={{
-                    transformOrigin: `${isoProject(it.gx, it.gy, 0).x}px ${isoProject(it.gx, it.gy, 0).y}px`,
-                  }}
-                >
-                  <motion.g
-                    animate={{ opacity }}
-                    transition={{ duration: 0.35, ease: EASE }}
-                    transform={`translate(${isoProject(it.gx, it.gy, 0).x}, ${isoProject(it.gx, it.gy, 0).y})`}
-                    onMouseEnter={() => setActive(it.name)}
-                    onMouseLeave={() => setActive((a) => (a === it.name ? null : a))}
-                    onClick={() => setActive(it.name)}
-                    onFocus={() => setActive(it.name)}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`${it.name}, ${it.time} ${t.minWalk}`}
-                    className="cursor-pointer outline-none"
-                  >
-                    <circle cx={0} cy={-24} r={40} fill="transparent" />
-                    <IsoBuilding type={it.glyph} opacity={1} />
-                    <motion.g
-                      animate={{ scale: isActive ? 1.18 : 1 }}
-                      transition={{ duration: 0.3, ease: EASE }}
-                      style={{ transformOrigin: "0px -84px" }}
-                    >
-                      <circle
-                        cx={0}
-                        cy={-84}
-                        r={11}
-                        fill="var(--color-ink)"
-                        stroke="var(--color-gold)"
-                        strokeWidth={isActive ? 1.75 : 1.1}
-                      />
-                      <text
-                        x={0}
-                        y={-80.5}
-                        textAnchor="middle"
-                        fontSize="10"
-                        fontFamily="var(--font-serif)"
-                        fill="var(--color-gold)"
-                        style={{ pointerEvents: "none" }}
-                      >
-                        {numByName.get(it.name)}
-                      </text>
-                    </motion.g>
-                  </motion.g>
-                </motion.g>
-              );
-            })}
+        {/* Ruta a pie: se dibuja desde MAJMA hasta el punto activo */}
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+        >
+          <AnimatePresence>
+            {activePoint && (
+              <motion.path
+                key={activePoint.id}
+                d={routePath}
+                fill="none"
+                stroke="var(--color-gold)"
+                strokeWidth={0.4}
+                strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 0.9 }}
+                exit={{ opacity: 0 }}
+                transition={
+                  reduce
+                    ? { duration: 0.15 }
+                    : {
+                        pathLength: { duration: 0.65, ease: EASE },
+                        opacity: { duration: 0.2 },
+                      }
+                }
+              />
+            )}
+          </AnimatePresence>
+        </svg>
 
-            {/* MAJMA: la maqueta se sostiene sobre su propio brillo */}
-            <motion.circle
-              cx={majmaGround.x}
-              cy={majmaGround.y - 30}
-              r={30}
-              fill="var(--color-gold)"
-              initial={{ opacity: 0.1 }}
-              animate={reduce ? { opacity: 0.1 } : { opacity: [0.08, 0.22, 0.08] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              style={{ filter: "blur(14px)" }}
-            />
-            <g transform={`translate(${majmaGround.x}, ${majmaGround.y})`}>
-              <IsoBuilding type="tower" opacity={1} />
-            </g>
-            <text
-              x={majmaGround.x}
-              y={majmaGround.y + 22}
-              textAnchor="middle"
-              fill="var(--color-gold)"
-              fontSize="12"
-              letterSpacing="2"
-              fontFamily="var(--font-serif)"
-            >
-              MAJMA
-            </text>
-
-            {/* Recorrido: un punto dorado camina desde MAJMA hasta el lugar activo */}
-            {!reduce &&
-              activeItem &&
-              (() => {
-                const g = isoProject(activeItem.gx, activeItem.gy, 0);
-                return (
-                  <motion.circle
-                    key={`walker-${activeItem.name}`}
-                    r={3.5}
-                    fill="var(--color-gold)"
-                    initial={{ cx: majmaGround.x, cy: majmaGround.y, opacity: 0 }}
-                    animate={{
-                      cx: [majmaGround.x, g.x],
-                      cy: [majmaGround.y, g.y],
-                      opacity: [0, 1, 1, 0],
-                    }}
-                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ filter: "drop-shadow(0 0 3px var(--color-gold))" }}
-                  />
-                );
-              })()}
-
-            {/* Rosa de los vientos */}
-            <g transform="translate(348, -212)" opacity={0.55}>
-              <circle r={22} fill="none" stroke="var(--color-gold)" strokeWidth={1} opacity={0.6} />
-              <path d="M0,-16 L5,3 L0,-2 L-5,3 Z" fill="var(--color-gold)" />
-              <text
-                x={0}
-                y={32}
-                textAnchor="middle"
-                fontSize="9"
-                letterSpacing="1"
-                fill="var(--color-cream)"
-                fillOpacity={0.6}
-              >
-                N
-              </text>
-            </g>
-
-            {/* Escala */}
-            <g transform="translate(-372, 198)" opacity={0.5}>
-              <line x1={0} y1={0} x2={64} y2={0} stroke="var(--color-cream)" strokeWidth={1} />
-              <line x1={0} y1={-4} x2={0} y2={4} stroke="var(--color-cream)" strokeWidth={1} />
-              <line x1={64} y1={-4} x2={64} y2={4} stroke="var(--color-cream)" strokeWidth={1} />
-              <text
-                x={32}
-                y={16}
-                textAnchor="middle"
-                fontSize="8"
-                letterSpacing="0.5"
-                fill="var(--color-cream)"
-                fillOpacity={0.65}
-              >
-                {t.scaleLabel}
-              </text>
-            </g>
-
-            {sorted.map((it) => {
-              const g = isoProject(it.gx, it.gy, 0);
-              const isActive = active === it.name;
-              const dimmed = active !== null && !isActive;
-              return (
-                <text
-                  key={`label-${it.name}`}
-                  x={g.x}
-                  y={g.y + 16}
-                  textAnchor="middle"
-                  fill={isActive ? "var(--color-gold)" : "var(--color-cream)"}
-                  fillOpacity={dimmed ? 0.3 : isActive ? 1 : 0.7}
-                  fontSize="10"
-                  letterSpacing="0.5"
-                  style={{ pointerEvents: "none" }}
-                >
-                  {it.time} {t.minWalk}
-                </text>
-              );
-            })}
-          </svg>
+        {/* Punto principal: Apartamentos MAJMA, visualmente diferenciado */}
+        <div
+          className="pointer-events-none absolute z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+          style={{ left: `${MAJMA_MAP_POSITION.x}%`, top: `${MAJMA_MAP_POSITION.y}%` }}
+        >
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-gold bg-ink shadow-[0_4px_14px_rgba(0,0,0,0.4)]">
+            {!reduce && <span className="absolute inset-0 animate-ping rounded-full bg-gold/40" />}
+            <Home className="relative h-4 w-4 text-gold" strokeWidth={1.75} />
+          </span>
+          <span className="mt-1 whitespace-nowrap rounded-sm bg-ink/85 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.2em] text-gold shadow">
+            {t.majmaPinLabel}
+          </span>
         </div>
 
-        <div className="relative min-h-[220px] md:min-h-[260px]">
-          <AnimatePresence mode="wait">
-            {activeItem ? (
-              <motion.div
-                key={activeItem.name}
-                initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                transition={{ duration: 0.3, ease: EASE }}
-                className="overflow-hidden border border-gold/30 bg-ink shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
+        {/* 8 puntos turísticos numerados */}
+        {points.map((p) => {
+          const isActive = active === p.id;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onMouseEnter={() => openPoint(p.id)}
+              onMouseLeave={() => releasePoint(p.id)}
+              onFocus={() => openPoint(p.id)}
+              onClick={() => openPoint(p.id)}
+              aria-label={`${p.name} — ${p.time} ${t.minWalk}`}
+              aria-expanded={isActive}
+              className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center outline-none"
+              style={{ left: `${p.x}%`, top: `${p.y}%` }}
+            >
+              <motion.span
+                animate={{ scale: isActive ? 1.22 : 1 }}
+                transition={{ duration: 0.25, ease: EASE }}
+                className={`flex h-7 w-7 items-center justify-center rounded-full border-2 font-serif text-xs shadow-[0_3px_10px_rgba(0,0,0,0.35)] transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-gold ${
+                  isActive ? "border-gold bg-gold text-ink" : "border-gold/85 bg-ink/90 text-gold"
+                }`}
               >
-                <div className="flex items-center gap-3 border-b border-cream/10 bg-gold/[0.08] px-5 py-4">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gold/50 font-serif text-xs text-gold">
-                    {numByName.get(activeItem.name)}
+                {p.id}
+              </motion.span>
+            </button>
+          );
+        })}
+
+        {/* Tarjeta flotante con la información del punto activo.
+            En móvil se ancla como una hoja fija al pie de pantalla (para que
+            nunca se salga del viewport); desde md el posicionamiento "junto
+            al pin" se activa vía media query real (clases md:), no JS, así
+            que nunca compite con el `left`/`top` fijo del móvil. El giro
+            hacia el lado contrario cuando el pin está cerca de un borde vive
+            en un div intermedio SIN animar (una animación de Framer Motion
+            en el mismo nodo tomaría el control total de `transform` e
+            ignoraría cualquier translate CSS propio). */}
+        <AnimatePresence>
+          {activePoint && (
+            <div
+              className={`fixed inset-x-4 bottom-4 z-30 md:absolute md:inset-auto md:bottom-auto md:right-auto md:left-[var(--pin-x)] md:top-[var(--pin-y)] md:w-[min(85vw,20rem)] ${cardXClass} ${cardYClass}`}
+              style={
+                {
+                  "--pin-x": `${activePoint.x}%`,
+                  "--pin-y": `${activePoint.y}%`,
+                } as React.CSSProperties
+              }
+            >
+              <motion.div
+                key={activePoint.id}
+                role="dialog"
+                aria-label={activePoint.name}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.2, ease: EASE }}
+                onMouseEnter={() => openPoint(activePoint.id)}
+                onMouseLeave={() => releasePoint(activePoint.id)}
+                className="border border-gold/30 bg-cream text-ink shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)]"
+              >
+                <button
+                  type="button"
+                  onClick={closeCard}
+                  aria-label={t.closeCard}
+                  className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-ink/40 transition-colors hover:bg-ink/5 hover:text-ink"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+                <div className="border-b border-ink/10 bg-gold/[0.08] px-5 py-4 pr-9">
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-ink/50">
+                    {activePoint.id} · {activePoint.time} {t.minWalk}
                   </span>
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-gold">
-                    <LandmarkGlyph
-                      type={activeItem.glyph}
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    />
-                  </svg>
-                  <div>
-                    <h3 className="font-serif text-lg leading-tight text-cream">
-                      {activeItem.name}
-                    </h3>
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-gold/80">
-                      {activeItem.time} {t.minWalk}
-                    </span>
-                  </div>
+                  <h4 className="mt-0.5 font-serif text-lg leading-tight">{activePoint.name}</h4>
                 </div>
                 <div className="p-5">
-                  <p className="text-sm leading-relaxed text-cream/70">{activeItem.desc}</p>
-                  <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-cream/10 pt-4">
+                  <p className="text-sm leading-relaxed text-ink/70">{activePoint.desc}</p>
+                  <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-ink/10 pt-4 text-xs">
                     <div>
-                      <dt className="text-[10px] uppercase tracking-[0.2em] text-cream/40">
-                        {t.hoursLabel}
-                      </dt>
-                      <dd className="mt-1 text-xs leading-relaxed text-cream/80">
-                        {activeItem.hours}
+                      <dt className="uppercase tracking-[0.15em] text-ink/40">{t.distanceLabel}</dt>
+                      <dd className="mt-1 leading-snug text-ink/80">
+                        {t.distanceApprox.replace("{m}", String(estimateMeters(activePoint.time)))}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-[10px] uppercase tracking-[0.2em] text-cream/40">
-                        {t.priceLabel}
-                      </dt>
-                      <dd className="mt-1 text-xs leading-relaxed text-cream/80">
-                        {activeItem.price}
-                      </dd>
+                      <dt className="uppercase tracking-[0.15em] text-ink/40">{t.hoursLabel}</dt>
+                      <dd className="mt-1 leading-snug text-ink/80">{activePoint.hours}</dd>
+                    </div>
+                    <div>
+                      <dt className="uppercase tracking-[0.15em] text-ink/40">{t.priceLabel}</dt>
+                      <dd className="mt-1 leading-snug text-ink/80">{activePoint.price}</dd>
                     </div>
                   </dl>
                   {mapsHref && (
@@ -2002,7 +1647,7 @@ function ExperienceMap() {
                       href={mapsHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-gold/70 transition-colors duration-300 hover:text-gold"
+                      className="mt-4 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-ink/60 transition-colors duration-300 hover:text-ink"
                     >
                       {t.howToGetThere}
                       <ArrowRight className="h-3 w-3" />
@@ -2010,62 +1655,11 @@ function ExperienceMap() {
                   )}
                 </div>
               </motion.div>
-            ) : (
-              <motion.div
-                key="idle"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="flex h-full min-h-[220px] flex-col items-center justify-center gap-4 border border-cream/10 p-8 text-center md:min-h-[260px]"
-              >
-                <svg viewBox="0 0 24 24" className="h-6 w-6 text-gold/60">
-                  <LandmarkGlyph type="tower" stroke="currentColor" strokeWidth={1.25} />
-                </svg>
-                <p className="max-w-[24ch] text-xs uppercase tracking-[0.3em] text-cream/40">
-                  {t.mapHint}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
-
-      <div className="mt-10 border-t border-cream/10 pt-8 md:mt-12">
-        <p className="mb-5 text-center text-xs uppercase tracking-[0.3em] text-gold/70 md:text-left">
-          {t.discoverLabel}
-        </p>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
-          {byTime.map((it, i) => {
-            const isActive = active === it.name;
-            return (
-              <button
-                key={it.name}
-                type="button"
-                onMouseEnter={() => setActive(it.name)}
-                onMouseLeave={() => setActive((a) => (a === it.name ? null : a))}
-                onClick={() => setActive(it.name)}
-                onFocus={() => setActive(it.name)}
-                className={`flex items-center gap-2.5 border-b py-1.5 text-left transition-colors duration-300 ${
-                  isActive
-                    ? "border-gold/50 text-gold"
-                    : "border-transparent text-cream/60 hover:text-cream/90"
-                }`}
-              >
-                <span
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-serif text-[10px] transition-colors duration-300 ${
-                    isActive ? "border-gold text-gold" : "border-cream/30 text-cream/50"
-                  }`}
-                >
-                  {i + 1}
-                </span>
-                <span className="truncate text-xs">{it.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }
 
@@ -2111,7 +1705,7 @@ function GuiaCaceres() {
 
         <Reveal delay={0.15}>
           <div className="mt-16 md:mt-20">
-            <ExperienceMap />
+            <DiscoverCaceresMap />
           </div>
         </Reveal>
 
