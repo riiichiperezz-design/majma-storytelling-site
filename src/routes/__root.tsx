@@ -13,6 +13,12 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CookieConsent } from "../components/cookie-consent";
 import { LangProvider, useT } from "../lib/i18n";
+import heroImg from "../assets/hero-caceres.webp";
+
+// Dominio real registrado por el propietario (majmacaceres.es). Usado como
+// fallback de og:url/og:image en páginas que no definen su propio head
+// (aviso-legal, privacidad, 404) — la portada (index.tsx) sobreescribe esto.
+const SITE_URL = "https://www.majmacaceres.es";
 
 function NotFoundComponent() {
   const t = useT();
@@ -95,6 +101,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "es_ES" },
       { property: "og:locale:alternate", content: "en_US" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: new URL(heroImg, SITE_URL).toString() },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
@@ -105,6 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Tres apartamentos turísticos en el corazón amurallado de Cáceres, a dos pasos de la Iglesia de San Juan.",
       },
+      { name: "twitter:image", content: new URL(heroImg, SITE_URL).toString() },
       { name: "robots", content: "index, follow" },
       { name: "theme-color", content: "#14110C" },
     ],

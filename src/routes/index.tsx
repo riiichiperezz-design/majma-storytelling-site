@@ -96,9 +96,11 @@ const APARTMENT_IMAGES: Record<string, Record<string, string>> = {
 };
 
 /* ─────────── Datos reales ─────────── */
-// Dominio placeholder (igual que robots.txt/sitemap.xml): swap por el dominio
-// real antes de publicar para que las previews de redes sociales funcionen.
-const SITE_URL = "https://www.majma-caceres.com";
+// Dominio real registrado por el propietario (majmacaceres.es, con
+// majmacaceres.com también en cartera). Debe apuntar a este despliegue
+// desde el proveedor (Arsys) para que las previews de redes sociales
+// y el SEO usen la URL definitiva.
+const SITE_URL = "https://www.majmacaceres.es";
 const BOOKING_URL =
   "https://www.booking.com/hotel/es/apartamentos-turisticos-majma.es.html?aid=356980&label=gog235jc-10CAsoRkIdYXBhcnRhbWVudG9zLXR1cmlzdGljb3MtbWFqbWFIUlgDaEaIAQGYATO4ARfIAQzYAQPoAQH4AQGIAgGoAgG4AoD4ktIGwAIB0gIkZWYxYTJmNDEtZDRkNy00MGU0LWE4NmYtOTc4YWU4Zjc5MDUy2AIB4AIB&sid=faf8b176b4cd575f70169e3f6ca21d42&dist=0&keep_landing=1&sb_price_type=total&type=total&";
 const PHONE_HUMAN = "722 24 74 36";
@@ -1431,9 +1433,14 @@ function LiveWeather() {
 // cada punto con Dijkstra sobre esa cuadrícula, para que discurra por las
 // propias calles y plazas en vez de atravesar manzanas. El resultado se
 // suavizó (Catmull-Rom → Bézier) y se verificó de nuevo muestreando el color
-// a lo largo de la curva ya suavizada: cada ruta cruza tejado en <3.1% de los
+// a lo largo de la curva ya suavizada: cada ruta cruza tejado en <3.3% de los
 // puntos muestreados (recortes de esquina al suavizar, no atravesar un
 // edificio). Script usado: no versionado, ver historial de este cambio.
+//
+// Las posiciones (x, y) de los puntos 1-7 y 9-11 vienen de la foto de
+// referencia con marcas exactas que envió el propietario. El punto 8 (Foro
+// de los Balbos) es el único sin esa referencia — su posición es una
+// estimación mía a partir del plano numerado oficial.
 // TODO: si algún tramo no encaja al pixel, edita los puntos de control del
 // `routePath` correspondiente comparando con la sección renderizada.
 const MAJMA_MAP_POSITION = { x: 80.5, y: 58.5 };
@@ -1441,59 +1448,81 @@ const MAJMA_MAP_POSITION = { x: 80.5, y: 58.5 };
 const MAP_GEOMETRY: Record<number, { x: number; y: number; routePath: string }> = {
   // 1 · Iglesia de San Juan — a la vuelta de la esquina.
   1: {
-    x: 77,
-    y: 69.5,
+    x: 77.28,
+    y: 68.91,
     routePath:
-      "M 80.5 58.5 C 80.44 59.67, 81.34 62.96, 80.74 64.72 C 80.14 66.47, 77.45 68.44, 76.79 69.18",
+      "M 80.5 58.5 C 80.44 59.67, 81.19 62.96, 80.74 64.72 C 80.29 66.47, 78.2 68.44, 77.69 69.18",
   },
   // 2 · Barrio judío — rodea el bloque central y sube por la judería vieja al norte.
   2: {
-    x: 50.5,
-    y: 28.5,
+    x: 50.71,
+    y: 28.3,
     routePath:
       "M 80.5 58.5 C 80.44 59.83, 80.98 63.6, 80.74 65.67 C 80.5 67.75, 79.61 69.93, 78.95 71.09 C 78.29 72.26, 77.93 72.05, 76.79 72.69 C 75.66 73.33, 76.73 74.55, 72.13 74.92 C 67.52 75.29, 53.44 76.25, 49.16 74.92 C 44.89 73.59, 46.95 69.87, 46.47 66.95 C 45.99 64.03, 46.02 59.14, 46.29 57.39 C 46.56 55.63, 47.37 57.17, 48.09 56.43 C 48.8 55.69, 50.15 54.14, 50.6 52.92 C 51.05 51.7, 50.99 50.05, 50.78 49.1 C 50.57 48.14, 49.76 48.46, 49.34 47.18 C 48.92 45.91, 49.01 43.68, 48.27 41.45 C 47.52 39.21, 44.53 35.87, 44.86 33.79 C 45.19 31.72, 49.34 29.81, 50.24 29.01",
   },
   // 3 · Museo de Cáceres — rodea por el este, sube hacia la zona norte del museo.
   3: {
-    x: 63.5,
-    y: 25,
+    x: 62.99,
+    y: 25.4,
     routePath:
-      "M 80.5 58.5 C 80.44 59.72, 80.47 63.66, 80.74 65.04 C 81.01 66.42, 81.58 66.68, 82 66.95 C 82.42 67.22, 82.18 68.38, 83.25 66.63 C 84.33 64.88, 87.38 58.93, 88.46 56.43 C 89.53 53.93, 89.65 53.61, 89.71 51.65 C 89.77 49.68, 90.16 47.98, 88.82 44.63 C 87.47 41.29, 82.78 34.06, 81.64 31.56 C 80.5 29.06, 81.67 30.07, 82 29.65 C 82.33 29.22, 83.34 30.82, 83.61 29.01 C 83.88 27.21, 83.97 21.15, 83.61 18.81 C 83.25 16.47, 83.22 15.62, 81.46 14.98 C 79.69 14.35, 74.67 14.61, 73.03 14.98 C 71.38 15.36, 72.13 16.79, 71.59 17.22 C 71.05 17.64, 70.84 16.15, 69.8 17.53 C 68.75 18.92, 66.27 24.12, 65.31 25.5 C 64.35 26.89, 64.29 25.98, 64.06 25.82 C 63.82 25.66, 63.91 24.76, 63.88 24.55",
+      "M 80.5 58.5 C 80.44 59.72, 80.47 63.66, 80.74 65.04 C 81.01 66.42, 81.58 66.68, 82 66.95 C 82.42 67.22, 82.18 68.38, 83.25 66.63 C 84.33 64.88, 87.38 58.93, 88.46 56.43 C 89.53 53.93, 89.65 53.61, 89.71 51.65 C 89.77 49.68, 90.16 47.98, 88.82 44.63 C 87.47 41.29, 82.78 34.06, 81.64 31.56 C 80.5 29.06, 81.67 30.07, 82 29.65 C 82.33 29.22, 83.34 30.82, 83.61 29.01 C 83.88 27.21, 83.97 21.15, 83.61 18.81 C 83.25 16.47, 83.22 15.62, 81.46 14.98 C 79.69 14.35, 74.67 14.61, 73.03 14.98 C 71.38 15.36, 72.13 16.79, 71.59 17.22 C 71.05 17.64, 70.84 16.15, 69.8 17.53 C 68.75 18.92, 66.48 24.12, 65.31 25.5 C 64.14 26.89, 63.22 25.77, 62.8 25.82",
   },
   // 4 · Plaza Mayor — baja por el corredor central hasta la explanada de entrada.
   4: {
-    x: 48.5,
-    y: 73,
+    x: 49.63,
+    y: 72.24,
     routePath:
-      "M 80.5 58.5 C 80.44 59.83, 80.95 63.66, 80.74 65.67 C 80.53 67.69, 80.41 69.29, 79.13 70.78 C 77.84 72.26, 78.02 73.91, 73.03 74.6 C 68.03 75.29, 53.29 75.24, 49.16 74.92 C 45.04 74.6, 48.42 73.06, 48.27 72.69",
+      "M 80.5 58.5 C 80.44 59.83, 80.95 63.66, 80.74 65.67 C 80.53 67.69, 80.41 69.29, 79.13 70.78 C 77.84 72.26, 77.75 73.91, 73.03 74.6 C 68.3 75.29, 54.64 75.24, 50.78 74.92 C 46.92 74.6, 50.03 73.06, 49.88 72.69",
   },
   // 5 · Plaza de San Jorge — corredor central, rama hacia la Concatedral.
   5: {
-    x: 53,
-    y: 44,
+    x: 53.26,
+    y: 43.73,
     routePath:
-      "M 80.5 58.5 C 80.44 59.83, 81.34 63.34, 80.74 65.67 C 80.14 68.01, 78.23 71.15, 76.79 72.69 C 75.36 74.23, 76.73 74.55, 72.13 74.92 C 67.52 75.29, 53.47 77.84, 49.16 74.92 C 44.86 72, 46.05 61.05, 46.29 57.39 C 46.53 53.72, 49.46 55.21, 50.6 52.92 C 51.73 50.64, 52.69 45.22, 53.11 43.68",
+      "M 80.5 58.5 C 80.44 59.83, 81.34 63.34, 80.74 65.67 C 80.14 68.01, 78.23 71.15, 76.79 72.69 C 75.36 74.23, 76.73 74.55, 72.13 74.92 C 67.52 75.29, 53.47 77.84, 49.16 74.92 C 44.86 72, 45.48 62.11, 46.29 57.39 C 47.1 52.66, 52.81 48.88, 54.01 46.55 C 55.2 44.21, 53.56 43.89, 53.47 43.36",
   },
   // 6 · Torre de Bujaco — junto a la entrada de la Plaza Mayor.
   6: {
-    x: 43,
-    y: 69,
+    x: 44.07,
+    y: 68.13,
     routePath:
-      "M 80.5 58.5 C 80.44 59.83, 80.95 63.66, 80.74 65.67 C 80.53 67.69, 80.56 69.23, 79.13 70.78 C 77.69 72.32, 77.12 74.23, 72.13 74.92 C 67.14 75.61, 53.29 75.72, 49.16 74.92 C 45.04 74.12, 48.03 71.25, 47.37 70.14 C 46.71 69.02, 45.99 68.54, 45.22 68.23 C 44.44 67.91, 43.12 68.23, 42.7 68.23",
+      "M 80.5 58.5 C 80.44 59.83, 80.95 63.66, 80.74 65.67 C 80.53 67.69, 80.56 69.23, 79.13 70.78 C 77.69 72.32, 77.12 74.23, 72.13 74.92 C 67.14 75.61, 53.29 75.72, 49.16 74.92 C 45.04 74.12, 48.21 71.25, 47.37 70.14 C 46.53 69.02, 44.68 68.54, 44.14 68.23",
   },
   // 7 · Arco de la Estrella — junto a Torre de Bujaco, misma entrada.
   7: {
-    x: 48,
+    x: 47.59,
     y: 64,
     routePath:
       "M 80.5 58.5 C 80.44 59.83, 80.95 63.66, 80.74 65.67 C 80.53 67.69, 80.56 69.23, 79.13 70.78 C 77.69 72.32, 77.12 74.23, 72.13 74.92 C 67.14 75.61, 53.26 75.72, 49.16 74.92 C 45.07 74.12, 47.79 71.84, 47.55 70.14 C 47.31 68.44, 47.7 65.62, 47.73 64.72",
   },
   // 8 · Foro de los Balbos — se desvía del corredor central un poco antes.
+  //     Único punto sin foto de referencia del propietario; posición estimada.
   8: {
     x: 52,
     y: 60,
     routePath:
       "M 80.5 58.5 C 80.44 59.83, 81.01 63.55, 80.74 65.67 C 80.47 67.8, 80.2 69.87, 78.77 71.41 C 77.33 72.95, 74.28 74.34, 72.13 74.92 C 69.98 75.5, 66.99 75.08, 65.85 74.92 C 64.71 74.76, 66.36 74.12, 65.31 73.96 C 64.26 73.8, 61 74.97, 59.57 73.96 C 58.13 72.95, 56.94 69.5, 56.7 67.91 C 56.46 66.31, 57.98 66.26, 58.13 64.4 C 58.28 62.54, 57.83 58.18, 57.6 56.75 C 57.36 55.31, 57.12 55.9, 56.7 55.79 C 56.28 55.69, 55.62 55.74, 55.08 56.11 C 54.55 56.48, 53.74 57.7, 53.47 58.02",
+  },
+  // 9 · Iglesia de San Mateo — rodea por el este, en la zona monumental alta.
+  9: {
+    x: 66.85,
+    y: 36.91,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.72, 80.47 63.66, 80.74 65.04 C 81.01 66.42, 81.58 66.68, 82 66.95 C 82.42 67.22, 82.18 68.38, 83.25 66.63 C 84.33 64.88, 87.38 58.93, 88.46 56.43 C 89.53 53.93, 89.65 53.56, 89.71 51.65 C 89.77 49.73, 90.1 48.03, 88.82 44.95 C 87.53 41.87, 83.55 35.12, 82 33.16 C 80.44 31.19, 80.14 32.78, 79.49 33.16 C 78.83 33.53, 78.8 35.18, 78.05 35.39 C 77.3 35.6, 75.84 34.22, 75 34.43 C 74.16 34.64, 73.98 35.97, 73.03 36.66 C 72.07 37.35, 70.13 38.26, 69.26 38.58 C 68.39 38.89, 68.21 38.84, 67.82 38.58 C 67.43 38.31, 67.08 37.25, 66.93 36.98",
+  },
+  // 10 · Concatedral de Santa María — corredor central, ramal corto hacia el sur.
+  10: {
+    x: 42.25,
+    y: 51.98,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.83, 81.34 63.34, 80.74 65.67 C 80.14 68.01, 78.23 71.15, 76.79 72.69 C 75.36 74.23, 76.73 74.55, 72.13 74.92 C 67.52 75.29, 53.44 77.15, 49.16 74.92 C 44.89 72.69, 47.64 64.19, 46.47 61.53 C 45.31 58.87, 43.03 60.31, 42.17 58.98 C 41.3 57.65, 41.42 54.46, 41.27 53.56",
+  },
+  // 11 · Iglesia de Santiago — el punto más alejado, rodea todo el borde oeste.
+  11: {
+    x: 23.32,
+    y: 56.04,
+    routePath:
+      "M 80.5 58.5 C 80.44 59.83, 80.98 63.6, 80.74 65.67 C 80.5 67.75, 79.61 69.93, 78.95 71.09 C 78.29 72.26, 77.93 72.05, 76.79 72.69 C 75.66 73.33, 78.68 74.44, 72.13 74.92 C 65.58 75.4, 43.75 74.6, 37.5 75.56 C 31.25 76.51, 35.62 79.76, 34.63 80.66 C 33.64 81.56, 32.69 79.86, 31.58 80.98 C 30.47 82.09, 28.92 86.29, 27.99 87.35 C 27.06 88.42, 26.61 88.31, 26.02 87.35 C 25.42 86.4, 25 85.71, 24.4 81.62 C 23.8 77.52, 22.91 66.26, 22.43 62.81 C 21.95 59.35, 21.68 61.8, 21.53 60.89 C 21.38 59.99, 21.29 58.08, 21.53 57.39 C 21.77 56.7, 22.73 56.85, 22.97 56.75",
   },
 };
 
