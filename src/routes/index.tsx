@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import {
   motion,
   AnimatePresence,
@@ -54,6 +54,15 @@ import {
 import { trackEvent } from "@/lib/analytics";
 import { useT, useLang } from "@/lib/i18n";
 import { content } from "@/lib/content";
+import {
+  SITE_URL,
+  BOOKING_URL,
+  PHONE_HUMAN,
+  PHONE_TEL,
+  WA_URL,
+  GOOGLE_MAPS_URL,
+  EASE,
+} from "@/lib/site";
 
 import heroImg from "@/assets/hero-caceres.webp";
 import heroVideo from "@/assets/hero-video.mp4";
@@ -100,19 +109,8 @@ const APARTMENT_IMAGES: Record<string, Record<string, string>> = {
 };
 
 /* ─────────── Datos reales ─────────── */
-// Dominio real registrado por el propietario (majmacaceres.es, con
-// majmacaceres.com también en cartera). Debe apuntar a este despliegue
-// desde el proveedor (Arsys) para que las previews de redes sociales
-// y el SEO usen la URL definitiva.
-const SITE_URL = "https://www.majmacaceres.es";
-const BOOKING_URL =
-  "https://www.booking.com/hotel/es/apartamentos-turisticos-majma.es.html?aid=356980&label=gog235jc-10CAsoRkIdYXBhcnRhbWVudG9zLXR1cmlzdGljb3MtbWFqbWFIUlgDaEaIAQGYATO4ARfIAQzYAQPoAQH4AQGIAgGoAgG4AoD4ktIGwAIB0gIkZWYxYTJmNDEtZDRkNy00MGU0LWE4NmYtOTc4YWU4Zjc5MDUy2AIB4AIB&sid=faf8b176b4cd575f70169e3f6ca21d42&dist=0&keep_landing=1&sb_price_type=total&type=total&";
-const PHONE_HUMAN = "722 24 74 36";
-const PHONE_TEL = "+34722247436";
-const WA_URL =
-  "https://wa.me/34722247436?text=Hola,%20me%20interesa%20reservar%20en%20MAJMA.%20%C2%BFTen%C3%A9is%20disponibilidad%3F";
-const GOOGLE_MAPS_URL =
-  "https://www.google.com/maps?q=Calle+Cornudilla+3,+10003+C%C3%A1ceres,+Spain";
+// Compartidos con el blog vía src/lib/site.ts para que no puedan
+// desincronizarse entre secciones.
 
 // Términos de búsqueda reales por los que un huésped encontraría MAJMA:
 // intención de reserva ("apartamentos turísticos Cáceres") + intención
@@ -127,8 +125,6 @@ const KEYWORDS = [
   "apartamentos Iglesia de San Juan Cáceres",
   "qué ver en Cáceres",
 ];
-
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 // useReducedMotion() reads the real device preference synchronously on the
 // client's first render but always returns false during SSR, so anything
@@ -680,17 +676,26 @@ function LangToggle({ className = "" }: { className?: string }) {
   );
 }
 
-function TopBar() {
+export function TopBar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 60));
   const t = useT().nav;
+  // Los enlaces de navegación son anclas ("#apartamento"...) que solo existen
+  // en la portada. Fuera de ella (p.ej. en el blog), hay que anteponer "/"
+  // para volver a la portada y saltar a la sección, en vez de no hacer nada.
+  const { pathname } = useLocation();
+  const onHome = pathname === "/";
+  const anchor = (href: string) => (href.startsWith("#") && !onHome ? `/${href}` : href);
+  // Fuera de la portada no hay vídeo/hero oscuro tras la cabecera transparente
+  // — sin esto, el texto claro quedaría invisible sobre el fondo cream.
+  const solidBar = scrolled || !onHome;
 
   return (
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${
-        scrolled
+        solidBar
           ? "bg-ink/85 backdrop-blur-md shadow-[0_2px_20px_-10px_rgba(0,0,0,0.5)]"
           : "bg-transparent"
       }`}
@@ -699,7 +704,7 @@ function TopBar() {
         className={`mx-auto flex max-w-7xl items-center justify-between gap-x-6 px-6 md:px-10 transition-all duration-500 ${scrolled ? "py-3" : "py-5"}`}
       >
         <a
-          href="#top"
+          href={onHome ? "#top" : "/"}
           className="flex items-center text-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
         >
           <img
@@ -712,7 +717,7 @@ function TopBar() {
           {t.links.map((l) => (
             <a
               key={l.href}
-              href={l.href}
+              href={anchor(l.href)}
               className="hover:text-gold transition-colors duration-300"
             >
               {l.label}
@@ -722,7 +727,7 @@ function TopBar() {
         <div className="hidden items-center gap-5 md:flex">
           <LangToggle />
           <a
-            href="#reserva"
+            href={anchor("#reserva")}
             className="inline-flex items-center gap-2 border border-gold/60 px-5 py-2 text-xs uppercase tracking-[0.3em] text-cream transition-all duration-300 hover:bg-gold hover:text-ink"
           >
             {t.reservar}
@@ -747,7 +752,7 @@ function TopBar() {
           {t.links.map((l) => (
             <a
               key={l.href}
-              href={l.href}
+              href={anchor(l.href)}
               onClick={() => setOpen(false)}
               className="py-3 border-b border-cream/10 hover:text-gold"
             >
@@ -759,7 +764,7 @@ function TopBar() {
             <LangToggle />
           </div>
           <a
-            href="#reserva"
+            href={anchor("#reserva")}
             onClick={() => setOpen(false)}
             className="mt-3 inline-flex items-center justify-center gap-2 border border-gold px-5 py-3 text-xs text-cream hover:bg-gold hover:text-ink"
           >
@@ -2488,7 +2493,7 @@ function ShareButton() {
   );
 }
 
-function Footer() {
+export function Footer() {
   const t = useT().footer;
   return (
     <footer className="border-t border-border bg-cream py-16 pb-28 text-ink md:pb-16">
@@ -2620,7 +2625,7 @@ function scoreFaqMatch(query: string, target: string) {
 
 type ChatMessage = { role: "user" | "bot"; text: string; waFallback?: boolean };
 
-function ChatbotWidget() {
+export function ChatbotWidget() {
   const t = useT().chatbot;
   const faqItems = useT().faq.items;
   const [open, setOpen] = useState(false);
@@ -2801,7 +2806,7 @@ function ChatbotWidget() {
 
 /* ─────────── WhatsApp FAB ─────────── */
 
-function WhatsAppFab() {
+export function WhatsAppFab() {
   const wa = useT().whatsappFab;
   const [show, setShow] = useState(false);
   const [tag, setTag] = useState(false);
@@ -2847,7 +2852,7 @@ function WhatsAppFab() {
 
 /* ─────────── Sticky CTA móvil ─────────── */
 
-function MobileStickyCTA() {
+export function MobileStickyCTA() {
   const t = useT().mobileSticky;
   const [show, setShow] = useState(false);
   const { scrollY } = useScroll();
