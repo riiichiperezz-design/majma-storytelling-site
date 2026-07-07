@@ -405,11 +405,14 @@ function TiltImage({
   alt,
   className = "",
   onClick,
+  cinematic = false,
 }: {
   src: string;
   alt: string;
   className?: string;
   onClick?: () => void;
+  /** Trato "cinematográfico" (grano + virado de color + zoom lento continuo) para fotos destacadas. */
+  cinematic?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
@@ -443,12 +446,21 @@ function TiltImage({
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
         style={{ background: "var(--stone-soft)" }}
       >
-        <img
+        <motion.img
           src={src}
           alt={alt}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+          animate={cinematic && !reduce ? { scale: [1, 1.05, 1] } : undefined}
+          transition={cinematic ? { duration: 22, repeat: Infinity, ease: "easeInOut" } : undefined}
         />
+        {cinematic && (
+          <>
+            <div className="pointer-events-none absolute inset-0 photo-duotone" />
+            <div className="pointer-events-none absolute inset-0 photo-grain opacity-[0.08]" />
+            <div className="pointer-events-none absolute inset-0 photo-vignette" />
+          </>
+        )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       </motion.div>
     </div>
@@ -809,30 +821,31 @@ function Hero() {
       id="top"
       className="relative h-screen w-full overflow-hidden bg-ink text-cream"
     >
-      <motion.div style={{ y: yImg }} className="absolute inset-0 -top-10 -bottom-10">
-        {!videoFailed ? (
-          <video
-            ref={videoRef}
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster={heroImg}
-            onError={() => setVideoFailed(true)}
-            className="h-full w-full object-cover"
-          >
-            <source src={heroVideo} type="video/mp4" />
-          </video>
-        ) : (
-          <motion.img
-            src={heroImg}
-            alt={t.heroAlt}
-            className="h-full w-full object-cover"
-            initial={{ scale: 1 }}
-            animate={reduce ? undefined : { scale: 1.04 }}
-            transition={{ duration: 20, ease: "linear" }}
-          />
-        )}
+      <motion.div style={{ y: yImg }} className="absolute inset-0 -top-10 -bottom-10 overflow-hidden">
+        <motion.div
+          className="h-full w-full"
+          animate={reduce ? undefined : { scale: [1, 1.06, 1] }}
+          transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {!videoFailed ? (
+            <video
+              ref={videoRef}
+              muted
+              loop
+              playsInline
+              preload="auto"
+              poster={heroImg}
+              onError={() => setVideoFailed(true)}
+              className="h-full w-full object-cover"
+            >
+              <source src={heroVideo} type="video/mp4" />
+            </video>
+          ) : (
+            <img src={heroImg} alt={t.heroAlt} className="h-full w-full object-cover" />
+          )}
+        </motion.div>
+        <div className="pointer-events-none absolute inset-0 photo-duotone" />
+        <div className="pointer-events-none absolute inset-0 photo-grain opacity-[0.06]" />
         <div className="absolute inset-0 bg-gradient-to-b from-ink/60 via-ink/35 to-ink/85" />
       </motion.div>
 
@@ -1053,7 +1066,7 @@ function Apartamento() {
           </div>
         </Reveal>
         <Reveal delay={0.15}>
-          <TiltImage src={apto1Salon} alt={t.salonAlt} className="aspect-[4/5]" />
+          <TiltImage src={apto1Salon} alt={t.salonAlt} className="aspect-[4/5]" cinematic />
         </Reveal>
       </div>
     </section>
