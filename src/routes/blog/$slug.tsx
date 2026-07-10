@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Clock, ArrowRight, MessageCircle } from "lucide-react";
+import { Clock, ArrowRight, MessageCircle, Sparkles, HelpCircle } from "lucide-react";
 
 import { TopBar, Footer, ChatbotWidget, WhatsAppFab, MobileStickyCTA } from "@/routes/index";
 import { blogPosts, getBlogPost, type BlogPost } from "@/lib/blog";
@@ -8,8 +8,14 @@ import { SITE_URL, BOOKING_URL, WA_URL } from "@/lib/site";
 import heroImg from "@/assets/hero-caceres.webp";
 import caceresSkylineImg from "@/assets/caceres-skyline.webp";
 import mapa3dImg from "@/assets/mapa3d.webp";
+import apto3Vistas from "@/assets/apto3-vistas.webp";
 
-const COVER_IMAGES = { hero: heroImg, skyline: caceresSkylineImg, map: mapa3dImg };
+const COVER_IMAGES = {
+  hero: heroImg,
+  skyline: caceresSkylineImg,
+  map: mapa3dImg,
+  vistas: apto3Vistas,
+};
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: ({ params }) => {
@@ -24,6 +30,8 @@ export const Route = createFileRoute("/blog/$slug")({
     const post = loaderData as BlogPost;
     const url = `${SITE_URL}/blog/${post.slug}`;
     const image = new URL(COVER_IMAGES[post.coverImage], SITE_URL).toString();
+    const faqBlock = post.body.find((b) => b.type === "faq");
+
     return {
       meta: [
         { title: `${post.title} | MAJMA Apartamentos Turísticos` },
@@ -43,11 +51,38 @@ export const Route = createFileRoute("/blog/$slug")({
             description: post.metaDescription,
             image,
             datePublished: post.publishedDate,
+            dateModified: post.updatedDate ?? post.publishedDate,
             author: { "@type": "Organization", name: "MAJMA Apartamentos Turísticos" },
             publisher: { "@type": "Organization", name: "MAJMA Apartamentos Turísticos" },
             mainEntityOfPage: url,
           },
         },
+        {
+          "script:ld+json": {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+              { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+              { "@type": "ListItem", position: 3, name: post.title, item: url },
+            ],
+          },
+        },
+        ...(faqBlock && faqBlock.type === "faq"
+          ? [
+              {
+                "script:ld+json": {
+                  "@context": "https://schema.org",
+                  "@type": "FAQPage",
+                  mainEntity: faqBlock.items.map((qa) => ({
+                    "@type": "Question",
+                    name: qa.q,
+                    acceptedAnswer: { "@type": "Answer", text: qa.a },
+                  })),
+                },
+              },
+            ]
+          : []),
       ],
       links: [{ rel: "canonical", href: url }],
     };
@@ -109,12 +144,20 @@ function BlogPostPage() {
       <TopBar />
       <main className="bg-cream pb-24 pt-32 md:pt-40">
         <article className="mx-auto max-w-3xl px-6 md:px-10">
-          <Link
-            to="/blog"
-            className="text-[10px] uppercase tracking-[0.4em] text-ink/50 hover:text-gold"
+          <nav
+            aria-label="Migas de pan"
+            className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-ink/40"
           >
-            ← Guía de Cáceres
-          </Link>
+            <Link to="/" className="hover:text-gold">
+              Inicio
+            </Link>
+            <span>/</span>
+            <Link to="/blog" className="hover:text-gold">
+              Blog
+            </Link>
+            <span>/</span>
+            <span className="text-ink/60">{post.tag}</span>
+          </nav>
 
           <div className="mt-6 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-gold">
             <span>{post.tag}</span>
@@ -128,7 +171,9 @@ function BlogPostPage() {
             {post.title}
           </h1>
           <div className="mt-4 text-xs uppercase tracking-[0.25em] text-ink/40">
-            {formatDate(post.publishedDate)}
+            {post.updatedDate
+              ? `Actualizado el ${formatDate(post.updatedDate)}`
+              : formatDate(post.publishedDate)}
           </div>
 
           <div className="mt-10 aspect-[16/9] overflow-hidden">
@@ -137,6 +182,21 @@ function BlogPostPage() {
               alt={post.coverAlt}
               className="h-full w-full object-cover"
             />
+          </div>
+
+          <div className="mt-10 border border-gold/30 bg-stone-soft/40 p-6">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] text-gold">
+              <Sparkles className="h-3.5 w-3.5" />
+              En resumen
+            </div>
+            <ul className="mt-4 space-y-2">
+              {post.quickFacts.map((fact, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm leading-relaxed text-ink/80">
+                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" />
+                  {fact}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="prose prose-neutral mt-10 max-w-none text-ink/85">
@@ -157,6 +217,50 @@ function BlogPostPage() {
                       </li>
                     ))}
                   </ul>
+                );
+              }
+              if (block.type === "tip") {
+                return (
+                  <div
+                    key={i}
+                    className="not-prose my-8 border-l-2 border-gold bg-cream px-6 py-5"
+                  >
+                    <div className="text-[10px] uppercase tracking-[0.35em] text-gold">
+                      Consejo MAJMA
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-ink/80">{block.text}</p>
+                  </div>
+                );
+              }
+              if (block.type === "link") {
+                return (
+                  <Link
+                    key={i}
+                    to="/blog/$slug"
+                    params={{ slug: block.slug }}
+                    className="not-prose group my-8 flex items-center justify-between gap-4 border border-ink/15 px-6 py-4 text-sm text-ink transition-colors duration-300 hover:border-gold"
+                  >
+                    <span className="font-medium">{block.text}</span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-gold transition-transform group-hover:translate-x-1" />
+                  </Link>
+                );
+              }
+              if (block.type === "faq") {
+                return (
+                  <div key={i} className="not-prose mt-10">
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] text-gold">
+                      <HelpCircle className="h-3.5 w-3.5" />
+                      Preguntas frecuentes
+                    </div>
+                    <div className="mt-4 divide-y divide-ink/10 border-t border-ink/10">
+                      {block.items.map((qa, j) => (
+                        <div key={j} className="py-5">
+                          <p className="font-serif text-lg text-ink">{qa.q}</p>
+                          <p className="mt-2 text-sm leading-relaxed text-ink/70">{qa.a}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 );
               }
               return (
