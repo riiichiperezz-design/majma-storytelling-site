@@ -81,11 +81,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Apartamentos Turísticos en Cáceres | MAJMA · Casco Histórico" },
+      { title: "MAJMA Cáceres | Apartamentos turísticos junto al casco histórico" },
       {
         name: "description",
         content:
-          "Apartamentos turísticos en el casco histórico de Cáceres, Patrimonio de la Humanidad. 3 apartamentos independientes junto a la Iglesia de San Juan. Reserva directa.",
+          "Apartamentos turísticos en Cáceres con encanto, ubicación céntrica y acceso al casco histórico. Consulta disponibilidad y prepara tu escapada.",
       },
       { name: "author", content: "MAJMA Apartamentos Turísticos" },
       { property: "og:site_name", content: "MAJMA · Apartamentos Turísticos Cáceres" },

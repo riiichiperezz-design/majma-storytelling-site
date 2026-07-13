@@ -27,8 +27,9 @@ export const content = {
       titleLine1: "Dormir dentro",
       titleLine2: "de la Historia.",
       subtitle:
-        "A dos minutos de la Iglesia de San Juan, en el corazón amurallado de Cáceres. Tres apartamentos turísticos independientes. Una ciudad Patrimonio de la Humanidad a tus pies.",
+        "Apartamentos turísticos en Cáceres, junto al casco histórico. A dos minutos de la Iglesia de San Juan, en el recinto amurallado — Patrimonio de la Humanidad.",
       ctaBooking: "Reservar en Booking",
+      ctaWhatsapp: "Hablar por WhatsApp",
       ctaDiscover: "Descubre los apartamentos",
       scrollHint: "Baja para entrar",
       heroAlt: "Casco histórico amurallado de Cáceres al atardecer",
@@ -91,6 +92,7 @@ export const content = {
       sizeLabel: "m²",
       guestsLabel: "huéspedes máx.",
       verDetalles: "Ver detalles",
+      consultarApartamento: "Consultar disponibilidad para",
       apartments: [
         {
           id: "apto1",
@@ -617,13 +619,45 @@ export const content = {
           q: "¿Por qué reservar directamente con vosotros en vez de por Booking?",
           a: "Al escribirnos por WhatsApp evitas comisiones de intermediarios y te confirmamos la disponibilidad real al momento, resolviendo cualquier duda directamente con nosotros.",
         },
+        {
+          q: "¿Dónde están ubicados los apartamentos?",
+          a: "En Calle Cornudilla, 3, en pleno casco histórico amurallado de Cáceres, a dos minutos a pie de la Iglesia de San Juan.",
+        },
+        {
+          q: "¿Cómo puedo consultar disponibilidad?",
+          a: "Escríbenos directamente por WhatsApp o consulta el calendario de disponibilidad en Booking.com.",
+        },
+        {
+          q: "¿Cómo puedo reservar?",
+          a: "Puedes reservar online en Booking.com o escribirnos por WhatsApp indicando tus fechas y el número de huéspedes; te confirmamos la disponibilidad al momento.",
+        },
+        {
+          q: "¿Los apartamentos tienen cocina?",
+          a: "Sí. Los tres apartamentos son independientes y cada uno tiene su propia cocina, completamente equipada.",
+        },
+        {
+          q: "¿Cómo puedo llegar a MAJMA?",
+          a: "El casco histórico de Cáceres es peatonal: se llega caminando desde cualquier punto de la ciudad o en taxi. El acceso en coche particular a la Ciudad Monumental está restringido a residentes; si vienes en coche, el Parking Obispo Galarza es la opción más cómoda, a un paseo corto de la Plaza Mayor.",
+        },
+        {
+          q: "¿Qué lugares turísticos hay cerca?",
+          a: "A pocos minutos a pie tienes la Plaza Mayor, la Torre de Bujaco, el Museo de Cáceres con su aljibe árabe, el Barrio Judío y la Concatedral de Santa María: todo el casco histórico, Patrimonio de la Humanidad, está a un paseo de MAJMA.",
+        },
+        {
+          q: "¿Puedo contactar por WhatsApp?",
+          a: "Sí, es la forma más rápida de contactar con nosotros: escríbenos y te respondemos en cuanto podamos.",
+        },
+        {
+          q: "¿En qué idiomas está disponible la web?",
+          a: "La web está disponible en español e inglés. Puedes cambiar de idioma desde el selector ES/EN en la parte superior.",
+        },
       ],
     },
     reserva: {
       sectionLabel: "Reserva",
       titlePre: "Tu atalaya",
       titleEm: "te espera.",
-      p1: "Reserva directa en Booking o escríbenos por WhatsApp y resolvemos cualquier duda al momento.",
+      p1: "Consulta disponibilidad directamente por WhatsApp o reserva online en Booking.",
       ctaBooking: "Reservar en Booking",
       ctaWhatsapp: "WhatsApp directo",
       calendar: {
@@ -660,8 +694,12 @@ export const content = {
       tag: "¿Dudas? Escríbenos",
     },
     mobileSticky: {
-      ctaBooking: "Reservar en Booking",
-      ariaCall: "Llamar",
+      ctaWhatsapp: "WhatsApp",
+      ariaWhatsapp: "Escribir por WhatsApp",
+      ctaBooking: "Reservar",
+      ariaBooking: "Reservar en Booking",
+      ctaMaps: "Cómo llegar",
+      ariaMaps: "Cómo llegar en Google Maps",
     },
     lightbox: {
       close: "Cerrar",
@@ -678,12 +716,12 @@ export const content = {
       label: "Asistente MAJMA",
       title: "Asistente MAJMA",
       subtitle: "Busca en las preguntas frecuentes",
-      greeting: "Hola, soy el asistente de MAJMA. Elige una pregunta o escribe la tuya.",
+      greeting:
+        "Puedo ayudarte con las preguntas más frecuentes sobre MAJMA. Elige una o escribe la tuya.",
       placeholder: "Escribe tu pregunta...",
       send: "Enviar",
-      noMatch:
-        "No he encontrado una respuesta exacta a eso. Escríbenos por WhatsApp y te ayudamos enseguida.",
-      whatsappCta: "Escribir por WhatsApp",
+      noMatch: "No tengo esa información, pero puedes consultarla directamente por WhatsApp.",
+      whatsappCta: "Preguntar por WhatsApp",
       bookCta: "Ver disponibilidad",
       close: "Cerrar",
     },
@@ -721,8 +759,9 @@ export const content = {
       titleLine1: "Sleep inside",
       titleLine2: "History.",
       subtitle:
-        "Two minutes from the Iglesia de San Juan, in the walled heart of Cáceres. Three independent tourist apartments. A World Heritage city at your feet.",
+        "Tourist apartments in Cáceres, right by the old town. Two minutes from the Iglesia de San Juan, inside the walled city — a World Heritage Site.",
       ctaBooking: "Book on Booking.com",
+      ctaWhatsapp: "Message us on WhatsApp",
       ctaDiscover: "Discover the apartments",
       scrollHint: "Scroll to enter",
       heroAlt: "Walled old town of Cáceres at sunset",
@@ -781,6 +820,7 @@ export const content = {
       sizeLabel: "m²",
       guestsLabel: "guests max.",
       verDetalles: "See details",
+      consultarApartamento: "Check availability for",
       apartments: [
         {
           id: "apto1",
@@ -1304,13 +1344,45 @@ export const content = {
           q: "Why book directly with you instead of through Booking.com?",
           a: "Messaging us on WhatsApp skips intermediary commissions and lets us confirm real availability right away, sorting out any question directly with us.",
         },
+        {
+          q: "Where are the apartments located?",
+          a: "At Calle Cornudilla, 3, right in the walled old town of Cáceres, a two-minute walk from the Church of San Juan.",
+        },
+        {
+          q: "How can I check availability?",
+          a: "Message us directly on WhatsApp or check the availability calendar on Booking.com.",
+        },
+        {
+          q: "How can I book?",
+          a: "You can book online on Booking.com or message us on WhatsApp with your dates and number of guests; we'll confirm availability right away.",
+        },
+        {
+          q: "Do the apartments have a kitchen?",
+          a: "Yes. All three apartments are independent and each has its own fully equipped kitchen.",
+        },
+        {
+          q: "How can I get to MAJMA?",
+          a: "The old town of Cáceres is pedestrian-only: it's reached on foot from anywhere in the city, or by taxi. Private car access to the Monumental City is restricted to residents; if you're driving, the Obispo Galarza car park is the most convenient option, a short walk from Plaza Mayor.",
+        },
+        {
+          q: "What tourist attractions are nearby?",
+          a: "A few minutes' walk away you'll find Plaza Mayor, the Bujaco Tower, the Cáceres Museum with its Arab cistern, the Jewish Quarter and the Co-Cathedral of Santa María: the whole old town, a UNESCO World Heritage Site, is a short stroll from MAJMA.",
+        },
+        {
+          q: "Can I contact you on WhatsApp?",
+          a: "Yes, it's the fastest way to reach us: message us and we'll get back to you as soon as we can.",
+        },
+        {
+          q: "What languages is the website available in?",
+          a: "The website is available in Spanish and English. You can switch languages using the ES/EN selector at the top.",
+        },
       ],
     },
     reserva: {
       sectionLabel: "Book",
       titlePre: "Your watchtower",
       titleEm: "awaits.",
-      p1: "Book directly on Booking.com or message us on WhatsApp and we'll answer any question right away.",
+      p1: "Check availability directly on WhatsApp or book online on Booking.com.",
       ctaBooking: "Book on Booking.com",
       ctaWhatsapp: "WhatsApp us directly",
       calendar: {
@@ -1347,8 +1419,12 @@ export const content = {
       tag: "Questions? Message us",
     },
     mobileSticky: {
-      ctaBooking: "Book on Booking.com",
-      ariaCall: "Call",
+      ctaWhatsapp: "WhatsApp",
+      ariaWhatsapp: "Message us on WhatsApp",
+      ctaBooking: "Book",
+      ariaBooking: "Book on Booking.com",
+      ctaMaps: "Directions",
+      ariaMaps: "Get directions on Google Maps",
     },
     lightbox: {
       close: "Close",
@@ -1365,12 +1441,11 @@ export const content = {
       label: "MAJMA Assistant",
       title: "MAJMA Assistant",
       subtitle: "Search our frequently asked questions",
-      greeting: "Hi, I'm the MAJMA assistant. Pick a question or type your own.",
+      greeting: "I can help with the most frequently asked questions about MAJMA. Pick one or type your own.",
       placeholder: "Type your question...",
       send: "Send",
-      noMatch:
-        "I couldn't find an exact answer to that. Message us on WhatsApp and we'll help right away.",
-      whatsappCta: "Message on WhatsApp",
+      noMatch: "I don't have that information, but you can ask us directly on WhatsApp.",
+      whatsappCta: "Ask on WhatsApp",
       bookCta: "Check availability",
       close: "Close",
     },

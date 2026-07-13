@@ -62,6 +62,7 @@ import {
   WA_URL,
   GOOGLE_MAPS_URL,
   EASE,
+  waLinkForApartment,
 } from "@/lib/site";
 
 import heroImg from "@/assets/hero-caceres.webp";
@@ -150,11 +151,11 @@ const FAQS = content.es.faq.items;
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Apartamentos Turísticos en Cáceres | MAJMA · Casco Histórico" },
+      { title: "MAJMA Cáceres | Apartamentos turísticos junto al casco histórico" },
       {
         name: "description",
         content:
-          "Apartamentos turísticos en el casco histórico de Cáceres, Patrimonio de la Humanidad. 3 apartamentos independientes junto a la Iglesia de San Juan. Reserva directa.",
+          "Apartamentos turísticos en Cáceres con encanto, ubicación céntrica y acceso al casco histórico. Consulta disponibilidad y prepara tu escapada.",
       },
       { name: "keywords", content: KEYWORDS.join(", ") },
       { property: "og:title", content: "MAJMA · Apartamentos Turísticos en Cáceres" },
@@ -370,7 +371,10 @@ function CountUp({
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.5 });
   const reduce = useReducedMotionSafe();
-  const [n, setN] = useState(reduce ? to : 0);
+  // El valor real (`to`) se renderiza siempre, también en el HTML servido antes
+  // de hidratar: así Google y los lectores de pantalla nunca ven "0". La cuenta
+  // ascendente es puramente visual y solo arranca tras hidratar en cliente.
+  const [n, setN] = useState(to);
 
   useEffect(() => {
     if (reduce) {
@@ -378,6 +382,7 @@ function CountUp({
       return;
     }
     if (!inView) return;
+    setN(0);
     const start = performance.now();
     let raf = 0;
     const tick = (t: number) => {
@@ -934,24 +939,24 @@ function Hero() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </a>
           <a
-            href="#apartamento"
+            href={WA_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("click_whatsapp", { location: "hero" })}
             className="inline-flex items-center gap-3 border border-cream/40 px-8 py-4 text-xs uppercase tracking-[0.3em] text-cream transition-all duration-300 hover:border-gold hover:text-gold active:scale-[0.98]"
           >
-            {t.ctaDiscover}
+            <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+            {t.ctaWhatsapp}
           </a>
         </motion.div>
         <motion.a
-          href={WA_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackEvent("click_whatsapp", { location: "hero" })}
+          href="#apartamento"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.9, delay: 0.85, ease: EASE }}
           className="mt-5 inline-flex items-center gap-2 text-xs text-cream/70 underline-offset-4 hover:text-gold hover:underline"
         >
-          <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
-          {t.ctaWhatsappHint}
+          {t.ctaDiscover}
         </motion.a>
       </motion.div>
 
@@ -1193,6 +1198,19 @@ function Distribucion() {
             ))}
           </motion.div>
         </AnimatePresence>
+
+        <Reveal delay={0.2}>
+          <a
+            href={waLinkForApartment(apt.name)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("click_whatsapp", { location: "apartamento", apartment: apt.name })}
+            className="mt-10 inline-flex items-center gap-3 border border-ink/20 px-6 py-3.5 text-xs uppercase tracking-[0.3em] text-ink transition-all duration-300 hover:border-gold hover:text-gold active:scale-[0.98]"
+          >
+            <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+            {t.consultarApartamento} {apt.name}
+          </a>
+        </Reveal>
       </div>
     </section>
   );
@@ -2509,7 +2527,7 @@ function ShareButton() {
 export function Footer() {
   const t = useT().footer;
   return (
-    <footer className="border-t border-border bg-cream py-16 pb-28 text-ink md:pb-16">
+    <footer id="site-footer" className="border-t border-border bg-cream py-16 pb-28 text-ink md:pb-16">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 md:grid-cols-3 md:px-10">
         <div>
           <img src={logoFull} alt="MAJMA · Apartamentos turísticos" className="h-16 w-auto" />
@@ -2873,29 +2891,62 @@ export function MobileStickyCTA() {
     if (typeof window === "undefined") return;
     setShow(v > window.innerHeight * 0.6);
   });
+
+  // Se oculta al acercarse al footer para no tapar sus enlaces (contacto,
+  // legal...) con la barra fija.
+  const [nearFooter, setNearFooter] = useState(false);
+  useEffect(() => {
+    const footer = document.getElementById("site-footer");
+    if (!footer) return;
+    const observer = new IntersectionObserver(([entry]) => setNearFooter(entry.isIntersecting), {
+      rootMargin: "0px 0px -10% 0px",
+    });
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <motion.div
       initial={{ y: 80 }}
-      animate={{ y: show ? 0 : 80 }}
+      animate={{ y: show && !nearFooter ? 0 : 80 }}
       transition={{ duration: 0.4, ease: EASE }}
-      className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-ink/10 bg-cream/95 p-3 shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.2)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex gap-1.5 border-t border-ink/10 bg-cream/95 p-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.2)] backdrop-blur md:hidden"
     >
+      <a
+        href={WA_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-event="click_whatsapp"
+        onClick={() => trackEvent("click_whatsapp", { location: "mobile_sticky" })}
+        aria-label={t.ariaWhatsapp}
+        className="flex min-w-0 flex-1 items-center justify-center gap-1 border border-ink/30 px-1.5 py-3 text-[10px] uppercase tracking-[0.02em] text-ink active:scale-[0.98]"
+      >
+        <MessageCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+        <span className="truncate">{t.ctaWhatsapp}</span>
+      </a>
       <a
         href={BOOKING_URL}
         target="_blank"
         rel="noopener noreferrer"
+        data-event="click_booking"
         onClick={() => trackEvent("click_booking", { location: "mobile_sticky" })}
-        className="flex flex-1 items-center justify-center gap-2 bg-ink px-4 py-3 text-[11px] uppercase tracking-[0.25em] text-cream active:scale-[0.98]"
+        aria-label={t.ariaBooking}
+        className="flex min-w-0 flex-1 items-center justify-center gap-1 bg-ink px-1.5 py-3 text-[10px] uppercase tracking-[0.02em] text-cream active:scale-[0.98]"
       >
-        {t.ctaBooking}
+        <CalendarCheck className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+        <span className="truncate">{t.ctaBooking}</span>
       </a>
       <a
-        href={`tel:${PHONE_TEL}`}
-        onClick={() => trackEvent("click_phone", { location: "mobile_sticky" })}
-        aria-label={t.ariaCall}
-        className="flex items-center justify-center border border-ink/30 px-4 py-3 text-ink active:scale-[0.98]"
+        href={GOOGLE_MAPS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-event="click_maps"
+        onClick={() => trackEvent("click_maps", { location: "mobile_sticky" })}
+        aria-label={t.ariaMaps}
+        className="flex min-w-0 flex-1 items-center justify-center gap-1 border border-ink/30 px-1.5 py-3 text-[10px] uppercase tracking-[0.02em] text-ink active:scale-[0.98]"
       >
-        <Phone className="h-4 w-4" />
+        <MapPin className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+        <span className="truncate">{t.ctaMaps}</span>
       </a>
     </motion.div>
   );
