@@ -25,14 +25,18 @@ function AvisoLegal() {
           Información y Comercio Electrónico (LSSI-CE), se informa a los usuarios de este sitio
           web de los siguientes datos identificativos del titular:
         </p>
+        {/* TODO: pendientes del propietario — razón social, NIF/CIF y nº de
+            registro turístico de Extremadura. Hasta entonces no se muestran
+            estos campos para no dejar placeholders visibles al usuario. */}
         <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Titular:</strong> [RAZÓN SOCIAL]</li>
-          <li><strong>NIF / CIF:</strong> [NIF]</li>
           <li><strong>Domicilio:</strong> Calle Cornudilla, 3, 10003 Cáceres, España</li>
           <li><strong>Contacto:</strong> +34 722 24 74 36</li>
           <li><strong>Actividad:</strong> Explotación de apartamentos turísticos</li>
-          <li><strong>Nº de registro turístico:</strong> [REGISTRO TURÍSTICO EXTREMADURA]</li>
         </ul>
+        <p className="text-sm text-ink/60">
+          Los datos identificativos y registrales del titular están en proceso de
+          incorporación a este aviso legal.
+        </p>
         <h2 className="font-serif text-2xl">Condiciones de uso</h2>
         <p>
           El acceso a este sitio web es gratuito y su navegación implica la aceptación de los

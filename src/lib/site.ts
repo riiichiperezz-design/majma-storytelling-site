@@ -12,8 +12,21 @@ export const BOOKING_URL =
 
 export const PHONE_HUMAN = "722 24 74 36";
 export const PHONE_TEL = "+34722247436";
-export const WA_URL =
-  "https://wa.me/34722247436?text=Hola,%20me%20interesa%20reservar%20en%20MAJMA.%20%C2%BFTen%C3%A9is%20disponibilidad%3F";
+
+/** Mensaje de WhatsApp por defecto, mostrado en el botón flotante, la barra
+ * móvil, el hero y el chatbot — un único texto para que no queden mensajes
+ * distintos según de dónde venga el clic. */
+export const WA_DEFAULT_MESSAGE =
+  "Hola, me gustaría consultar disponibilidad en MAJMA Cáceres.";
+export const WA_URL = `https://wa.me/34722247436?text=${encodeURIComponent(WA_DEFAULT_MESSAGE)}`;
+
+/** Enlace de WhatsApp con un mensaje que identifica el apartamento consultado
+ * (botón "Consultar este apartamento" en Estancias). */
+export function waLinkForApartment(apartmentName: string) {
+  const text = `Hola, me gustaría consultar disponibilidad para el apartamento ${apartmentName}.`;
+  return `https://wa.me/34722247436?text=${encodeURIComponent(text)}`;
+}
+
 export const GOOGLE_MAPS_URL =
   "https://www.google.com/maps?q=Calle+Cornudilla+3,+10003+C%C3%A1ceres,+Spain";
 

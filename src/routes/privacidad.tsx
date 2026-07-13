@@ -25,12 +25,17 @@ function Privacidad() {
           los usuarios del tratamiento de sus datos personales.
         </p>
         <h2 className="font-serif text-2xl">Responsable del tratamiento</h2>
+        {/* TODO: pendientes del propietario — razón social y NIF. Hasta
+            entonces no se muestran estos campos para no dejar placeholders
+            visibles al usuario. */}
         <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Titular:</strong> [RAZÓN SOCIAL]</li>
-          <li><strong>NIF:</strong> [NIF]</li>
           <li><strong>Domicilio:</strong> Calle Cornudilla, 3, 10003 Cáceres, España</li>
           <li><strong>Contacto:</strong> +34 722 24 74 36</li>
         </ul>
+        <p className="text-sm text-ink/60">
+          Los datos identificativos del responsable del tratamiento están en proceso de
+          incorporación a esta política de privacidad.
+        </p>
         <h2 className="font-serif text-2xl">Finalidad</h2>
         <p>
           Los datos facilitados a través de formularios, WhatsApp, teléfono o email se utilizan
@@ -61,8 +66,11 @@ function Privacidad() {
         </p>
         <h2 className="font-serif text-2xl">Cookies</h2>
         <p>
-          Este sitio no utiliza cookies de seguimiento ni herramientas de analítica de terceros
-          con fines publicitarios.
+          Este sitio utiliza únicamente cookies técnicas necesarias y, solo si el usuario lo
+          consiente a través del aviso de cookies, cookies analíticas de Google Analytics para
+          medir el uso de la web. No se utilizan cookies de publicidad ni de seguimiento con
+          fines comerciales de terceros. Puedes cambiar tu decisión en cualquier momento desde
+          el aviso de cookies.
         </p>
       </div>
     </main>
