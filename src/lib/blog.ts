@@ -26,7 +26,7 @@ export type BlogPost = {
   title: string;
   metaDescription: string;
   excerpt: string;
-  coverImage: "hero" | "skyline" | "map" | "vistas";
+  coverImage: "hero" | "skyline" | "map" | "vistas" | "mirador" | "torreBujaco" | "postre";
   coverAlt: string;
   publishedDate: string; // ISO
   updatedDate?: string; // ISO — para señalar contenido revisado/actualizado
@@ -45,8 +45,8 @@ export const blogPosts: BlogPost[] = [
       "Qué hacer en Cáceres en un fin de semana: itinerario hora a hora por la Plaza Mayor, la Torre de Bujaco, el aljibe árabe y el Barrio Judío, todo a pie por el casco histórico.",
     excerpt:
       "Todo lo esencial del casco histórico se recorre a pie en un fin de semana. Este es el itinerario, hora a hora, con horarios y precios reales.",
-    coverImage: "hero",
-    coverAlt: "Casco histórico de Cáceres al atardecer",
+    coverImage: "torreBujaco",
+    coverAlt: "Torre de Bujaco y Plaza Mayor de Cáceres al atardecer",
     publishedDate: "2026-06-01",
     updatedDate: "2026-07-01",
     readTime: 7,
@@ -138,8 +138,8 @@ export const blogPosts: BlogPost[] = [
       "Dónde comer en Cáceres: guía de restaurantes para todos los presupuestos, desde el tapeo en la Plaza Mayor hasta Atrio, con 3 Soles Repsol y 2 estrellas Michelin.",
     excerpt:
       "Desde el bizcocho de migas de la Plaza Mayor hasta las 2 estrellas Michelin de Atrio: así se come en Cáceres.",
-    coverImage: "skyline",
-    coverAlt: "Vistas panorámicas de Cáceres",
+    coverImage: "postre",
+    coverAlt: "Postre de torrija con helado en un restaurante de Cáceres",
     publishedDate: "2026-06-08",
     updatedDate: "2026-07-01",
     readTime: 6,
@@ -416,8 +416,8 @@ export const blogPosts: BlogPost[] = [
       "Los mejores miradores de Cáceres: el Foro de los Balbos, la torre de la Concatedral de Santa María y el Santuario de la Virgen de la Montaña, a 621 metros de altitud.",
     excerpt:
       "Desde la muralla hasta el Santuario de la Virgen de la Montaña, a 621 metros de altitud: los mejores balcones sobre el casco histórico de Cáceres.",
-    coverImage: "vistas",
-    coverAlt: "Vistas del casco histórico de Cáceres desde un balcón",
+    coverImage: "mirador",
+    coverAlt: "Vista panorámica del casco histórico de Cáceres desde un mirador en altura",
     publishedDate: "2026-07-06",
     readTime: 5,
     tag: "Itinerarios",

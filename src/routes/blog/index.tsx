@@ -10,12 +10,18 @@ import heroImg from "@/assets/hero-caceres.webp";
 import caceresSkylineImg from "@/assets/caceres-skyline.webp";
 import mapa3dImg from "@/assets/mapa3d.webp";
 import apto3Vistas from "@/assets/apto3-vistas.webp";
+import miradorImg from "@/assets/mirador-caceres.webp";
+import torreBujacoImg from "@/assets/torre-bujaco-plaza-mayor.webp";
+import postreImg from "@/assets/torrija-postre-caceres.webp";
 
 const COVER_IMAGES = {
   hero: heroImg,
   skyline: caceresSkylineImg,
   map: mapa3dImg,
   vistas: apto3Vistas,
+  mirador: miradorImg,
+  torreBujaco: torreBujacoImg,
+  postre: postreImg,
 };
 
 const TITLE = "Guía de Cáceres: qué hacer, dónde comer y cómo moverte | MAJMA";
