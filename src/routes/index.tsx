@@ -797,10 +797,19 @@ export function TopBar() {
 
 function Hero() {
   const t = useT().hero;
+  const tc = useT().reserva.calendar;
   const ref = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const reduce = useReducedMotion();
   const [videoFailed, setVideoFailed] = useState(false);
+  const todayISO = toISODate(startOfDay(new Date()));
+  const [heroCheckIn, setHeroCheckIn] = useState("");
+  const [heroCheckOut, setHeroCheckOut] = useState("");
+  const [heroGuests, setHeroGuests] = useState(2);
+  const heroBookingHref =
+    heroCheckIn && heroCheckOut
+      ? `${BOOKING_URL}checkin=${heroCheckIn}&checkout=${heroCheckOut}&group_adults=${heroGuests}`
+      : BOOKING_URL;
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -904,7 +913,7 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
-          className="mt-8 max-w-xl text-base text-cream/85 md:text-lg"
+          className="mt-5 max-w-xl text-base text-cream/85 sm:mt-8 md:text-lg"
         >
           {t.subtitle}
         </motion.p>
@@ -912,7 +921,7 @@ function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.6, ease: EASE }}
-          className="mt-6 flex items-center gap-2 text-xs text-cream/80"
+          className="mt-4 flex items-center gap-2 text-xs text-cream/80 sm:mt-6"
         >
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -925,39 +934,101 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.7, ease: EASE }}
-          className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
+          className="mt-6 w-full max-w-md sm:mt-9"
         >
-          <a
-            href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackEvent("click_booking", { location: "hero" })}
-            className="group relative inline-flex items-center gap-3 overflow-hidden bg-gold px-8 py-4 text-xs uppercase tracking-[0.3em] text-ink transition-all duration-300 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:-translate-y-[1px] active:scale-[0.98]"
-          >
-            <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cream/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-            {t.ctaBooking}
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </a>
+          <div className="border border-cream/25 bg-cream/95 text-ink shadow-[0_30px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur">
+            <div className="grid grid-cols-2 divide-x divide-ink/10 border-b border-ink/10">
+              <label className="flex flex-col gap-0.5 px-4 py-2.5 text-left">
+                <span className="text-[10px] uppercase tracking-[0.22em] text-ink/50">
+                  {tc.checkin}
+                </span>
+                <input
+                  type="date"
+                  value={heroCheckIn}
+                  min={todayISO}
+                  onChange={(e) => {
+                    setHeroCheckIn(e.target.value);
+                    if (heroCheckOut && e.target.value && heroCheckOut <= e.target.value) {
+                      setHeroCheckOut("");
+                    }
+                  }}
+                  className="w-full bg-transparent font-serif text-sm text-ink [color-scheme:light] focus:outline-none sm:text-base"
+                />
+              </label>
+              <label className="flex flex-col gap-0.5 px-4 py-2.5 text-left">
+                <span className="text-[10px] uppercase tracking-[0.22em] text-ink/50">
+                  {tc.checkout}
+                </span>
+                <input
+                  type="date"
+                  value={heroCheckOut}
+                  min={heroCheckIn ? addDays(heroCheckIn, 1) : todayISO}
+                  onChange={(e) => setHeroCheckOut(e.target.value)}
+                  className="w-full bg-transparent font-serif text-sm text-ink [color-scheme:light] focus:outline-none sm:text-base"
+                />
+              </label>
+            </div>
+            <div className="flex items-stretch divide-x divide-ink/10">
+              <label className="flex w-24 shrink-0 flex-col justify-center gap-0.5 px-4 py-2.5 text-left">
+                <span className="text-[10px] uppercase tracking-[0.22em] text-ink/50">
+                  {tc.guestsLabel}
+                </span>
+                <select
+                  value={heroGuests}
+                  onChange={(e) => setHeroGuests(Number(e.target.value))}
+                  className="w-full bg-transparent font-serif text-sm text-ink focus:outline-none sm:text-base"
+                >
+                  {[1, 2, 3, 4].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <a
+                href={heroBookingHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  trackEvent("click_booking", {
+                    location: "hero_widget",
+                    checkin: heroCheckIn,
+                    checkout: heroCheckOut,
+                    guests: heroGuests,
+                  })
+                }
+                className="group flex flex-1 items-center justify-center gap-2 bg-gold px-4 py-3 text-[11px] uppercase tracking-[0.22em] text-ink transition-all duration-300 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] active:scale-[0.98] sm:gap-3 sm:px-6 sm:text-xs sm:tracking-[0.3em]"
+              >
+                {tc.cta}
+                <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
+              </a>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.8, ease: EASE }}
+          className="mt-3 flex items-center gap-4 text-xs text-cream/80 sm:mt-5"
+        >
           <a
             href={WA_URL}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent("click_whatsapp", { location: "hero" })}
-            className="inline-flex items-center gap-3 border border-cream/40 px-8 py-4 text-xs uppercase tracking-[0.3em] text-cream transition-all duration-300 hover:border-gold hover:text-gold active:scale-[0.98]"
+            className="inline-flex items-center gap-2 uppercase tracking-[0.22em] text-cream/80 hover:text-gold"
           >
-            <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+            <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
             {t.ctaWhatsapp}
           </a>
+          <span className="text-cream/30">·</span>
+          <a
+            href="#apartamento"
+            className="uppercase tracking-[0.22em] text-cream/70 underline-offset-4 hover:text-gold hover:underline"
+          >
+            {t.ctaDiscover}
+          </a>
         </motion.div>
-        <motion.a
-          href="#apartamento"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.9, delay: 0.85, ease: EASE }}
-          className="mt-5 inline-flex items-center gap-2 text-xs text-cream/70 underline-offset-4 hover:text-gold hover:underline"
-        >
-          {t.ctaDiscover}
-        </motion.a>
       </motion.div>
 
       <motion.div
@@ -2184,6 +2255,12 @@ function startOfDay(d: Date) {
   return c;
 }
 
+function addDays(iso: string, days: number) {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return toISODate(d);
+}
+
 function BookingCalendar() {
   const t = useT().reserva.calendar;
   const { lang } = useLang();
@@ -2664,6 +2741,16 @@ export function ChatbotWidget() {
   const [query, setQuery] = useState("");
   const [thread, setThread] = useState<ChatMessage[]>([]);
 
+  // Se mantiene oculto sobre el hero (donde ahora vive el buscador de fechas)
+  // y aparece al hacer scroll, igual que el FAB de WhatsApp.
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, "change", (v) => {
+    if (typeof window === "undefined") return;
+    setScrolledPastHero(v > window.innerHeight * 0.85);
+  });
+  const showToggle = scrolledPastHero || open;
+
   const toggleOpen = () => {
     setOpen((o) => !o);
     setEverOpened(true);
@@ -2699,10 +2786,10 @@ export function ChatbotWidget() {
         type="button"
         onClick={toggleOpen}
         aria-label={t.label}
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, delay: 1, ease: EASE }}
-        className="fixed bottom-24 left-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-ink shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-transform hover:scale-105 md:bottom-6"
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={showToggle ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+        transition={{ duration: 0.4, ease: EASE }}
+        className={`fixed bottom-24 left-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-ink shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-transform hover:scale-105 md:bottom-6 ${showToggle ? "" : "pointer-events-none"}`}
       >
         {!everOpened && (
           <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-gold/60" />
